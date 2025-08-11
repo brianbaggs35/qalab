@@ -9,9 +9,9 @@ RSpec.describe "Organizations", type: :request do
     context "with system admin" do
       before { sign_in system_admin }
 
-      it "returns http success" do
+      it "redirects to system admin dashboard" do
         get organizations_path
-        expect(response).to have_http_status(:success)
+        expect(response).to redirect_to(system_admin_dashboard_path)
       end
     end
 

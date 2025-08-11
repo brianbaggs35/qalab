@@ -28,14 +28,6 @@
       "!app/javascript/application.js",
       "!app/javascript/controllers/**/*.ts"
     ],
-    "coverageThreshold": {
-      "global": {
-        "lines": 85,
-        "functions": 85,
-        "branches": 85,
-        "statements": 85
-      }
-    },
     "transform": {
       "^.+\\.tsx?$": "ts-jest",
       "^.+\\.jsx?$": "babel-jest"

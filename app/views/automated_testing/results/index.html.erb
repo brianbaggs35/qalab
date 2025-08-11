@@ -1,0 +1,170 @@
+<% content_for :title, "Test Results" %>
+<% content_for :breadcrumbs do %>
+  <li>Automated Testing</li>
+  <li class="text-primary font-semibold">Test Results</li>
+<% end %>
+
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-bold text-primary">Test Results</h1>
+      <p class="text-base-content/70 mt-1">View and manage your automated test results</p>
+    </div>
+    <div class="flex gap-2">
+      <%= link_to automated_testing_upload_path, 
+          class: "btn btn-primary gap-2" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Upload New Results
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Filters and Search -->
+  <div class="card bg-base-100 shadow-sm">
+    <div class="card-body">
+      <div class="flex flex-col lg:flex-row gap-4">
+        <!-- Search -->
+        <div class="flex-1">
+          <div class="form-control">
+            <div class="input-group">
+              <input type="text" placeholder="Search test runs..." class="input input-bordered flex-1">
+              <button class="btn btn-square btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="flex gap-2">
+          <select class="select select-bordered">
+            <option>All Environments</option>
+            <option>Development</option>
+            <option>Staging</option>
+            <option>Production</option>
+            <option>QA</option>
+          </select>
+          
+          <select class="select select-bordered">
+            <option>All Statuses</option>
+            <option>Passed</option>
+            <option>Failed</option>
+            <option>Skipped</option>
+          </select>
+
+          <select class="select select-bordered">
+            <option>Last 30 days</option>
+            <option>Last 7 days</option>
+            <option>Last 24 hours</option>
+            <option>Custom Range</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="stat bg-base-100 shadow-sm rounded-lg">
+      <div class="stat-figure text-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <div class="stat-title">Total Runs</div>
+      <div class="stat-value text-primary">0</div>
+      <div class="stat-desc">No test runs yet</div>
+    </div>
+
+    <div class="stat bg-base-100 shadow-sm rounded-lg">
+      <div class="stat-figure text-success">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <div class="stat-title">Passed</div>
+      <div class="stat-value text-success">0</div>
+      <div class="stat-desc">0% pass rate</div>
+    </div>
+
+    <div class="stat bg-base-100 shadow-sm rounded-lg">
+      <div class="stat-figure text-error">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </div>
+      <div class="stat-title">Failed</div>
+      <div class="stat-value text-error">0</div>
+      <div class="stat-desc">0% failure rate</div>
+    </div>
+
+    <div class="stat bg-base-100 shadow-sm rounded-lg">
+      <div class="stat-figure text-warning">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <div class="stat-title">Skipped</div>
+      <div class="stat-value text-warning">0</div>
+      <div class="stat-desc">0% skipped</div>
+    </div>
+  </div>
+
+  <!-- Results Table -->
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="card-title text-xl">Test Runs</h2>
+        <div class="text-sm text-base-content/60">
+          Showing 0 of 0 results
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="text-center py-16">
+        <div class="text-6xl mb-4">📊</div>
+        <h3 class="text-xl font-semibold text-base-content/80 mb-2">No Test Results Yet</h3>
+        <p class="text-base-content/60 mb-6">Upload your first test results to see them here</p>
+        <%= link_to automated_testing_upload_path, 
+            class: "btn btn-primary gap-2" do %>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          </svg>
+          Upload Test Results
+        <% end %>
+      </div>
+
+      <!-- Pagination placeholder (hidden when empty) -->
+      <div class="hidden justify-center mt-6">
+        <div class="btn-group">
+          <button class="btn btn-outline">«</button>
+          <button class="btn btn-outline btn-active">1</button>
+          <button class="btn btn-outline">2</button>
+          <button class="btn btn-outline">3</button>
+          <button class="btn btn-outline">»</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Test Result Detail Modal (placeholder) -->
+<dialog id="test_result_modal" class="modal">
+  <div class="modal-box max-w-4xl">
+    <form method="dialog">
+      <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+    </form>
+    <h3 class="font-bold text-lg">Test Result Details</h3>
+    <div class="py-4">
+      <p>Test result details will be displayed here when a row is clicked.</p>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>

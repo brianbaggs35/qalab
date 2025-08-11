@@ -7,6 +7,7 @@ class ApplicationController < ActionController::Base
   # Devise parameter sanitization
   before_action :authenticate_user!
   before_action :configure_permitted_parameters, if: :devise_controller?
+  before_action :redirect_system_admin, if: :user_signed_in?
 
   # Pundit authorization
   after_action :verify_authorized, except: :index, unless: :skip_authorization?
@@ -17,7 +18,11 @@ class ApplicationController < ActionController::Base
 
   # Devise redirects
   def after_sign_in_path_for(resource)
-    dashboard_path
+    if resource.system_admin?
+      system_admin_dashboard_path
+    else
+      dashboard_path
+    end
   end
 
   def after_sign_up_path_for(resource)
@@ -38,6 +43,12 @@ class ApplicationController < ActionController::Base
 
   private
 
+  def redirect_system_admin
+    if current_user&.system_admin? && !request.path.start_with?("/system_admin") && !devise_controller?
+      redirect_to system_admin_dashboard_path
+    end
+  end
+
   def user_not_authorized(exception)
     policy_name = exception.policy.class.to_s.underscore
     flash[:alert] = t "#{policy_name}.#{exception.query}", scope: "pundit", default: :default
@@ -49,6 +60,9 @@ class ApplicationController < ActionController::Base
     (controller_name == "home" && action_name == "index") ||
     (controller_name == "dashboard" && action_name == "index") ||
     (controller_name == "organizations" && action_name == "index") ||
+    controller_path.start_with?("automated_testing") ||
+    controller_path.start_with?("manual_testing") ||
+    controller_path.start_with?("system_admin") ||
     (controller_name == "rails/health" && action_name == "show")
   end
 end

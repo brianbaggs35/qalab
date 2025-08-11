@@ -1,0 +1,179 @@
+<% content_for :title, "System Administration" %>
+
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="hero bg-gradient-to-r from-error/10 to-warning/10 rounded-xl">
+    <div class="hero-content text-center">
+      <div class="max-w-md">
+        <div class="text-6xl mb-4">🛡️</div>
+        <h1 class="text-4xl font-bold text-error">System Administration</h1>
+        <p class="py-6 text-base-content/70">
+          Welcome to the system administration panel. Monitor and manage the entire QA Lab platform.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- System Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="stat bg-base-100 shadow-lg rounded-lg border-l-4 border-l-primary">
+      <div class="stat-figure text-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+      </div>
+      <div class="stat-title">Organizations</div>
+      <div class="stat-value text-primary"><%= Organization.count %></div>
+      <div class="stat-desc">Active tenants</div>
+    </div>
+
+    <div class="stat bg-base-100 shadow-lg rounded-lg border-l-4 border-l-secondary">
+      <div class="stat-figure text-secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+        </svg>
+      </div>
+      <div class="stat-title">Total Users</div>
+      <div class="stat-value text-secondary"><%= User.count %></div>
+      <div class="stat-desc"><%= User.system_admins.count %> system admins</div>
+    </div>
+
+    <div class="stat bg-base-100 shadow-lg rounded-lg border-l-4 border-l-accent">
+      <div class="stat-figure text-accent">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      </div>
+      <div class="stat-title">Test Runs</div>
+      <div class="stat-value text-accent">0</div>
+      <div class="stat-desc">Total across all orgs</div>
+    </div>
+
+    <div class="stat bg-base-100 shadow-lg rounded-lg border-l-4 border-l-info">
+      <div class="stat-figure text-info">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      </div>
+      <div class="stat-title">System Health</div>
+      <div class="stat-value text-info">100%</div>
+      <div class="stat-desc">All services online</div>
+    </div>
+  </div>
+
+  <!-- Admin Actions -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Organization Management -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title text-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+          Organization Management
+        </h2>
+        <p class="text-base-content/70 mb-4">Manage organizations and their settings</p>
+        
+        <div class="space-y-2">
+          <%= link_to system_admin_organizations_path, 
+              class: "btn btn-outline btn-primary w-full justify-start gap-2" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            View All Organizations
+          <% end %>
+          
+          <%= link_to new_system_admin_organization_path, 
+              class: "btn btn-outline btn-secondary w-full justify-start gap-2" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Create New Organization
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Management -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title text-secondary">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+          </svg>
+          User Management
+        </h2>
+        <p class="text-base-content/70 mb-4">Manage system users and permissions</p>
+        
+        <div class="space-y-2">
+          <%= link_to system_admin_users_path, 
+              class: "btn btn-outline btn-accent w-full justify-start gap-2" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            View All Users
+          <% end %>
+          
+          <%= link_to new_system_admin_user_path, 
+              class: "btn btn-outline btn-info w-full justify-start gap-2" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+            Create System Admin
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- System Health -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title text-accent">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          System Monitoring
+        </h2>
+        <p class="text-base-content/70 mb-4">Monitor system performance and health</p>
+        
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <span>Database</span>
+            <div class="badge badge-success">Healthy</div>
+          </div>
+          <div class="flex justify-between items-center">
+            <span>Redis Cache</span>
+            <div class="badge badge-success">Healthy</div>
+          </div>
+          <div class="flex justify-between items-center">
+            <span>Background Jobs</span>
+            <div class="badge badge-success">Running</div>
+          </div>
+          <div class="flex justify-between items-center">
+            <span>Storage</span>
+            <div class="badge badge-warning">85% Full</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title text-info">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Recent Activity
+        </h2>
+        <p class="text-base-content/70 mb-4">Latest system events</p>
+        
+        <div class="space-y-3 text-sm">
+          <div class="text-center text-base-content/60 py-4">
+            No recent activity
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
