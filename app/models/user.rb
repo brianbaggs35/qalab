@@ -8,6 +8,7 @@ class User < ApplicationRecord
   # Relationships
   has_many :organization_users, dependent: :destroy
   has_many :organizations, through: :organization_users
+  has_many :test_runs, dependent: :destroy
 
   # Validations
   validates :first_name, :last_name, presence: true

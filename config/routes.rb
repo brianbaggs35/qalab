@@ -1,12 +1,40 @@
 Rails.application.routes.draw do
-  # Authentication routes
-  devise_for :users
+  # Authentication routes with custom controllers
+  devise_for :users, controllers: {
+    sessions: "users/sessions",
+    registrations: "users/registrations"
+  }
 
   # Dashboard routes
   get "dashboard", to: "dashboard#index"
 
   # Organization routes
   resources :organizations, only: [ :index, :show, :new, :create ]
+
+  # Automated Testing routes
+  namespace :automated_testing do
+    get "upload", to: "upload#index"
+    post "upload", to: "upload#create"
+    get "results", to: "results#index"
+    resources :test_runs, path: "results", only: [ :show, :edit, :update, :destroy ] do
+      member do
+        get :download_xml
+      end
+    end
+  end
+
+  # Manual Testing routes
+  namespace :manual_testing do
+    get "cases", to: "test_cases#index"
+    resources :test_cases, only: [ :index, :show, :new, :create, :edit, :update, :destroy ]
+  end
+
+  # System Admin routes
+  namespace :system_admin do
+    get "dashboard", to: "dashboard#index"
+    resources :organizations, only: [ :index, :show, :new, :create, :edit, :update, :destroy ]
+    resources :users, only: [ :index, :show, :new, :create, :edit, :update, :destroy ]
+  end
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

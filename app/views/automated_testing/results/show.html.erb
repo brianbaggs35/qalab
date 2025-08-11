@@ -1,0 +1,20 @@
+<% content_for :title, "Test Result Details" %>
+<% content_for :breadcrumbs do %>
+  <li>Automated Testing</li>
+  <li><%= link_to "Test Results", automated_testing_results_path %></li>
+  <li class="text-primary font-semibold">Result #<%= params[:id] %></li>
+<% end %>
+
+<div class="space-y-6">
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <h1 class="text-2xl font-bold text-primary mb-4">Test Result Details</h1>
+      <p>Detailed test result information for ID: <%= params[:id] %></p>
+      <div class="card-actions justify-end mt-4">
+        <%= link_to automated_testing_results_path, class: "btn btn-primary" do %>
+          Back to Results
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

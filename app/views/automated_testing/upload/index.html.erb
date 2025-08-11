@@ -1,0 +1,181 @@
+<% content_for :title, "Upload Test Results" %>
+<% content_for :breadcrumbs do %>
+  <li>Automated Testing</li>
+  <li class="text-primary font-semibold">Upload</li>
+<% end %>
+
+<div class="hero min-h-[60vh] bg-gradient-to-br from-primary/10 to-secondary/10">
+  <div class="hero-content text-center">
+    <div class="max-w-4xl">
+      <h1 class="text-5xl font-bold text-primary mb-4">Upload Test Results</h1>
+      <p class="py-6 text-xl text-base-content/80">
+        Upload your automated test results from JUnit or TestNG XML files. 
+        Each upload represents one test run and can contain thousands of individual test results.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="container mx-auto px-4 py-8">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Upload Form -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title text-primary text-2xl mb-6">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          </svg>
+          Upload XML File
+        </h2>
+
+        <%= form_with url: automated_testing_upload_path, method: :post, local: true, multipart: true, class: "space-y-6" do |form| %>
+          <!-- File Upload -->
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text text-base font-semibold">Test Results File</span>
+              <span class="label-text-alt text-error">Required</span>
+            </label>
+            <input 
+              type="file" 
+              name="test_file" 
+              accept=".xml" 
+              class="file-input file-input-bordered file-input-primary w-full" 
+              required
+            />
+            <label class="label">
+              <span class="label-text-alt">Accepts JUnit and TestNG XML files only</span>
+            </label>
+          </div>
+
+          <!-- Test Run Name -->
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text text-base font-semibold">Test Run Name</span>
+              <span class="label-text-alt">Optional</span>
+            </label>
+            <%= form.text_field :name, 
+                class: "input input-bordered w-full", 
+                placeholder: "e.g., Regression Test - Build 1.2.3" %>
+            <label class="label">
+              <span class="label-text-alt">If not provided, will be generated from filename and timestamp</span>
+            </label>
+          </div>
+
+          <!-- Description -->
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text text-base font-semibold">Description</span>
+              <span class="label-text-alt">Optional</span>
+            </label>
+            <%= form.textarea :description, 
+                class: "textarea textarea-bordered w-full h-24", 
+                placeholder: "Brief description of this test run..." %>
+          </div>
+
+          <!-- Tags/Environment -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text text-base font-semibold">Environment</span>
+              </label>
+              <%= form.select :environment, 
+                  options_for_select([
+                    ['Development', 'development'],
+                    ['Staging', 'staging'],
+                    ['Production', 'production'],
+                    ['QA', 'qa']
+                  ], 'development'), 
+                  {}, 
+                  { class: "select select-bordered w-full" } %>
+            </div>
+
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text text-base font-semibold">Test Suite</span>
+              </label>
+              <%= form.text_field :test_suite, 
+                  class: "input input-bordered w-full", 
+                  placeholder: "e.g., Smoke Tests, Full Regression" %>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="form-control mt-8">
+            <%= form.submit "Upload Test Results", 
+                class: "btn btn-primary btn-lg w-full gap-2" do %>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              Upload Test Results
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Information Panel -->
+    <div class="space-y-6">
+      <!-- Supported Formats -->
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <h3 class="card-title text-secondary mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Supported Formats
+          </h3>
+          <ul class="space-y-2">
+            <li class="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <span>JUnit XML format</span>
+            </li>
+            <li class="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <span>TestNG XML format</span>
+            </li>
+            <li class="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <span>Files up to 50MB</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Recent Uploads -->
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <h3 class="card-title text-accent mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Recent Uploads
+          </h3>
+          <div class="text-base-content/60 text-center py-8">
+            <p>No recent uploads</p>
+            <p class="text-sm mt-2">Your recent test uploads will appear here</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="stats shadow w-full">
+        <div class="stat">
+          <div class="stat-figure text-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </div>
+          <div class="stat-title">Total Test Runs</div>
+          <div class="stat-value">0</div>
+          <div class="stat-desc">No uploads yet</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
