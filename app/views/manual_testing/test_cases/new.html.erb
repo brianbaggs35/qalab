@@ -1,0 +1,207 @@
+<% content_for :title, "New Test Case" %>
+<% content_for :breadcrumbs do %>
+  <li>Manual Testing</li>
+  <li><%= link_to "Test Cases", manual_testing_test_cases_path, class: "text-secondary" %></li>
+  <li class="text-primary font-semibold">New Test Case</li>
+<% end %>
+
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-bold text-primary">New Test Case</h1>
+      <p class="text-base-content/70 mt-1">Create a new manual test case</p>
+    </div>
+    <div class="flex gap-2">
+      <%= link_to manual_testing_test_cases_path, 
+          class: "btn btn-ghost gap-2" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to Test Cases
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <%= form_with url: manual_testing_test_cases_path, method: :post, local: true, class: "space-y-6" do |form| %>
+        
+        <!-- Basic Information -->
+        <div class="divider">
+          <h3 class="text-lg font-semibold">Basic Information</h3>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Title -->
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text text-base font-semibold">Test Case Title</span>
+              <span class="label-text-alt text-error">Required</span>
+            </label>
+            <%= form.text_field :title, 
+                class: "input input-bordered w-full", 
+                placeholder: "e.g., User Login Functionality Test",
+                required: true %>
+          </div>
+
+          <!-- Priority -->
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text text-base font-semibold">Priority</span>
+            </label>
+            <%= form.select :priority, 
+                options_for_select([
+                  ['High', 'high'],
+                  ['Medium', 'medium'],
+                  ['Low', 'low']
+                ], 'medium'), 
+                {}, 
+                { class: "select select-bordered w-full" } %>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Category -->
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text text-base font-semibold">Category</span>
+            </label>
+            <%= form.select :category, 
+                options_for_select([
+                  ['Functional', 'functional'],
+                  ['UI/UX', 'ui_ux'],
+                  ['Integration', 'integration'],
+                  ['Performance', 'performance'],
+                  ['Security', 'security'],
+                  ['Regression', 'regression']
+                ], 'functional'), 
+                {}, 
+                { class: "select select-bordered w-full" } %>
+          </div>
+
+          <!-- Status -->
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text text-base font-semibold">Status</span>
+            </label>
+            <%= form.select :status, 
+                options_for_select([
+                  ['Draft', 'draft'],
+                  ['Ready', 'ready'],
+                  ['In Review', 'in_review'],
+                  ['Approved', 'approved']
+                ], 'draft'), 
+                {}, 
+                { class: "select select-bordered w-full" } %>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text text-base font-semibold">Description</span>
+          </label>
+          <%= form.textarea :description, 
+              class: "textarea textarea-bordered w-full h-24", 
+              placeholder: "Brief description of what this test case validates..." %>
+        </div>
+
+        <!-- Test Details -->
+        <div class="divider">
+          <h3 class="text-lg font-semibold">Test Details</h3>
+        </div>
+
+        <!-- Preconditions -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text text-base font-semibold">Preconditions</span>
+          </label>
+          <%= form.textarea :preconditions, 
+              class: "textarea textarea-bordered w-full h-24", 
+              placeholder: "What needs to be set up or available before running this test..." %>
+          <label class="label">
+            <span class="label-text-alt">List any setup requirements, user permissions, data, etc.</span>
+          </label>
+        </div>
+
+        <!-- Test Steps -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text text-base font-semibold">Test Steps</span>
+            <span class="label-text-alt text-error">Required</span>
+          </label>
+          <%= form.textarea :test_steps, 
+              class: "textarea textarea-bordered w-full h-32", 
+              placeholder: "1. Navigate to login page&#10;2. Enter valid credentials&#10;3. Click submit button&#10;4. Verify user is logged in",
+              required: true %>
+          <label class="label">
+            <span class="label-text-alt">List each step clearly and in sequence</span>
+          </label>
+        </div>
+
+        <!-- Expected Results -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text text-base font-semibold">Expected Results</span>
+            <span class="label-text-alt text-error">Required</span>
+          </label>
+          <%= form.textarea :expected_results, 
+              class: "textarea textarea-bordered w-full h-24", 
+              placeholder: "User should be successfully logged in and redirected to dashboard...",
+              required: true %>
+          <label class="label">
+            <span class="label-text-alt">Describe what should happen when the test is executed correctly</span>
+          </label>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="divider">
+          <h3 class="text-lg font-semibold">Additional Information</h3>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Estimated Duration -->
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text text-base font-semibold">Estimated Duration (minutes)</span>
+            </label>
+            <%= form.number_field :estimated_duration, 
+                class: "input input-bordered w-full", 
+                placeholder: "5",
+                min: 1,
+                max: 300 %>
+          </div>
+
+          <!-- Tags -->
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text text-base font-semibold">Tags</span>
+            </label>
+            <%= form.text_field :tags, 
+                class: "input input-bordered w-full", 
+                placeholder: "login, authentication, regression" %>
+            <label class="label">
+              <span class="label-text-alt">Comma-separated tags for organization</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-col sm:flex-row gap-4 pt-6">
+          <%= form.submit "Create Test Case", 
+              class: "btn btn-primary gap-2 flex-1 sm:flex-none" %>
+          <% form.submit "Save as Draft", 
+              name: "draft", 
+              class: "btn btn-outline gap-2 flex-1 sm:flex-none" %>
+          <%= link_to manual_testing_test_cases_path, 
+              class: "btn btn-ghost gap-2 flex-1 sm:flex-none" do %>
+            Cancel
+          <% end %>
+        </div>
+
+      <% end %>
+    </div>
+  </div>
+</div>
