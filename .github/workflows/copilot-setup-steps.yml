@@ -1,4 +1,4 @@
-name: Copilot Development Environment Setup
+name: Copilot Setup Steps
 
 # This workflow provides all the steps necessary to setup a Ruby 3.4.5 and Rails 8.0.2
 # development environment with PostgreSQL for GitHub Copilot to understand and use.
