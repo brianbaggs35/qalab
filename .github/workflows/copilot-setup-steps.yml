@@ -22,10 +22,10 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: qalab_development
+          POSTGRES_DB: postgres
         ports:
           - 5432:5432
-        options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
+        options: --health-cmd="pg_isready -U postgres" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
       # Step 1: Checkout the repository code
@@ -68,19 +68,33 @@ jobs:
       - name: Install npm dependencies  
         run: npm install
 
+      # Step 5.5: Wait for PostgreSQL to be ready
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          echo "Waiting for PostgreSQL to be ready..."
+          until pg_isready -h localhost -p 5432 -U postgres; do
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
+          echo "PostgreSQL is ready!"
+
       # Step 6: Set up the database
       - name: Setup database
         env:
-          RAILS_ENV: development
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/qalab_development
           DATABASE_USERNAME: postgres
           DATABASE_PASSWORD: postgres
           DATABASE_HOST: localhost
           DATABASE_PORT: 5432
         run: |
-          echo "Creating and setting up the development database..."
-          bundle exec rails db:create
-          bundle exec rails db:migrate
+          echo "Creating development and test databases..."
+          # Create databases using Rails
+          RAILS_ENV=development bundle exec rails db:create
+          RAILS_ENV=test bundle exec rails db:create
+          
+          echo "Running database migrations..."
+          RAILS_ENV=development bundle exec rails db:migrate
+          
+          echo "Database setup completed successfully!"
 
       # Step 7: Install RSpec (if not already configured)
       - name: Generate RSpec configuration
@@ -93,7 +107,6 @@ jobs:
       - name: Precompile assets
         env:
           RAILS_ENV: development
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/qalab_development
           DATABASE_USERNAME: postgres
           DATABASE_PASSWORD: postgres
           DATABASE_HOST: localhost
@@ -114,17 +127,18 @@ jobs:
       # Step 11: Run Rails tests and RSpec tests
       - name: Setup test database and run tests
         env:
-          RAILS_ENV: test
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/qalab_test
           DATABASE_USERNAME: postgres
           DATABASE_PASSWORD: postgres
           DATABASE_HOST: localhost
           DATABASE_PORT: 5432
         run: |
-          bundle exec rails db:test:prepare
+          echo "Preparing test database..."
+          RAILS_ENV=test bundle exec rails db:test:prepare
+          
           echo "Running Rails tests..."
           bundle exec rails test
           bundle exec rails test:system
+          
           echo "Running RSpec tests..."
           if [ -f spec/rails_helper.rb ]; then
             bundle exec rspec
@@ -132,7 +146,7 @@ jobs:
             echo "RSpec not configured yet, skipping..."
           fi
 
-      # Step 12: Display setup summary
+      # Step 13: Display setup summary
       - name: Development environment setup summary
         run: |
           echo "🎉 Development environment setup completed successfully!"
