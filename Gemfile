@@ -21,7 +21,7 @@ gem "jbuilder"
 gem "devise"
 gem "pundit"
 
-# Charts and visualization  
+# Charts and visualization
 gem "chartkick"
 gem "groupdate"
 
@@ -60,7 +60,7 @@ group :development, :test do
 
   # RSpec for testing [https://rspec.info/]
   gem "rspec-rails", "~> 7.1"
-  
+
   # Test fixtures and factories
   gem "factory_bot_rails"
   gem "faker"
@@ -75,7 +75,7 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
-  
+
   # Test coverage
   gem "simplecov", require: false
   gem "simplecov-lcov", require: false
