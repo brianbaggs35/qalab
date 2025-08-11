@@ -1,0 +1,64 @@
+<% content_for :title, "Edit Test Run" %>
+<% content_for :breadcrumbs do %>
+  <li>Automated Testing</li>
+  <li><%= link_to "Test Results", automated_testing_results_path %></li>
+  <li><%= link_to "Result ##{@test_run.id}", automated_testing_result_path(@test_run) %></li>
+  <li class="text-primary font-semibold">Edit</li>
+<% end %>
+
+<div class="space-y-6">
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <h1 class="text-2xl font-bold text-primary mb-4">Edit Test Run</h1>
+      
+      <%= form_with model: [@test_run], url: automated_testing_result_path(@test_run), method: :patch, local: true, class: "space-y-4" do |form| %>
+        <% if @test_run.errors.any? %>
+          <div class="alert alert-error">
+            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <h3 class="font-bold">Error!</h3>
+              <div class="text-xs">
+                <%= @test_run.errors.full_messages.join(', ') %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <div class="form-control">
+          <%= form.label :name, class: "label" %>
+          <%= form.text_field :name, class: "input input-bordered", placeholder: "Test run name" %>
+        </div>
+
+        <div class="form-control">
+          <%= form.label :description, class: "label" %>
+          <%= form.text_area :description, class: "textarea textarea-bordered", rows: 3, placeholder: "Test run description" %>
+        </div>
+
+        <div class="form-control">
+          <%= form.label :environment, class: "label" %>
+          <%= form.select :environment, 
+              options_for_select([
+                ['Development', 'development'],
+                ['Staging', 'staging'], 
+                ['QA', 'qa'],
+                ['Production', 'production']
+              ], @test_run.environment), 
+              { prompt: 'Select Environment' }, 
+              { class: "select select-bordered" } %>
+        </div>
+
+        <div class="form-control">
+          <%= form.label :test_suite, class: "label" %>
+          <%= form.text_field :test_suite, class: "input input-bordered", placeholder: "Test suite name" %>
+        </div>
+
+        <div class="card-actions justify-end gap-2">
+          <%= link_to "Cancel", automated_testing_result_path(@test_run), class: "btn btn-ghost" %>
+          <%= form.submit "Update Test Run", class: "btn btn-primary" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

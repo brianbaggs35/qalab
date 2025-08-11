@@ -2,7 +2,9 @@ Rails.application.routes.draw do
   # Authentication routes with custom controllers
   devise_for :users, controllers: {
     sessions: "users/sessions",
-    registrations: "users/registrations"
+    registrations: "users/registrations",
+    confirmations: "users/confirmations",
+    passwords: "users/passwords"
   }
 
   # Dashboard routes
@@ -15,8 +17,7 @@ Rails.application.routes.draw do
   namespace :automated_testing do
     get "upload", to: "upload#index"
     post "upload", to: "upload#create"
-    get "results", to: "results#index"
-    resources :test_runs, path: "results", only: [ :show, :edit, :update, :destroy ] do
+    resources :results, only: [ :index, :show, :edit, :update, :destroy ] do
       member do
         get :download_xml
       end

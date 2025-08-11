@@ -104,10 +104,10 @@ RSpec.describe AutomatedTesting::ResultsController, type: :controller do
         expect(assigns(:test_details)).to be_an(Array)
       end
 
-      it 'raises error for unauthorized test run' do
-        expect {
-          get :show, params: { id: other_test_run.id }
-        }.to raise_error(Pundit::NotAuthorizedError)
+      it 'redirects unauthorized test run access' do
+        get :show, params: { id: other_test_run.id }
+        expect(response).to redirect_to(root_path)
+        expect(flash[:alert]).to be_present
       end
     end
   end
@@ -162,7 +162,7 @@ RSpec.describe AutomatedTesting::ResultsController, type: :controller do
 
         it 'redirects to show page' do
           patch :update, params: valid_params
-          expect(response).to redirect_to(automated_testing_test_run_path(test_run))
+          expect(response).to redirect_to(automated_testing_result_path(test_run))
         end
       end
 

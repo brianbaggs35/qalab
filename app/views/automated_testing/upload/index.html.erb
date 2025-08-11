@@ -28,20 +28,17 @@
           Upload XML File
         </h2>
 
-        <%= form_with url: automated_testing_upload_path, method: :post, local: true, multipart: true, class: "space-y-6" do |form| %>
+        <%= form_with model: @test_run, url: automated_testing_upload_path, method: :post, local: true, multipart: true, class: "space-y-6" do |form| %>
           <!-- File Upload -->
           <div class="form-control w-full">
             <label class="label">
               <span class="label-text text-base font-semibold">Test Results File</span>
               <span class="label-text-alt text-error">Required</span>
             </label>
-            <input 
-              type="file" 
-              name="test_file" 
-              accept=".xml" 
-              class="file-input file-input-bordered file-input-primary w-full" 
-              required
-            />
+            <%= form.file_field :xml_file, 
+                class: "file-input file-input-bordered file-input-primary w-full", 
+                accept: ".xml",
+                required: true %>
             <label class="label">
               <span class="label-text-alt">Accepts JUnit and TestNG XML files only</span>
             </label>
