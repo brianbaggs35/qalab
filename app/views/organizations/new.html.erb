@@ -1,0 +1,49 @@
+<% content_for :title, "Create Organization" %>
+
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-base-200 to-secondary/10">
+  <div class="card w-full max-w-md shadow-2xl bg-base-100">
+    <div class="card-body">
+      <div class="text-center mb-6">
+        <h1 class="text-3xl font-bold text-primary">Create Organization</h1>
+        <p class="text-base-content/60 mt-2">Set up your new organization</p>
+      </div>
+
+      <%= form_with model: @organization, local: true, class: "space-y-4" do |f| %>
+        <% if @organization.errors.any? %>
+          <div class="alert alert-error">
+            <div>
+              <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <h3 class="font-bold">Please fix the following errors:</h3>
+                <ul class="list-disc list-inside mt-2">
+                  <% @organization.errors.full_messages.each do |message| %>
+                    <li><%= message %></li>
+                  <% end %>
+                </ul>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <div class="form-control">
+          <%= f.label :name, class: "label" do %>
+            <span class="label-text font-medium">Organization Name</span>
+          <% end %>
+          <%= f.text_field :name, class: "input input-bordered w-full", placeholder: "Enter organization name", required: true %>
+        </div>
+
+        <div class="form-control mt-6">
+          <%= f.submit "Create Organization", class: "btn btn-primary w-full" %>
+        </div>
+      <% end %>
+
+      <div class="divider">or</div>
+
+      <div class="text-center">
+        <%= link_to "Back to Organizations", organizations_path, class: "link link-primary" %>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,56 @@
+<% content_for :title, @organization.name %>
+
+<div class="space-y-6">
+  <div class="flex justify-between items-center">
+    <div>
+      <h1 class="text-3xl font-bold text-base-content"><%= @organization.name %></h1>
+      <p class="text-base-content/60 mt-1">Organization details and management</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Organization info -->
+    <div class="lg:col-span-2">
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <h2 class="card-title text-primary">Organization Information</h2>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="font-medium text-sm text-base-content/80">Name</label>
+              <p class="text-base-content"><%= @organization.name %></p>
+            </div>
+            
+            <div>
+              <label class="font-medium text-sm text-base-content/80">Created</label>
+              <p class="text-base-content"><%= @organization.created_at.strftime("%B %d, %Y") %></p>
+            </div>
+            
+            <div>
+              <label class="font-medium text-sm text-base-content/80">Total Members</label>
+              <p class="text-base-content"><%= @organization.users.count %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick stats -->
+    <div class="space-y-6">
+      <div class="stat bg-base-100 shadow rounded-box">
+        <div class="stat-title">Owners</div>
+        <div class="stat-value text-primary"><%= @organization.owners.count %></div>
+      </div>
+      
+      <div class="stat bg-base-100 shadow rounded-box">
+        <div class="stat-title">Admins</div>
+        <div class="stat-value text-secondary"><%= @organization.admins.count %></div>
+      </div>
+      
+      <div class="stat bg-base-100 shadow rounded-box">
+        <div class="stat-title">Members</div>
+        <div class="stat-value text-accent"><%= @organization.members.count %></div>
+      </div>
+    </div>
+  </div>
+</div>

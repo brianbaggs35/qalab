@@ -1,0 +1,37 @@
+<% content_for :title, "Organizations" %>
+
+<div class="space-y-6">
+  <div class="flex justify-between items-center">
+    <h1 class="text-3xl font-bold text-base-content">Organizations</h1>
+    <% unless current_user.system_admin? %>
+      <%= link_to "Create Organization", new_organization_path, class: "btn btn-primary" %>
+    <% end %>
+  </div>
+
+  <% if @organizations.any? %>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% @organizations.each do |organization| %>
+        <div class="card bg-base-100 shadow-xl">
+          <div class="card-body">
+            <h2 class="card-title text-primary"><%= organization.name %></h2>
+            <p class="text-base-content/60">
+              <%= pluralize(organization.users.count, 'member') %>
+            </p>
+            <div class="card-actions justify-end">
+              <%= link_to "View", organization, class: "btn btn-primary btn-sm" %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="text-center py-12">
+      <div class="text-6xl mb-4">🏢</div>
+      <h3 class="text-xl font-semibold mb-2">No organizations found</h3>
+      <p class="text-base-content/60 mb-6">Get started by creating your first organization.</p>
+      <% unless current_user.system_admin? %>
+        <%= link_to "Create Organization", new_organization_path, class: "btn btn-primary" %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

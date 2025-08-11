@@ -48,6 +48,7 @@ class ApplicationController < ActionController::Base
     devise_controller? || 
     (controller_name == 'home' && action_name == 'index') ||
     (controller_name == 'dashboard' && action_name == 'index') ||
+    (controller_name == 'organizations' && action_name == 'index') ||
     (controller_name == 'rails/health' && action_name == 'show')
   end
 end
