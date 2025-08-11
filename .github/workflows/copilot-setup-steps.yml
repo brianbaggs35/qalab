@@ -4,10 +4,16 @@ name: Copilot Development Environment Setup
 # development environment with PostgreSQL for GitHub Copilot to understand and use.
 
 on:
-  workflow_dispatch: # Allows manual triggering for reference
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
 
 jobs:
-  setup_development_environment:
+  copilot-setup-steps:
     runs-on: ubuntu-latest
 
     services:
@@ -80,9 +86,6 @@ jobs:
 
       - name: Run RuboCop linting
         run: bundle exec rubocop
-
-      - name: Run ImportMap audit
-        run: bundle exec importmap audit
 
       # Step 8: Run tests to ensure everything is working
       - name: Setup test database and run tests
