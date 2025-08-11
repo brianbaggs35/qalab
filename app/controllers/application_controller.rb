@@ -15,6 +15,15 @@ class ApplicationController < ActionController::Base
   # Handle Pundit authorization errors
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
   
+  # Devise redirects
+  def after_sign_in_path_for(resource)
+    dashboard_path
+  end
+  
+  def after_sign_up_path_for(resource)
+    dashboard_path
+  end
+  
   protected
   
   def configure_permitted_parameters
@@ -38,6 +47,7 @@ class ApplicationController < ActionController::Base
   def skip_authorization?
     devise_controller? || 
     (controller_name == 'home' && action_name == 'index') ||
+    (controller_name == 'dashboard' && action_name == 'index') ||
     (controller_name == 'rails/health' && action_name == 'show')
   end
 end

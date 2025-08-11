@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :organization do
-    name { "MyString" }
-    settings { "MyText" }
+    name { Faker::Company.name }
+    settings { { timezone: "UTC", notifications: true } }
   end
 end

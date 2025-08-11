@@ -8,7 +8,7 @@ class OrganizationPolicy < ApplicationPolicy
   end
 
   def create?
-    user.present? && !user.system_admin? # Regular users can create organizations
+    user.present? # Regular users and system admins can create organizations
   end
 
   def update?
