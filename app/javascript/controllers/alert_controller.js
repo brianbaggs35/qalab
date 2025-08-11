@@ -1,15 +1,12 @@
 import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="alert"
-export default class extends Controller<HTMLElement> {
+export default class extends Controller {
   static values = { autoClose: Boolean }
-
-  declare readonly autoCloseValue: boolean
-  private autoCloseTimeout?: number
 
   connect() {
     if (this.autoCloseValue) {
-      this.autoCloseTimeout = window.setTimeout(() => {
+      this.autoCloseTimeout = setTimeout(() => {
         this.close()
       }, 5000) // Auto-close after 5 seconds
     }

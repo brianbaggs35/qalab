@@ -1,14 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="upload"
-export default class extends Controller<HTMLElement> {
+export default class extends Controller {
   static targets = ["form", "fileInput", "submitButton", "progressBar", "progressContainer"]
-
-  declare readonly formTarget: HTMLFormElement
-  declare readonly fileInputTarget: HTMLInputElement
-  declare readonly submitButtonTarget: HTMLButtonElement
-  declare readonly progressBarTarget: HTMLElement
-  declare readonly progressContainerTarget: HTMLElement
 
   connect() {
     // Add event listeners
@@ -16,8 +10,8 @@ export default class extends Controller<HTMLElement> {
     this.fileInputTarget.addEventListener('change', this.handleFileChange.bind(this))
   }
 
-  handleFileChange(event: Event) {
-    const input = event.target as HTMLInputElement
+  handleFileChange(event) {
+    const input = event.target
     const file = input.files?.[0]
     
     if (file) {
@@ -37,7 +31,7 @@ export default class extends Controller<HTMLElement> {
     }
   }
 
-  handleSubmit(event: Event) {
+  handleSubmit(event) {
     event.preventDefault()
     
     const file = this.fileInputTarget.files?.[0]
@@ -104,7 +98,7 @@ export default class extends Controller<HTMLElement> {
     `
   }
 
-  updateProgress(percent: number) {
+  updateProgress(percent) {
     this.progressBarTarget.style.width = `${percent}%`
     this.progressBarTarget.textContent = `${Math.round(percent)}%`
   }
@@ -122,7 +116,7 @@ export default class extends Controller<HTMLElement> {
     this.submitButtonTarget.classList.add('btn-success')
   }
 
-  showError(message: string) {
+  showError(message) {
     this.progressContainerTarget.classList.add('hidden')
     this.submitButtonTarget.disabled = false
     this.submitButtonTarget.textContent = 'Upload Test Results'
