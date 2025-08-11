@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_11_151644) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_11_193727) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -33,6 +33,26 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_11_151644) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_organizations_on_name"
+  end
+
+  create_table "test_runs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description"
+    t.string "environment"
+    t.string "test_suite"
+    t.text "xml_file"
+    t.string "status", default: "pending", null: false
+    t.jsonb "results_summary", default: {}
+    t.uuid "organization_id", null: false
+    t.uuid "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_test_runs_on_created_at"
+    t.index ["environment"], name: "index_test_runs_on_environment"
+    t.index ["organization_id", "created_at"], name: "index_test_runs_on_organization_id_and_created_at"
+    t.index ["organization_id"], name: "index_test_runs_on_organization_id"
+    t.index ["status"], name: "index_test_runs_on_status"
+    t.index ["user_id"], name: "index_test_runs_on_user_id"
   end
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -67,4 +87,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_11_151644) do
 
   add_foreign_key "organization_users", "organizations"
   add_foreign_key "organization_users", "users"
+  add_foreign_key "test_runs", "organizations"
+  add_foreign_key "test_runs", "users"
 end

@@ -25,6 +25,9 @@ gem "pundit"
 gem "chartkick"
 gem "groupdate"
 
+# Pagination
+gem "kaminari"
+
 # Image processing for avatars
 gem "image_processing", "~> 1.2"
 
@@ -79,4 +82,10 @@ group :test do
   # Test coverage
   gem "simplecov", require: false
   gem "simplecov-lcov", require: false
+
+  # Pundit policy testing
+  gem "pundit-matchers", "~> 1.6"
+
+  # Controller testing support
+  gem "rails-controller-testing"
 end

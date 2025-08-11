@@ -1,8 +1,8 @@
 Rails.application.routes.draw do
   # Authentication routes with custom controllers
   devise_for :users, controllers: {
-    sessions: 'users/sessions',
-    registrations: 'users/registrations'
+    sessions: "users/sessions",
+    registrations: "users/registrations"
   }
 
   # Dashboard routes
@@ -16,7 +16,11 @@ Rails.application.routes.draw do
     get "upload", to: "upload#index"
     post "upload", to: "upload#create"
     get "results", to: "results#index"
-    get "results/:id", to: "results#show", as: :result
+    resources :test_runs, path: "results", only: [ :show, :edit, :update, :destroy ] do
+      member do
+        get :download_xml
+      end
+    end
   end
 
   # Manual Testing routes
