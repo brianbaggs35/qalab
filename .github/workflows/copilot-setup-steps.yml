@@ -1,6 +1,6 @@
 name: Copilot Development Environment Setup
 
-# This workflow provides all the steps necessary to setup a Ruby 3.4.5 and Rails 8.0.2 
+# This workflow provides all the steps necessary to setup a Ruby 3.4.5 and Rails 8.0.2
 # development environment with PostgreSQL for GitHub Copilot to understand and use.
 
 on:
@@ -9,7 +9,7 @@ on:
 jobs:
   setup_development_environment:
     runs-on: ubuntu-latest
-    
+
     services:
       postgres:
         image: postgres:16
@@ -65,7 +65,7 @@ jobs:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/qalab_development
         run: |
           echo "Preparing the development database..."
-          bundle exec rails db:prepare
+          bundle exec rails db:create
 
       # Step 6: Precompile assets (for production-like setup)
       - name: Precompile assets
