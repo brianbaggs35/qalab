@@ -3,7 +3,7 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   root "home#index"
-  
+
   get "home/index"
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

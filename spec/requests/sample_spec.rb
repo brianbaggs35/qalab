@@ -8,7 +8,7 @@ RSpec.describe "Home page", type: :request do
       expect(response.body).to include("Welcome to QA Lab")
     end
   end
-  
+
   describe "GET /home/index" do
     it "returns http success" do
       get "/home/index"
