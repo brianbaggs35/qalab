@@ -132,6 +132,7 @@
           null,
           1,
           18,
+          null,
           18,
           16,
           14,
@@ -140,6 +141,8 @@
           null,
           4,
           null,
+          null,
+          1,
           null
         ]
       },
@@ -354,6 +357,42 @@
           null
         ]
       },
+      "/home/runner/work/qalab/qalab/app/controllers/users/registrations_controller.rb": {
+        "lines": [
+          1,
+          null,
+          1,
+          1,
+          null,
+          1,
+          null,
+          1,
+          0,
+          null,
+          null,
+          1,
+          0,
+          null
+        ]
+      },
+      "/home/runner/work/qalab/qalab/app/controllers/users/sessions_controller.rb": {
+        "lines": [
+          1,
+          null,
+          1,
+          1,
+          null,
+          1,
+          null,
+          1,
+          0,
+          null,
+          null,
+          1,
+          0,
+          null
+        ]
+      },
       "/home/runner/work/qalab/qalab/app/jobs/application_job.rb": {
         "lines": [
           1,
@@ -536,6 +575,6 @@
         ]
       }
     },
-    "timestamp": 1754939163
+    "timestamp": 1754939820
   }
 }

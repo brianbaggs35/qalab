@@ -1,6 +1,9 @@
 Rails.application.routes.draw do
-  # Authentication routes
-  devise_for :users
+  # Authentication routes with custom controllers
+  devise_for :users, controllers: {
+    sessions: 'users/sessions',
+    registrations: 'users/registrations'
+  }
 
   # Dashboard routes
   get "dashboard", to: "dashboard#index"

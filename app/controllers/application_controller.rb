@@ -10,8 +10,8 @@ class ApplicationController < ActionController::Base
   before_action :redirect_system_admin, if: :user_signed_in?
 
   # Pundit authorization
-  after_action :verify_authorized, except: :index, unless: :skip_authorization?
-  after_action :verify_policy_scoped, only: :index, unless: :skip_authorization?
+  after_action :verify_authorized, except: :index, unless: :skip_pundit_authorization?
+  after_action :verify_policy_scoped, only: :index, unless: :skip_pundit_authorization?
 
   # Handle Pundit authorization errors
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
@@ -55,8 +55,9 @@ class ApplicationController < ActionController::Base
     redirect_to(request.referrer || root_path)
   end
 
-  def skip_authorization?
+  def skip_pundit_authorization?
     devise_controller? ||
+    controller_name.in?(%w[sessions registrations passwords confirmations unlocks]) ||
     (controller_name == "home" && action_name == "index") ||
     (controller_name == "dashboard" && action_name == "index") ||
     (controller_name == "organizations" && action_name == "index") ||
@@ -65,4 +66,6 @@ class ApplicationController < ActionController::Base
     controller_path.start_with?("system_admin") ||
     (controller_name == "rails/health" && action_name == "show")
   end
+
+  alias_method :skip_authorization?, :skip_pundit_authorization?
 end
