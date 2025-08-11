@@ -61,7 +61,6 @@ class ApplicationController < ActionController::Base
     (controller_name == "home" && action_name == "index") ||
     (controller_name == "dashboard" && action_name == "index") ||
     (controller_name == "organizations" && action_name == "index") ||
-    controller_path.start_with?("automated_testing") ||
     controller_path.start_with?("manual_testing") ||
     controller_path.start_with?("system_admin") ||
     (controller_name == "rails/health" && action_name == "show")

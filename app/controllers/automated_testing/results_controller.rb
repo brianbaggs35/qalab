@@ -71,7 +71,7 @@ class AutomatedTesting::ResultsController < ApplicationController
   private
 
   def set_test_run
-    @test_run = policy_scope(TestRun).find(params[:id])
+    @test_run = TestRun.find(params[:id])
   rescue ActiveRecord::RecordNotFound
     redirect_to automated_testing_results_path, alert: "Test run not found."
   end
