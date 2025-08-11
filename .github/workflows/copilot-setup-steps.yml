@@ -22,10 +22,10 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: qalab_development
+          POSTGRES_DB: postgres
         ports:
           - 5432:5432
-        options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
+        options: --health-cmd="pg_isready -U postgres" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
       # Step 1: Checkout the repository code
@@ -64,40 +64,89 @@ jobs:
           echo "Bundler version:"
           bundle --version
 
-      # Step 5: Set up the database
+      # Step 5: Install JavaScript dependencies
+      - name: Install npm dependencies  
+        run: npm install
+
+      # Step 5.5: Wait for PostgreSQL to be ready
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          echo "Waiting for PostgreSQL to be ready..."
+          until pg_isready -h localhost -p 5432 -U postgres; do
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
+          echo "PostgreSQL is ready!"
+
+      # Step 6: Set up the database
       - name: Setup database
         env:
-          RAILS_ENV: development
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/qalab_development
+          DATABASE_USERNAME: postgres
+          DATABASE_PASSWORD: postgres
+          DATABASE_HOST: localhost
+          DATABASE_PORT: 5432
         run: |
-          echo "Preparing the development database..."
-          bundle exec rails db:create
+          echo "Creating development and test databases..."
+          # Create databases using Rails
+          RAILS_ENV=development bundle exec rails db:create
+          RAILS_ENV=test bundle exec rails db:create
+          
+          echo "Running database migrations..."
+          RAILS_ENV=development bundle exec rails db:migrate
+          
+          echo "Database setup completed successfully!"
 
-      # Step 6: Precompile assets (for production-like setup)
+      # Step 7: Install RSpec (if not already configured)
+      - name: Generate RSpec configuration
+        run: |
+          if [ ! -f spec/rails_helper.rb ]; then
+            bundle exec rails generate rspec:install
+          fi
+
+      # Step 8: Precompile assets (for production-like setup)
       - name: Precompile assets
         env:
           RAILS_ENV: development
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/qalab_development
+          DATABASE_USERNAME: postgres
+          DATABASE_PASSWORD: postgres
+          DATABASE_HOST: localhost
+          DATABASE_PORT: 5432
         run: bundle exec rails assets:precompile
 
-      # Step 7: Run security and code quality checks
+      # Step 9: Run security and code quality checks
       - name: Run Brakeman security scan
         run: bundle exec brakeman --no-pager
 
       - name: Run RuboCop linting
         run: bundle exec rubocop
 
-      # Step 8: Run tests to ensure everything is working
+      # Step 10: Run JavaScript tests
+      - name: Run Jest tests
+        run: npm test
+
+      # Step 11: Run Rails tests and RSpec tests
       - name: Setup test database and run tests
         env:
-          RAILS_ENV: test
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/qalab_test
+          DATABASE_USERNAME: postgres
+          DATABASE_PASSWORD: postgres
+          DATABASE_HOST: localhost
+          DATABASE_PORT: 5432
         run: |
-          bundle exec rails db:test:prepare
+          echo "Preparing test database..."
+          RAILS_ENV=test bundle exec rails db:test:prepare
+          
+          echo "Running Rails tests..."
           bundle exec rails test
           bundle exec rails test:system
+          
+          echo "Running RSpec tests..."
+          if [ -f spec/rails_helper.rb ]; then
+            bundle exec rspec
+          else
+            echo "RSpec not configured yet, skipping..."
+          fi
 
-      # Step 9: Display setup summary
+      # Step 13: Display setup summary
       - name: Development environment setup summary
         run: |
           echo "🎉 Development environment setup completed successfully!"
@@ -107,17 +156,26 @@ jobs:
           echo "- Rails: $(bundle exec rails --version)"
           echo "- PostgreSQL: $(psql --version | head -1)"
           echo "- Bundler: $(bundle --version)"
+          echo "- Node.js: $(node --version)"
+          echo "- npm: $(npm --version)"
           echo ""
           echo "Database Configuration:"
           echo "- Development DB: qalab_development"
           echo "- Test DB: qalab_test"
           echo "- PostgreSQL running on localhost:5432"
           echo ""
+          echo "Testing Frameworks:"
+          echo "- Rails Test Suite: ✓ Configured"
+          echo "- RSpec: $(if [ -f spec/rails_helper.rb ]; then echo '✓ Configured'; else echo '⚠ Available but not configured'; fi)"
+          echo "- Jest: ✓ Configured"
+          echo ""
           echo "Available Commands:"
           echo "- bin/dev (start development server)"
           echo "- bin/rails server (alternative server start)"
           echo "- bin/rails console (Rails console)"
-          echo "- bin/rails test (run tests)"
+          echo "- bin/rails test (run Rails tests)"
+          echo "- bundle exec rspec (run RSpec tests)"
+          echo "- npm test (run Jest tests)"
           echo "- bin/rails db:create (create database)"
           echo "- bin/rails db:migrate (run migrations)"
           echo "- bin/rubocop (code linting)"
