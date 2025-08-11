@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for QA Lab */
+
+/* DaisyUI theme customization */
+@import "https://cdn.jsdelivr.net/npm/daisyui@4.12.14/dist/full.css";
+
+/* Base styles */
+@layer base {
+  html {
+    @apply h-full bg-white;
+  }
+  
+  body {
+    @apply h-full;
+  }
+}
+
+/* Component styles */
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-primary-content hover:bg-primary/90 border-primary;
+  }
+  
+  .form-input {
+    @apply input input-bordered w-full;
+  }
+  
+  .form-label {
+    @apply label-text font-medium text-gray-700;
+  }
+  
+  .card-shadow {
+    @apply shadow-lg shadow-gray-200/50;
+  }
+}
+
+/* Authentication forms */
+.auth-form {
+  @apply bg-white shadow-xl rounded-lg p-8 w-full max-w-md;
+}
+
+.auth-input {
+  @apply input input-bordered w-full mb-4;
+}
+
+.auth-button {
+  @apply btn btn-primary w-full;
+}
+
+.auth-link {
+  @apply link link-primary text-sm;
+}
+
+/* Dashboard styles */
+.dashboard-card {
+  @apply card bg-base-100 shadow-xl;
+}
+
+.dashboard-stat {
+  @apply stat;
+}
