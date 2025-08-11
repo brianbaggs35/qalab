@@ -39,3 +39,6 @@
 # Node.js dependencies
 /node_modules/
 package-lock.json
+
+# Test coverage
+/coverage/

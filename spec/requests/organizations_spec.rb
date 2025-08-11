@@ -56,7 +56,7 @@ RSpec.describe "Organizations", type: :request do
       expect {
         post organizations_path, params: { organization: { name: "Test Organization" } }
       }.to change(Organization, :count).by(1)
-      
+
       expect(response).to redirect_to(Organization.last)
     end
 
@@ -64,7 +64,7 @@ RSpec.describe "Organizations", type: :request do
       expect {
         post organizations_path, params: { organization: { name: "Test Organization" } }
       }.to change(OrganizationUser, :count).by(1)
-      
+
       org_user = OrganizationUser.last
       expect(org_user.user).to eq(user)
       expect(org_user.role).to eq('owner')

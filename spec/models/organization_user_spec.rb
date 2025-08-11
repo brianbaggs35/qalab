@@ -12,7 +12,7 @@ RSpec.describe OrganizationUser, type: :model do
       organization = create(:organization)
       user = create(:user)
       create(:organization_user, organization: organization, user: user)
-      
+
       duplicate = build(:organization_user, organization: organization, user: user)
       expect(duplicate).not_to be_valid
       expect(duplicate.errors[:user_id]).to include("has already been taken")

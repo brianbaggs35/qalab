@@ -1,5 +1,5 @@
 class OrganizationsController < ApplicationController
-  before_action :set_organization, only: [:show]
+  before_action :set_organization, only: [ :show ]
 
   def index
     @organizations = policy_scope(Organization)
@@ -22,9 +22,9 @@ class OrganizationsController < ApplicationController
       # Add the creator as owner
       @organization.organization_users.create!(
         user: current_user,
-        role: 'owner'
+        role: "owner"
       )
-      redirect_to @organization, notice: 'Organization was successfully created.'
+      redirect_to @organization, notice: "Organization was successfully created."
     else
       render :new, status: :unprocessable_entity
     end
