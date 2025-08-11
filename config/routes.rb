@@ -1,4 +1,13 @@
 Rails.application.routes.draw do
+  # Authentication routes
+  devise_for :users
+  
+  # Dashboard routes
+  get "dashboard", to: "dashboard#index"
+  
+  # Organization routes
+  resources :organizations, only: [:index, :show, :new, :create]
+  
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Defines the root path route ("/")

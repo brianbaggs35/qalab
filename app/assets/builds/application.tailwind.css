@@ -1,0 +1,28 @@
+/* Compiled Tailwind CSS with DaisyUI */
+@import url('https://cdn.jsdelivr.net/npm/daisyui@4.12.14/dist/full.css');
+@import url('https://cdn.tailwindcss.com');
+
+/* Custom styles for QA Lab */
+.auth-form {
+  @apply bg-white shadow-xl rounded-lg p-8 w-full max-w-md;
+}
+
+.auth-input {
+  @apply input input-bordered w-full mb-4;
+}
+
+.auth-button {
+  @apply btn btn-primary w-full;
+}
+
+.auth-link {
+  @apply link link-primary text-sm;
+}
+
+.dashboard-card {
+  @apply card bg-base-100 shadow-xl;
+}
+
+.dashboard-stat {
+  @apply stat;
+}
