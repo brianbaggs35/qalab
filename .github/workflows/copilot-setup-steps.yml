@@ -1,0 +1,121 @@
+name: Copilot Development Environment Setup
+
+# This workflow provides all the steps necessary to setup a Ruby 3.4.5 and Rails 8.0.2 
+# development environment with PostgreSQL for GitHub Copilot to understand and use.
+
+on:
+  workflow_dispatch: # Allows manual triggering for reference
+
+jobs:
+  setup_development_environment:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: qalab_development
+        ports:
+          - 5432:5432
+        options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      # Step 1: Checkout the repository code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Install system dependencies
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y \
+            build-essential \
+            git \
+            libpq-dev \
+            libyaml-dev \
+            pkg-config \
+            postgresql-client \
+            curl \
+            nodejs \
+            npm
+
+      # Step 3: Set up Ruby 3.4.5 with bundler caching
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version  # Uses Ruby 3.4.5 from .ruby-version file
+          bundler-cache: true          # Automatically runs bundle install and caches gems
+
+      # Step 4: Verify Ruby and Rails versions
+      - name: Verify Ruby and Rails versions
+        run: |
+          echo "Ruby version:"
+          ruby --version
+          echo "Rails version:"
+          bundle exec rails --version
+          echo "Bundler version:"
+          bundle --version
+
+      # Step 5: Set up the database
+      - name: Setup database
+        env:
+          RAILS_ENV: development
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/qalab_development
+        run: |
+          echo "Preparing the development database..."
+          bundle exec rails db:prepare
+
+      # Step 6: Precompile assets (for production-like setup)
+      - name: Precompile assets
+        env:
+          RAILS_ENV: development
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/qalab_development
+        run: bundle exec rails assets:precompile
+
+      # Step 7: Run security and code quality checks
+      - name: Run Brakeman security scan
+        run: bundle exec brakeman --no-pager
+
+      - name: Run RuboCop linting
+        run: bundle exec rubocop
+
+      - name: Run ImportMap audit
+        run: bundle exec importmap audit
+
+      # Step 8: Run tests to ensure everything is working
+      - name: Setup test database and run tests
+        env:
+          RAILS_ENV: test
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/qalab_test
+        run: |
+          bundle exec rails db:test:prepare
+          bundle exec rails test
+          bundle exec rails test:system
+
+      # Step 9: Display setup summary
+      - name: Development environment setup summary
+        run: |
+          echo "🎉 Development environment setup completed successfully!"
+          echo ""
+          echo "Environment Details:"
+          echo "- Ruby: $(ruby --version)"
+          echo "- Rails: $(bundle exec rails --version)"
+          echo "- PostgreSQL: $(psql --version | head -1)"
+          echo "- Bundler: $(bundle --version)"
+          echo ""
+          echo "Database Configuration:"
+          echo "- Development DB: qalab_development"
+          echo "- Test DB: qalab_test"
+          echo "- PostgreSQL running on localhost:5432"
+          echo ""
+          echo "Available Commands:"
+          echo "- bin/dev (start development server)"
+          echo "- bin/rails server (alternative server start)"
+          echo "- bin/rails console (Rails console)"
+          echo "- bin/rails test (run tests)"
+          echo "- bin/rails db:prepare (prepare database)"
+          echo "- bin/rubocop (code linting)"
+          echo "- bin/brakeman (security scanning)"
+          echo "- bin/setup (run complete setup script)"
