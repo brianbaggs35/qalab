@@ -96,14 +96,7 @@ jobs:
           
           echo "Database setup completed successfully!"
 
-      # Step 7: Install RSpec (if not already configured)
-      - name: Generate RSpec configuration
-        run: |
-          if [ ! -f spec/rails_helper.rb ]; then
-            bundle exec rails generate rspec:install
-          fi
-
-      # Step 8: Precompile assets (for production-like setup)
+      # Step 7: Precompile assets (for production-like setup)
       - name: Precompile assets
         env:
           RAILS_ENV: development
@@ -113,40 +106,7 @@ jobs:
           DATABASE_PORT: 5432
         run: bundle exec rails assets:precompile
 
-      # Step 9: Run security and code quality checks
-      - name: Run Brakeman security scan
-        run: bundle exec brakeman --no-pager
-
-      - name: Run RuboCop linting
-        run: bundle exec rubocop
-
-      # Step 10: Run JavaScript tests
-      - name: Run Jest tests
-        run: npm test
-
-      # Step 11: Run Rails tests and RSpec tests
-      - name: Setup test database and run tests
-        env:
-          DATABASE_USERNAME: postgres
-          DATABASE_PASSWORD: postgres
-          DATABASE_HOST: localhost
-          DATABASE_PORT: 5432
-        run: |
-          echo "Preparing test database..."
-          RAILS_ENV=test bundle exec rails db:test:prepare
-          
-          echo "Running Rails tests..."
-          bundle exec rails test
-          bundle exec rails test:system
-          
-          echo "Running RSpec tests..."
-          if [ -f spec/rails_helper.rb ]; then
-            bundle exec rspec
-          else
-            echo "RSpec not configured yet, skipping..."
-          fi
-
-      # Step 13: Display setup summary
+      # Step 8: Display setup summary
       - name: Development environment setup summary
         run: |
           echo "🎉 Development environment setup completed successfully!"
