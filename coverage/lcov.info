@@ -12,7 +12,7 @@ FNDA:0,(anonymous_1)
 FNDA:0,(anonymous_2)
 FNDA:0,(anonymous_3)
 FNDA:0,(anonymous_4)
-DA:5,0
+DA:5,1
 DA:8,0
 DA:9,0
 DA:10,0
@@ -24,7 +24,7 @@ DA:25,0
 DA:28,0
 DA:29,0
 LF:11
-LH:0
+LH:1
 BRDA:8,0,0,0
 BRDA:8,0,1,0
 BRDA:16,1,0,0
@@ -36,11 +36,11 @@ TN:
 SF:app/javascript/controllers/application.js
 FNF:0
 FNH:0
-DA:3,0
-DA:6,0
-DA:7,0
+DA:3,10
+DA:6,10
+DA:7,10
 LF:3
-LH:0
+LH:3
 BRF:0
 BRH:0
 end_of_record
@@ -104,8 +104,8 @@ FNDA:0,(anonymous_6)
 FNDA:0,(anonymous_7)
 FNDA:0,(anonymous_8)
 FNDA:0,(anonymous_9)
-DA:5,0
-DA:6,0
+DA:5,1
+DA:6,1
 DA:9,0
 DA:13,0
 DA:14,0
@@ -139,7 +139,7 @@ DA:99,0
 DA:100,0
 DA:101,0
 LF:34
-LH:0
+LH:2
 BRDA:13,0,0,0
 BRDA:13,0,1,0
 BRDA:52,1,0,0
@@ -169,7 +169,7 @@ FNDA:0,(anonymous_4)
 FNDA:0,(anonymous_5)
 FNDA:0,(anonymous_6)
 FNDA:0,(anonymous_7)
-DA:5,0
+DA:5,1
 DA:8,0
 DA:9,0
 DA:13,0
@@ -199,7 +199,7 @@ DA:76,0
 DA:77,0
 DA:78,0
 LF:29
-LH:0
+LH:1
 BRDA:13,0,0,0
 BRDA:13,0,1,0
 BRDA:23,1,0,0
@@ -233,7 +233,7 @@ FNDA:0,(anonymous_7)
 FNDA:0,(anonymous_8)
 FNDA:0,(anonymous_9)
 FNDA:0,(anonymous_10)
-DA:5,0
+DA:5,1
 DA:8,0
 DA:10,0
 DA:11,0
@@ -309,7 +309,7 @@ DA:152,0
 DA:153,0
 DA:154,0
 LF:75
-LH:0
+LH:1
 BRDA:22,0,0,0
 BRDA:22,0,1,0
 BRDA:26,1,0,0
