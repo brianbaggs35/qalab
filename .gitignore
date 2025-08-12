@@ -50,3 +50,22 @@ package-lock.json
 # Additional coverage formats
 *.lcov
 coverage-final.json
+
+# Deployment and configuration files
+.env
+.env.local
+.env.production
+.env.staging
+/config/database.yml
+
+# Capistrano deployment files
+/.git_cache
+/log/capistrano.log
+
+# SSL certificates (use proper certificates in production)  
+*.key
+*.crt
+*.pem
+
+# RSpec failures
+spec/examples.txt
