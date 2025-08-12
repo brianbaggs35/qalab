@@ -42,6 +42,8 @@ package-lock.json
 
 # Test coverage
 /coverage/
+.nyc_output/
+coverage.json
 
 # Build artifacts and test files
 /public/assets/__tests__

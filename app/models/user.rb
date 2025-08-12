@@ -5,6 +5,9 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable,
          :confirmable, :lockable, :trackable
 
+  # Virtual attributes for registration
+  attr_accessor :invitation_token
+
   # Relationships
   has_many :organization_users, dependent: :destroy
   has_many :organizations, through: :organization_users

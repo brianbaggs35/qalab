@@ -52,7 +52,7 @@ RSpec.describe TestCasePolicy, type: :policy do
       let(:admin_user) { create(:user) }
       let(:admin_test_case) { create(:test_case, user: admin_user, organization: organization) }
       let(:admin_policy) { described_class.new(user, admin_test_case) }
-      
+
       before { create(:organization_user, user: user, organization: organization, role: "admin") }
 
       it "permits the admin to update any test case" do
@@ -65,7 +65,7 @@ RSpec.describe TestCasePolicy, type: :policy do
       let(:other_organization) { create(:organization) }
       let(:other_test_case) { create(:test_case, user: other_user, organization: other_organization) }
       let(:other_policy) { described_class.new(user, other_test_case) }
-      
+
       before { create(:organization_user, user: user, organization: organization, role: "member") }
 
       it "does not permit the user to update the test case from different org" do
@@ -87,7 +87,7 @@ RSpec.describe TestCasePolicy, type: :policy do
       let(:admin_user) { create(:user) }
       let(:admin_test_case) { create(:test_case, user: admin_user, organization: organization) }
       let(:admin_policy) { described_class.new(user, admin_test_case) }
-      
+
       before { create(:organization_user, user: user, organization: organization, role: "admin") }
 
       it "permits the admin to destroy any test case" do

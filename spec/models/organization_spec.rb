@@ -58,8 +58,8 @@ RSpec.describe Organization, type: :model do
     context 'with completed test runs' do
       it 'calculates success rate correctly' do
         # Test run with 80% success rate (8/10 passed)
-        create(:test_run, :completed, 
-               organization: organization, 
+        create(:test_run, :completed,
+               organization: organization,
                user: user,
                results_summary: {
                  'total_tests' => 10,
@@ -67,7 +67,7 @@ RSpec.describe Organization, type: :model do
                  'failed' => 2,
                  'skipped' => 0
                })
-        
+
         # Test run with 100% success rate (5/5 passed)
         create(:test_run, :completed,
                organization: organization,
@@ -78,7 +78,7 @@ RSpec.describe Organization, type: :model do
                  'failed' => 0,
                  'skipped' => 0
                })
-        
+
         # Overall: 13/15 = 86.67%
         expect(organization.success_rate).to eq(86.67)
       end
@@ -95,7 +95,7 @@ RSpec.describe Organization, type: :model do
                  'failed' => 0,
                  'skipped' => 0
                })
-        
+
         expect(organization.success_rate).to eq(0)
       end
     end
