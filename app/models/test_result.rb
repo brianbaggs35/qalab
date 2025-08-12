@@ -35,6 +35,10 @@ class TestResult < ApplicationRecord
 
   def full_stacktrace
     return nil unless has_failure?
-    failure_stacktrace.presence || failure_message
+
+    stacktrace = failure_stacktrace.presence
+    message = failure_message.presence
+
+    stacktrace || message
   end
 end

@@ -87,6 +87,69 @@ RSpec.describe Invitation, type: :model do
     end
   end
 
+  describe 'class methods' do
+    describe '.find_by_token' do
+      it 'finds invitation by token' do
+        invitation = create(:invitation, token: 'test_token_123')
+        expect(described_class.find_by_token('test_token_123')).to eq(invitation)
+      end
+
+      it 'returns nil when token not found' do
+        expect(described_class.find_by_token('nonexistent')).to be_nil
+      end
+    end
+
+    describe '.find_valid_invitation' do
+      it 'returns valid invitation by token' do
+        invitation = create(:invitation, token: 'valid_token')
+        expect(described_class.find_valid_invitation('valid_token')).to eq(invitation)
+      end
+
+      it 'returns nil for expired invitation' do
+        invitation = create(:invitation, :expired, token: 'expired_token')
+        expect(described_class.find_valid_invitation('expired_token')).to be_nil
+      end
+
+      it 'returns nil for accepted invitation' do
+        invitation = create(:invitation, :accepted, token: 'accepted_token')
+        expect(described_class.find_valid_invitation('accepted_token')).to be_nil
+      end
+
+      it 'returns nil for non-existent token' do
+        expect(described_class.find_valid_invitation('nonexistent')).to be_nil
+      end
+    end
+  end
+
+  describe 'validations with existing users' do
+    let(:existing_user) { create(:user, email: 'existing@example.com') }
+
+    it 'prevents invitation to already registered email' do
+      existing_user # Create the user first
+      invitation = build(:invitation, email: 'existing@example.com')
+      expect(invitation).not_to be_valid
+      expect(invitation.errors[:email]).to include('is already registered')
+    end
+
+    it 'prevents duplicate pending invitations for same email and organization' do
+      organization = create(:organization)
+      create(:invitation, email: 'test@example.com', organization: organization)
+      
+      duplicate = build(:invitation, email: 'test@example.com', organization: organization)
+      expect(duplicate).not_to be_valid
+      expect(duplicate.errors[:email]).to include('has already been invited to this organization')
+    end
+
+    it 'allows invitation to different organization' do
+      org1 = create(:organization)
+      org2 = create(:organization)
+      create(:invitation, email: 'test@example.com', organization: org1)
+      
+      invitation = build(:invitation, email: 'test@example.com', organization: org2)
+      expect(invitation).to be_valid
+    end
+  end
+
   describe '#accept!' do
     it 'sets accepted_at timestamp for valid invitation' do
       invitation = create(:invitation)

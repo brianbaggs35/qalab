@@ -12,6 +12,14 @@ FactoryBot.define do
       role { "system_admin" }
     end
 
+    trait :confirmed do
+      confirmed_at { Time.current }
+    end
+
+    trait :onboarded do
+      onboarding_completed_at { Time.current }
+    end
+
     trait :unconfirmed do
       confirmed_at { nil }
     end
