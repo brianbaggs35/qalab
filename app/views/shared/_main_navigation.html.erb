@@ -48,6 +48,9 @@
               </summary>
               <ul class="p-2">
                 <li><%= link_to "Organization", organizations_path, class: "text-sm" %></li>
+                <% if policy(Invitation).index? %>
+                  <li><%= link_to "Invitations", invitations_path, class: "text-sm" %></li>
+                <% end %>
               </ul>
             </details>
           </li>
@@ -101,6 +104,9 @@
             </summary>
             <ul class="p-2 bg-base-100 rounded-t-none shadow-lg w-48">
               <li><%= link_to "Organization", organizations_path, class: "text-sm hover:text-accent" %></li>
+              <% if policy(Invitation).index? %>
+                <li><%= link_to "Invitations", invitations_path, class: "text-sm hover:text-accent" %></li>
+              <% end %>
             </ul>
           </details>
         </li>

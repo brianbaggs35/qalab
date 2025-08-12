@@ -1,6 +1,6 @@
 class Invitation < ApplicationRecord
   # Relationships
-  belongs_to :invited_by, class_name: 'User'
+  belongs_to :invited_by, class_name: "User"
   belongs_to :organization
 
   # Validations
@@ -13,9 +13,9 @@ class Invitation < ApplicationRecord
 
   # Scopes
   scope :pending, -> { where(accepted_at: nil) }
-  scope :expired, -> { where('expires_at < ?', Time.current) }
-  scope :valid_invitations, -> { pending.where('expires_at >= ?', Time.current) }
-  
+  scope :expired, -> { where("expires_at < ?", Time.current) }
+  scope :valid_invitations, -> { pending.where("expires_at >= ?", Time.current) }
+
   # Callbacks
   before_validation :generate_token, on: :create
   before_validation :set_expiration, on: :create
@@ -60,17 +60,17 @@ class Invitation < ApplicationRecord
 
   def email_not_already_registered
     return unless email.present?
-    
+
     if User.exists?(email: email)
-      errors.add(:email, 'is already registered')
+      errors.add(:email, "is already registered")
     end
   end
 
   def email_unique_per_organization
     return unless email.present? && organization_id.present?
-    
+
     if self.class.pending.where(email: email, organization: organization).where.not(id: id).exists?
-      errors.add(:email, 'has already been invited to this organization')
+      errors.add(:email, "has already been invited to this organization")
     end
   end
 end

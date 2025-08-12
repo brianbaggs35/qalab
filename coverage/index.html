@@ -13,7 +13,7 @@
       <img src="./assets/0.13.2/loading.gif" alt="loading"/>
     </div>
     <div id="wrapper" class="hide">
-      <div class="timestamp">Generated <abbr class="timeago" title="2025-08-12T13:14:33+00:00">2025-08-12T13:14:33+00:00</abbr></div>
+      <div class="timestamp">Generated <abbr class="timeago" title="2025-08-12T13:22:36+00:00">2025-08-12T13:22:36+00:00</abbr></div>
       <ul class="group_tabs"></ul>
 
       <div id="content">
@@ -5525,7 +5525,7 @@
 
             
 
-            <code class="ruby">  before_action :set_invitation, only: [:show, :destroy]</code>
+            <code class="ruby">  before_action :set_invitation, only: [ :show, :destroy ]</code>
           </li>
         </div>
       
@@ -5537,7 +5537,7 @@
 
             
 
-            <code class="ruby">  before_action :set_organization, only: [:index, :new, :create]</code>
+            <code class="ruby">  before_action :set_organization, only: [ :index, :new, :create ]</code>
           </li>
         </div>
       
@@ -5547,7 +5547,7 @@
 
             
 
-            <code class="ruby">  </code>
+            <code class="ruby"></code>
           </li>
         </div>
       
@@ -5743,7 +5743,7 @@
 
             
 
-            <code class="ruby">    </code>
+            <code class="ruby"></code>
           </li>
         </div>
       
@@ -5763,7 +5763,7 @@
 
             
 
-            <code class="ruby">    </code>
+            <code class="ruby"></code>
           </li>
         </div>
       
@@ -5803,7 +5803,7 @@
 
             
 
-            <code class="ruby">      </code>
+            <code class="ruby"></code>
           </li>
         </div>
       
@@ -5813,7 +5813,7 @@
 
             
 
-            <code class="ruby">      redirect_to invitations_path, </code>
+            <code class="ruby">      redirect_to invitations_path,</code>
           </li>
         </div>
       
@@ -5947,7 +5947,7 @@
 
             
 
-            <code class="ruby">    </code>
+            <code class="ruby"></code>
           </li>
         </div>
       
@@ -6059,7 +6059,7 @@
 
             
 
-            <code class="ruby">    </code>
+            <code class="ruby"></code>
           </li>
         </div>
       
@@ -6079,7 +6079,7 @@
 
             
 
-            <code class="ruby">      redirect_to new_user_registration_path, </code>
+            <code class="ruby">      redirect_to new_user_registration_path,</code>
           </li>
         </div>
       
@@ -6219,7 +6219,7 @@
 
             
 
-            <code class="ruby">      </code>
+            <code class="ruby"></code>
           </li>
         </div>
       
@@ -6279,7 +6279,7 @@
 
             
 
-            <code class="ruby">      </code>
+            <code class="ruby"></code>
           </li>
         </div>
       
@@ -6289,7 +6289,7 @@
 
             
 
-            <code class="ruby">      redirect_to dashboard_path, </code>
+            <code class="ruby">      redirect_to dashboard_path,</code>
           </li>
         </div>
       
@@ -6505,7 +6505,7 @@
 
             
 
-            <code class="ruby">    </code>
+            <code class="ruby"></code>
           </li>
         </div>
       
@@ -14588,7 +14588,7 @@
 
             
 
-            <code class="ruby">  belongs_to :invited_by, class_name: &#39;User&#39;</code>
+            <code class="ruby">  belongs_to :invited_by, class_name: &quot;User&quot;</code>
           </li>
         </div>
       
@@ -14736,7 +14736,7 @@
 
             
 
-            <code class="ruby">  scope :expired, -&gt; { where(&#39;expires_at &lt; ?&#39;, Time.current) }</code>
+            <code class="ruby">  scope :expired, -&gt; { where(&quot;expires_at &lt; ?&quot;, Time.current) }</code>
           </li>
         </div>
       
@@ -14748,7 +14748,7 @@
 
             
 
-            <code class="ruby">  scope :valid_invitations, -&gt; { pending.where(&#39;expires_at &gt;= ?&#39;, Time.current) }</code>
+            <code class="ruby">  scope :valid_invitations, -&gt; { pending.where(&quot;expires_at &gt;= ?&quot;, Time.current) }</code>
           </li>
         </div>
       
@@ -14758,7 +14758,7 @@
 
             
 
-            <code class="ruby">  </code>
+            <code class="ruby"></code>
           </li>
         </div>
       
@@ -15246,7 +15246,7 @@
 
             
 
-            <code class="ruby">    </code>
+            <code class="ruby"></code>
           </li>
         </div>
       
@@ -15268,7 +15268,7 @@
 
             
 
-            <code class="ruby">      errors.add(:email, &#39;is already registered&#39;)</code>
+            <code class="ruby">      errors.add(:email, &quot;is already registered&quot;)</code>
           </li>
         </div>
       
@@ -15332,7 +15332,7 @@
 
             
 
-            <code class="ruby">    </code>
+            <code class="ruby"></code>
           </li>
         </div>
       
@@ -15354,7 +15354,7 @@
 
             
 
-            <code class="ruby">      errors.add(:email, &#39;has already been invited to this organization&#39;)</code>
+            <code class="ruby">      errors.add(:email, &quot;has already been invited to this organization&quot;)</code>
           </li>
         </div>
       
@@ -21380,7 +21380,7 @@
 
             
 
-            <code class="ruby">                              .where(role: [&#39;owner&#39;, &#39;admin&#39;])</code>
+            <code class="ruby">                              .where(role: [ &quot;owner&quot;, &quot;admin&quot; ])</code>
           </li>
         </div>
       
@@ -21494,7 +21494,7 @@
 
             
 
-            <code class="ruby">    </code>
+            <code class="ruby"></code>
           </li>
         </div>
       
@@ -21514,7 +21514,7 @@
 
             
 
-            <code class="ruby">    user.organization_users.where(role: [&#39;owner&#39;, &#39;admin&#39;]).exists?</code>
+            <code class="ruby">    user.organization_users.where(role: [ &quot;owner&quot;, &quot;admin&quot; ]).exists?</code>
           </li>
         </div>
       
@@ -21566,7 +21566,7 @@
 
             
 
-            <code class="ruby">    </code>
+            <code class="ruby"></code>
           </li>
         </div>
       
@@ -21586,7 +21586,7 @@
 
             
 
-            <code class="ruby">                          .where(role: [&#39;owner&#39;, &#39;admin&#39;])</code>
+            <code class="ruby">                          .where(role: [ &quot;owner&quot;, &quot;admin&quot; ])</code>
           </li>
         </div>
       
@@ -21658,7 +21658,7 @@
 
             
 
-            <code class="ruby">    </code>
+            <code class="ruby"></code>
           </li>
         </div>
       
@@ -21708,7 +21708,7 @@
 
             
 
-            <code class="ruby">    </code>
+            <code class="ruby"></code>
           </li>
         </div>
       
@@ -21728,7 +21728,7 @@
 
             
 
-            <code class="ruby">    when &#39;owner&#39;</code>
+            <code class="ruby">    when &quot;owner&quot;</code>
           </li>
         </div>
       
@@ -21748,7 +21748,7 @@
 
             
 
-            <code class="ruby">      [&#39;owner&#39;, &#39;admin&#39;, &#39;member&#39;].include?(record.role)</code>
+            <code class="ruby">      [ &quot;owner&quot;, &quot;admin&quot;, &quot;member&quot; ].include?(record.role)</code>
           </li>
         </div>
       
@@ -21758,7 +21758,7 @@
 
             
 
-            <code class="ruby">    when &#39;admin&#39;</code>
+            <code class="ruby">    when &quot;admin&quot;</code>
           </li>
         </div>
       
@@ -21778,7 +21778,7 @@
 
             
 
-            <code class="ruby">      [&#39;admin&#39;, &#39;member&#39;].include?(record.role)</code>
+            <code class="ruby">      [ &quot;admin&quot;, &quot;member&quot; ].include?(record.role)</code>
           </li>
         </div>
       

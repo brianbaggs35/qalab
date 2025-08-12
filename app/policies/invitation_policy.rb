@@ -26,7 +26,7 @@ class InvitationPolicy < ApplicationPolicy
       else
         # Only show invitations for organizations where user has admin/owner role
         organization_ids = user.organization_users
-                              .where(role: ['owner', 'admin'])
+                              .where(role: [ "owner", "admin" ])
                               .pluck(:organization_id)
         scope.where(organization_id: organization_ids)
       end
@@ -37,35 +37,35 @@ class InvitationPolicy < ApplicationPolicy
 
   def user_can_manage_invitations?
     return true if user.system_admin?
-    
+
     # User must be owner or admin of at least one organization
-    user.organization_users.where(role: ['owner', 'admin']).exists?
+    user.organization_users.where(role: [ "owner", "admin" ]).exists?
   end
 
   def invitation_belongs_to_user_organization?
     return true if user.system_admin?
-    
+
     organization_ids = user.organization_users
-                          .where(role: ['owner', 'admin'])
+                          .where(role: [ "owner", "admin" ])
                           .pluck(:organization_id)
     organization_ids.include?(record.organization_id)
   end
 
   def can_invite_role?
     return true if user.system_admin?
-    
+
     # Get user's highest role in the organization
     user_role = user.organization_users
                    .find_by(organization: record.organization)
                    &.role
-    
+
     case user_role
-    when 'owner'
+    when "owner"
       # Owners can invite anyone
-      ['owner', 'admin', 'member'].include?(record.role)
-    when 'admin'
+      [ "owner", "admin", "member" ].include?(record.role)
+    when "admin"
       # Admins can invite admins and members, but not owners
-      ['admin', 'member'].include?(record.role)
+      [ "admin", "member" ].include?(record.role)
     else
       # Members cannot invite anyone
       false

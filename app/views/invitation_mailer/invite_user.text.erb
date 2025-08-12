@@ -1,3 +1,26 @@
-Invitation#invite_user
+🎉 You're Invited to Join <%= @organization.name %> on QA Lab!
 
-<%= @greeting %>, find me in app/views/invitation_mailer/invite_user.text.erb
+Hello!
+
+<%= @invited_by.first_name %> <%= @invited_by.last_name %> has invited you to join <%= @organization.name %> on QA Lab as a <%= @invitation.role.titleize %>.
+
+QA Lab is a comprehensive Quality Assurance and Testing Management platform that helps teams:
+
+• Manage and track automated test results
+• Organize manual testing workflows  
+• Visualize testing metrics and progress
+• Collaborate effectively across teams
+
+To accept this invitation and create your account, visit:
+<%= @accept_url %>
+
+IMPORTANT: This invitation will expire in 7 days. If you don't have a QA Lab account, you'll create one as part of accepting this invitation.
+
+If you have any questions, feel free to reach out to <%= @invited_by.first_name %> at <%= @invited_by.email %>.
+
+Welcome to the team!
+The QA Lab Team
+
+---
+
+This invitation was sent to <%= @invitation.email %>. If you weren't expecting this invitation, you can safely ignore this email.

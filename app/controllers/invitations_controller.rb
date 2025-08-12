@@ -1,8 +1,8 @@
 class InvitationsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_invitation, only: [:show, :destroy]
-  before_action :set_organization, only: [:index, :new, :create]
-  
+  before_action :set_invitation, only: [ :show, :destroy ]
+  before_action :set_organization, only: [ :index, :new, :create ]
+
   def index
     authorize Invitation
     @invitations = policy_scope(Invitation)
@@ -21,14 +21,14 @@ class InvitationsController < ApplicationController
   def create
     @invitation = @organization.invitations.build(invitation_params)
     @invitation.invited_by = current_user
-    
+
     authorize @invitation
-    
+
     if @invitation.save
       # TODO: Send invitation email
       InvitationMailer.invite_user(@invitation).deliver_later
-      
-      redirect_to invitations_path, 
+
+      redirect_to invitations_path,
         notice: "Invitation sent to #{@invitation.email} successfully!"
     else
       render :new, status: :unprocessable_entity
@@ -41,7 +41,7 @@ class InvitationsController < ApplicationController
 
   def destroy
     authorize @invitation
-    
+
     if @invitation.destroy
       redirect_to invitations_path, notice: "Invitation cancelled successfully."
     else
@@ -52,9 +52,9 @@ class InvitationsController < ApplicationController
   # Accept invitation via token (public endpoint)
   def accept
     @invitation = Invitation.find_valid_invitation(params[:token])
-    
+
     unless @invitation
-      redirect_to new_user_registration_path, 
+      redirect_to new_user_registration_path,
         alert: "Invalid or expired invitation link."
       return
     end
@@ -68,14 +68,14 @@ class InvitationsController < ApplicationController
     # If user is already signed in with the correct email, just accept the invitation
     if user_signed_in? && current_user.email == @invitation.email
       @invitation.accept!
-      
+
       OrganizationUser.create!(
         user: current_user,
         organization: @invitation.organization,
         role: @invitation.role
       )
-      
-      redirect_to dashboard_path, 
+
+      redirect_to dashboard_path,
         notice: "Welcome to #{@invitation.organization.name}!"
       return
     end
@@ -96,7 +96,7 @@ class InvitationsController < ApplicationController
     # For now, use the first organization the user belongs to
     # This will be improved in the multi-organization phase
     @organization = current_user.organizations.first
-    
+
     unless @organization
       redirect_to dashboard_path, alert: "You must belong to an organization to manage invitations."
     end
