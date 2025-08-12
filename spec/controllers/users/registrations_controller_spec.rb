@@ -21,7 +21,7 @@ RSpec.describe Users::RegistrationsController, type: :controller do
           }
         }
 
-        expect(response).to redirect_to(root_path)  # Actually redirects to root in test env
+        expect(response).to redirect_to(onboarding_welcome_path)  # First user should go to welcome page
         expect(User.find_by(email: 'john@example.com')).to be_present
       end
     end
@@ -58,7 +58,7 @@ RSpec.describe Users::RegistrationsController, type: :controller do
           }
         }
 
-        expect(response).to redirect_to(root_path)  # Actually redirects to root in test env
+        expect(response).to redirect_to(dashboard_path)  # Invited users go to dashboard
         user = User.find_by(email: 'invited@example.com')
         expect(user).to be_present
         expect(user.first_name).to eq('Jane')
