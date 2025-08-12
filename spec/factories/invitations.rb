@@ -4,7 +4,7 @@ FactoryBot.define do
     role { 'member' }
     expires_at { 7.days.from_now }
     accepted_at { nil }
-    
+
     association :invited_by, factory: :user
     association :organization
 

@@ -19,8 +19,8 @@ class CreateTestResults < ActiveRecord::Migration[8.0]
     add_index :test_results, :test_run_id
     add_index :test_results, :status
     add_index :test_results, :classname
-    add_index :test_results, [:test_run_id, :status]
-    add_index :test_results, [:test_run_id, :classname]
+    add_index :test_results, [ :test_run_id, :status ]
+    add_index :test_results, [ :test_run_id, :classname ]
 
     # Add foreign key constraint
     add_foreign_key :test_results, :test_runs

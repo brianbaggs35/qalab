@@ -6,7 +6,7 @@ RSpec.describe InvitationsController, type: :controller do
   let(:admin) { create(:user) }
   let(:member) { create(:user) }
   let(:system_admin) { create(:user, role: 'system_admin') }
-  
+
   before do
     create(:organization_user, organization: organization, user: owner, role: 'owner')
     create(:organization_user, organization: organization, user: admin, role: 'admin')
@@ -136,7 +136,7 @@ RSpec.describe InvitationsController, type: :controller do
         it "handles validation errors appropriately" do
           post :create, params: invalid_params
           # The response could be a redirect due to authorization or validation error
-          expect(response.status).to be_in([422, 302])
+          expect(response.status).to be_in([ 422, 302 ])
         end
       end
     end
@@ -217,7 +217,7 @@ RSpec.describe InvitationsController, type: :controller do
         expect {
           get :accept, params: { token: invitation.token }
         }.to change(OrganizationUser, :count).by(1)
-        
+
         expect(response).to redirect_to(dashboard_path)
         expect(flash[:notice]).to include("Welcome")
       end

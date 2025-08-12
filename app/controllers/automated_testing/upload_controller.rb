@@ -20,22 +20,22 @@ class AutomatedTesting::UploadController < ApplicationController
     # Handle file upload and store content in xml_file field
     if params[:test_run][:xml_file].present?
       uploaded_file = params[:test_run][:xml_file]
-      
+
       # Validate file type
-      unless uploaded_file.content_type.in?(['text/xml', 'application/xml']) ||
-             uploaded_file.original_filename.downcase.ends_with?('.xml')
-        @test_run.errors.add(:xml_file, 'must be an XML file')
+      unless uploaded_file.content_type.in?([ "text/xml", "application/xml" ]) ||
+             uploaded_file.original_filename.downcase.ends_with?(".xml")
+        @test_run.errors.add(:xml_file, "must be an XML file")
       end
 
       # Validate file size (50MB limit)
       if uploaded_file.size > 50.megabytes
-        @test_run.errors.add(:xml_file, 'must be less than 50MB')
+        @test_run.errors.add(:xml_file, "must be less than 50MB")
       end
 
       # Read file content and store it
       if @test_run.errors.empty?
         @test_run.xml_file = uploaded_file.read
-        
+
         # Generate name from filename if not provided
         if @test_run.name.blank?
           base_name = File.basename(uploaded_file.original_filename, File.extname(uploaded_file.original_filename))
@@ -50,7 +50,7 @@ class AutomatedTesting::UploadController < ApplicationController
       # Process the XML file in background (for now, synchronously)
       if @test_run.xml_file.present?
         processed = @test_run.process_xml_file
-        
+
         if processed
           redirect_to automated_testing_results_path, notice: "Test run uploaded and processed successfully! #{@test_run.total_tests} tests processed."
         else

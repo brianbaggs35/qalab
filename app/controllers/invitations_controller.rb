@@ -1,10 +1,10 @@
 class InvitationsController < ApplicationController
-  before_action :authenticate_user!, except: [:accept]
+  before_action :authenticate_user!, except: [ :accept ]
   before_action :set_invitation, only: [ :show, :destroy ]
   before_action :set_organization, only: [ :index, :new, :create ]
-  
+
   # Skip Pundit for the accept action since it's public
-  skip_after_action :verify_authorized, only: [:accept]
+  skip_after_action :verify_authorized, only: [ :accept ]
 
   def index
     authorize Invitation
