@@ -25,7 +25,7 @@ class AutomatedTesting::UploadController < ApplicationController
         @test_run.process_xml_file
       end
 
-      redirect_to automated_testing_upload_path, notice: "Test run uploaded and processed successfully!"
+      redirect_to automated_testing_results_path, notice: "Test run uploaded and processed successfully!"
     else
       @recent_uploads = policy_scope(TestRun).recent.limit(5)
       @upload_stats = {

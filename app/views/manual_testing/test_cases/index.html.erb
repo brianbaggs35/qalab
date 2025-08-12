@@ -78,8 +78,8 @@
         </svg>
       </div>
       <div class="stat-title">Total Cases</div>
-      <div class="stat-value text-secondary">0</div>
-      <div class="stat-desc">No test cases yet</div>
+      <div class="stat-value text-secondary"><%= @stats[:total] %></div>
+      <div class="stat-desc"><%= @stats[:total] == 0 ? 'No test cases yet' : 'Created test cases' %></div>
     </div>
 
     <div class="stat bg-base-100 shadow-sm rounded-lg">
@@ -89,7 +89,7 @@
         </svg>
       </div>
       <div class="stat-title">Draft</div>
-      <div class="stat-value text-info">0</div>
+      <div class="stat-value text-info"><%= @stats[:draft] %></div>
       <div class="stat-desc">Being created</div>
     </div>
 
@@ -100,19 +100,19 @@
         </svg>
       </div>
       <div class="stat-title">Ready</div>
-      <div class="stat-value text-success">0</div>
+      <div class="stat-value text-success"><%= @stats[:ready] %></div>
       <div class="stat-desc">Ready for testing</div>
     </div>
 
     <div class="stat bg-base-100 shadow-sm rounded-lg">
       <div class="stat-figure text-warning">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
         </svg>
       </div>
-      <div class="stat-title">In Review</div>
-      <div class="stat-value text-warning">0</div>
-      <div class="stat-desc">Pending review</div>
+      <div class="stat-title">Approved</div>
+      <div class="stat-value text-warning"><%= @stats[:approved] %></div>
+      <div class="stat-desc">Production ready</div>
     </div>
   </div>
 
@@ -122,34 +122,153 @@
       <div class="flex items-center justify-between mb-4">
         <h2 class="card-title text-xl">Test Cases</h2>
         <div class="text-sm text-base-content/60">
-          Showing 0 of 0 test cases
+          Showing <%= @test_cases.size %> of <%= @stats[:total] %> test cases
         </div>
       </div>
 
-      <!-- Empty State -->
-      <div class="text-center py-16">
-        <div class="text-6xl mb-4">📝</div>
-        <h3 class="text-xl font-semibold text-base-content/80 mb-2">No Test Cases Yet</h3>
-        <p class="text-base-content/60 mb-6">Create your first manual test case to get started</p>
-        <%= link_to new_manual_testing_test_case_path, 
-            class: "btn btn-secondary gap-2" do %>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-          Create Test Case
+      <% if @test_cases.any? %>
+        <!-- Test Cases List -->
+        <div class="space-y-4">
+          <% @test_cases.each do |test_case| %>
+            <div class="card bg-base-200 hover:bg-base-300 transition-colors">
+              <div class="card-body p-6">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <div class="flex items-start gap-3">
+                      <div class="flex-1">
+                        <h3 class="card-title text-lg">
+                          <%= link_to test_case.title, manual_testing_test_case_path(test_case), 
+                              class: "hover:text-primary transition-colors" %>
+                        </h3>
+                        <% if test_case.description.present? %>
+                          <p class="text-base-content/70 mt-2 line-clamp-2">
+                            <%= truncate(test_case.description, length: 120) %>
+                          </p>
+                        <% end %>
+                      </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap items-center gap-2 mt-4">
+                      <!-- Priority Badge -->
+                      <div class="badge <%= test_case.priority_badge_class %> gap-2">
+                        <% case test_case.priority %>
+                        <% when 'critical' %>
+                          🔴
+                        <% when 'high' %>
+                          🟠
+                        <% when 'medium' %>
+                          🟡
+                        <% when 'low' %>
+                          🟢
+                        <% end %>
+                        <%= test_case.priority.humanize %>
+                      </div>
+                      
+                      <!-- Status Badge -->
+                      <div class="badge <%= test_case.status_badge_class %>">
+                        <%= test_case.status.humanize %>
+                      </div>
+                      
+                      <!-- Category -->
+                      <div class="badge badge-outline">
+                        <%= test_case.category.humanize %>
+                      </div>
+                      
+                      <!-- Steps count -->
+                      <div class="badge badge-ghost">
+                        <%= test_case.steps_list.size %> step<%= 's' unless test_case.steps_list.size == 1 %>
+                      </div>
+                      
+                      <!-- Duration -->
+                      <% if test_case.estimated_duration.present? %>
+                        <div class="badge badge-ghost">
+                          ⏱️ <%= test_case.estimated_duration %>min
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                  
+                  <div class="flex items-center gap-2 ml-4">
+                    <%= link_to manual_testing_test_case_path(test_case), 
+                        class: "btn btn-ghost btn-sm", title: "View" do %>
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    <% end %>
+                    
+                    <%= link_to edit_manual_testing_test_case_path(test_case), 
+                        class: "btn btn-ghost btn-sm", title: "Edit" do %>
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    <% end %>
+                    
+                    <div class="dropdown dropdown-end">
+                      <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01" />
+                        </svg>
+                      </div>
+                      <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+                        <li>
+                          <%= link_to manual_testing_test_case_path(test_case) do %>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2v0M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                            </svg>
+                            Duplicate
+                          <% end %>
+                        </li>
+                        <li>
+                          <%= link_to manual_testing_test_case_path(test_case), 
+                              method: :delete,
+                              class: "text-error",
+                              confirm: "Are you sure you want to delete '#{test_case.title}'?" do %>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Delete
+                          <% end %>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Tags -->
+                <% if test_case.tag_list.any? %>
+                  <div class="flex flex-wrap gap-1 mt-3">
+                    <% test_case.tag_list.each do |tag| %>
+                      <span class="badge badge-sm badge-outline"><%= tag %></span>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Pagination -->
+        <% if @test_cases.respond_to?(:current_page) && @test_cases.total_pages > 1 %>
+          <div class="flex justify-center mt-8">
+            <%= paginate @test_cases, theme: 'twitter_bootstrap_4' %>
+          </div>
         <% end %>
-      </div>
-
-      <!-- Pagination placeholder (hidden when empty) -->
-      <div class="hidden justify-center mt-6">
-        <div class="btn-group">
-          <button class="btn btn-outline">«</button>
-          <button class="btn btn-outline btn-active">1</button>
-          <button class="btn btn-outline">2</button>
-          <button class="btn btn-outline">3</button>
-          <button class="btn btn-outline">»</button>
+      <% else %>
+        <!-- Empty State -->
+        <div class="text-center py-16">
+          <div class="text-6xl mb-4">📝</div>
+          <h3 class="text-xl font-semibold text-base-content/80 mb-2">No Test Cases Yet</h3>
+          <p class="text-base-content/60 mb-6">Create your first manual test case to get started</p>
+          <%= link_to new_manual_testing_test_case_path, 
+              class: "btn btn-secondary gap-2" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Create Test Case
+          <% end %>
         </div>
-      </div>
+      <% end %>
     </div>
   </div>
 </div>

@@ -9,6 +9,7 @@ class User < ApplicationRecord
   has_many :organization_users, dependent: :destroy
   has_many :organizations, through: :organization_users
   has_many :test_runs, dependent: :destroy
+  has_many :test_cases, dependent: :destroy
 
   # Validations
   validates :first_name, :last_name, presence: true
@@ -23,6 +24,8 @@ class User < ApplicationRecord
   # Scopes
   scope :system_admins, -> { where(role: "system_admin") }
   scope :regular_users, -> { where(role: "member") }
+  scope :confirmed, -> { where.not(confirmed_at: nil) }
+  scope :unconfirmed, -> { where(confirmed_at: nil) }
 
   # Role checking methods
   def system_admin?

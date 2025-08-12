@@ -28,7 +28,7 @@
           Upload XML File
         </h2>
 
-        <%= form_with model: @test_run, url: automated_testing_upload_path, method: :post, local: true, multipart: true, class: "space-y-6" do |form| %>
+        <%= form_with model: @test_run, url: automated_testing_upload_path, method: :post, local: true, multipart: true, class: "space-y-6", data: { controller: "upload", upload_target: "form" } do |form| %>
           <!-- File Upload -->
           <div class="form-control w-full">
             <label class="label">
@@ -38,10 +38,27 @@
             <%= form.file_field :xml_file, 
                 class: "file-input file-input-bordered file-input-primary w-full", 
                 accept: ".xml",
-                required: true %>
+                required: true,
+                data: { upload_target: "fileInput" } %>
             <label class="label">
               <span class="label-text-alt">Accepts JUnit and TestNG XML files only</span>
             </label>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="hidden" data-upload-target="progressContainer">
+            <div class="form-control w-full">
+              <label class="label">
+                <span class="label-text text-base font-semibold">Upload Progress</span>
+              </label>
+              <div class="w-full bg-base-200 rounded-full h-4">
+                <div class="bg-primary h-4 rounded-full flex items-center justify-center text-white text-xs font-semibold" 
+                     style="width: 0%" 
+                     data-upload-target="progressBar">
+                  0%
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Test Run Name -->
@@ -99,12 +116,9 @@
           <!-- Submit Button -->
           <div class="form-control mt-8">
             <%= form.submit "Upload Test Results", 
-                class: "btn btn-primary btn-lg w-full gap-2" do %>
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
-              Upload Test Results
-            <% end %>
+                class: "btn btn-primary btn-lg w-full gap-2",
+                disabled: true,
+                data: { upload_target: "submitButton" } %>
           </div>
         <% end %>
       </div>

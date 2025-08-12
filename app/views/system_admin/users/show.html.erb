@@ -1,0 +1,147 @@
+<% content_for :title, "View User - #{@user.full_name}" %>
+
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-bold text-primary"><%= @user.full_name %></h1>
+      <p class="text-base-content/70 mt-1">User details and activity</p>
+    </div>
+    <div class="flex gap-2">
+      <%= link_to edit_system_admin_user_path(@user), 
+          class: "btn btn-primary gap-2" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+        Edit User
+      <% end %>
+      
+      <%= link_to system_admin_users_path, 
+          class: "btn btn-ghost gap-2" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to Users
+      <% end %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- User Information -->
+    <div class="lg:col-span-2 space-y-6">
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <h3 class="card-title text-lg mb-4">User Information</h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="text-sm font-semibold text-base-content/70">Full Name</label>
+              <p class="text-base-content text-lg"><%= @user.full_name %></p>
+            </div>
+            
+            <div>
+              <label class="text-sm font-semibold text-base-content/70">Email</label>
+              <p class="text-base-content"><%= @user.email %></p>
+            </div>
+            
+            <div>
+              <label class="text-sm font-semibold text-base-content/70">Role</label>
+              <div>
+                <% if @user.system_admin? %>
+                  <div class="badge badge-warning gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    System Admin
+                  </div>
+                <% else %>
+                  <div class="badge badge-info">Member</div>
+                <% end %>
+              </div>
+            </div>
+            
+            <div>
+              <label class="text-sm font-semibold text-base-content/70">Status</label>
+              <div class="flex flex-col gap-1">
+                <% if @user.confirmed? %>
+                  <div class="badge badge-success badge-sm">Confirmed</div>
+                <% else %>
+                  <div class="badge badge-error badge-sm">Unconfirmed</div>
+                <% end %>
+                
+                <% if @user.access_locked? %>
+                  <div class="badge badge-warning badge-sm">Locked</div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics & Actions -->
+    <div class="space-y-6">
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <h3 class="card-title text-lg mb-4">Statistics</h3>
+          <div class="space-y-4">
+            <div class="stat">
+              <div class="stat-title">Organizations</div>
+              <div class="stat-value text-primary text-2xl"><%= @user_stats[:organizations_count] %></div>
+            </div>
+            
+            <div class="stat">
+              <div class="stat-title">Test Runs</div>
+              <div class="stat-value text-secondary text-2xl"><%= @user_stats[:test_runs_count] %></div>
+            </div>
+            
+            <div class="stat">
+              <div class="stat-title">Test Cases</div>
+              <div class="stat-value text-accent text-2xl"><%= @user_stats[:test_cases_count] %></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <h3 class="card-title text-lg mb-4">Actions</h3>
+          <div class="space-y-2">
+            <%= link_to edit_system_admin_user_path(@user), 
+                class: "btn btn-primary btn-sm w-full" do %>
+              Edit User
+            <% end %>
+            
+            <% if @user != current_user %>
+              <% if @user.access_locked? %>
+                <%= link_to unlock_system_admin_user_path(@user), method: :patch,
+                    class: "btn btn-success btn-sm w-full" do %>
+                  Unlock Account
+                <% end %>
+              <% else %>
+                <%= link_to lock_system_admin_user_path(@user), method: :patch,
+                    class: "btn btn-warning btn-sm w-full" do %>
+                  Lock Account
+                <% end %>
+              <% end %>
+              
+              <% unless @user.confirmed? %>
+                <%= link_to confirm_system_admin_user_path(@user), method: :patch,
+                    class: "btn btn-info btn-sm w-full" do %>
+                  Confirm Account
+                <% end %>
+              <% end %>
+              
+              <%= link_to system_admin_user_path(@user), method: :delete,
+                  class: "btn btn-error btn-sm w-full",
+                  confirm: "Are you sure you want to delete this user?" do %>
+                Delete User
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
