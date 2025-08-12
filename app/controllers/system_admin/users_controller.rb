@@ -41,6 +41,7 @@ class SystemAdmin::UsersController < ApplicationController
 
   def create
     @user = User.new(user_params)
+    @user.confirmed_at = Time.current # Auto-confirm users created by system admin
     
     if @user.save
       redirect_to system_admin_user_path(@user), 
