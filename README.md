@@ -5,8 +5,11 @@ A comprehensive Quality Assurance and Testing Management application built with 
 ## Features
 
 ### 🔐 Authentication & Authorization
+- **Invitation-Only Registration**: Secure sign-up system requiring valid invitation codes
 - **Secure Authentication**: Implemented with Devise including confirmable, lockable, and trackable modules
 - **Role-Based Access Control**: Pundit-powered authorization with hierarchical roles
+- **Invitation Management**: Comprehensive invitation system with token-based security
+- **Email Integration**: Professional invitation emails with organization branding
 - **Password Security**: Minimum 12-character passwords with secure token generation
 - **Account Security**: Automatic lockout after 5 failed attempts, unlock via email or time-based
 - **Session Management**: 2-hour session timeout for enhanced security
@@ -14,8 +17,17 @@ A comprehensive Quality Assurance and Testing Management application built with 
 ### 👥 Multi-Tenant Organization Management
 - **Organizations**: Multi-tenant architecture with organization-based separation
 - **Role Hierarchy**: System Admin → Owner → Admin → Member
+- **Invitation System**: Secure, token-based user invitation system
 - **User Management**: Invite and manage users within organizations
 - **UUID-based**: All primary keys use UUIDs for enhanced security and scalability
+
+### 📧 Invitation System
+- **Invitation-Only Registration**: All new users must be invited by existing organization members
+- **Role-Based Invitations**: Owners can invite any role, Admins can invite Admins/Members
+- **Secure Token System**: Cryptographically secure invitation tokens with expiration
+- **Email Integration**: Professional invitation emails with accept links
+- **Permission Control**: Comprehensive authorization for invitation management
+- **Multi-Organization Support**: Users can be invited to multiple organizations with different roles
 
 ### 📊 Interactive Dashboard
 - **Real-time Metrics**: User registrations, organization growth, role distribution
@@ -77,43 +89,206 @@ A comprehensive Quality Assurance and Testing Management application built with 
 
 ### SMTP Configuration for Email Features
 
-The application requires SMTP configuration for email features (confirmation, password reset, etc.). Add the following to your environment variables or Rails credentials:
+QA Lab requires SMTP configuration for critical email features including:
+- **User Confirmations**: Email verification for new accounts
+- **Password Reset**: Secure password recovery emails
+- **Invitations**: Organization member invitation emails (invitation-only registration)
+- **Account Security**: Account lockout and unlock notifications
 
-#### For Development (config/environments/development.rb):
+#### Configuration Methods
+
+**Option 1: Environment Variables (Recommended for Development)**
+
+Create a `.env` file in your project root:
+```bash
+# SMTP Configuration
+SMTP_ADDRESS=smtp.gmail.com
+SMTP_PORT=587
+SMTP_DOMAIN=yourdomain.com
+SMTP_USERNAME=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+SMTP_AUTHENTICATION=plain
+SMTP_ENABLE_STARTTLS=true
+
+# Application Settings
+DEFAULT_FROM_EMAIL=noreply@yourdomain.com
+DEFAULT_REPLY_TO=support@yourdomain.com
+```
+
+Then configure your environment file:
+
 ```ruby
+# config/environments/development.rb
 config.action_mailer.delivery_method = :smtp
+config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
 config.action_mailer.smtp_settings = {
-  address: 'your-smtp-server.com',
-  port: 587,
-  domain: 'yourdomain.com',
+  address: ENV['SMTP_ADDRESS'],
+  port: ENV['SMTP_PORT'].to_i,
+  domain: ENV['SMTP_DOMAIN'],
   user_name: ENV['SMTP_USERNAME'],
   password: ENV['SMTP_PASSWORD'],
-  authentication: 'plain',
-  enable_starttls_auto: true
+  authentication: ENV['SMTP_AUTHENTICATION'],
+  enable_starttls_auto: ENV['SMTP_ENABLE_STARTTLS'] == 'true'
+}
+
+# Set default from address
+config.action_mailer.default_options = {
+  from: ENV['DEFAULT_FROM_EMAIL'],
+  reply_to: ENV['DEFAULT_REPLY_TO']
 }
 ```
 
-#### Environment Variables:
+**Option 2: Rails Encrypted Credentials (Recommended for Production)**
+
+Edit your encrypted credentials:
 ```bash
-# Add to .env or your environment
-SMTP_USERNAME=your-smtp-username
-SMTP_PASSWORD=your-smtp-password
-SMTP_DOMAIN=yourdomain.com
+EDITOR=nano bin/rails credentials:edit
 ```
 
-#### For Production:
-Use Rails encrypted credentials:
-```bash
-bin/rails credentials:edit
-```
-
-Add:
+Add your SMTP configuration:
 ```yaml
 smtp:
-  username: your-smtp-username
-  password: your-smtp-password
+  address: smtp.gmail.com
+  port: 587
   domain: yourdomain.com
+  username: your-email@gmail.com
+  password: your-app-password
+  authentication: plain
+  enable_starttls: true
+
+email:
+  default_from: noreply@yourdomain.com
+  default_reply_to: support@yourdomain.com
 ```
+
+Then configure production:
+```ruby
+# config/environments/production.rb
+config.action_mailer.delivery_method = :smtp
+config.action_mailer.default_url_options = { host: 'your-domain.com' }
+config.action_mailer.smtp_settings = {
+  address: Rails.application.credentials.smtp[:address],
+  port: Rails.application.credentials.smtp[:port],
+  domain: Rails.application.credentials.smtp[:domain],
+  user_name: Rails.application.credentials.smtp[:username],
+  password: Rails.application.credentials.smtp[:password],
+  authentication: Rails.application.credentials.smtp[:authentication],
+  enable_starttls_auto: Rails.application.credentials.smtp[:enable_starttls]
+}
+
+config.action_mailer.default_options = {
+  from: Rails.application.credentials.email[:default_from],
+  reply_to: Rails.application.credentials.email[:default_reply_to]
+}
+```
+
+#### Popular SMTP Providers
+
+**Gmail (Google Workspace)**
+```bash
+SMTP_ADDRESS=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=your-email@gmail.com
+SMTP_PASSWORD=your-app-password  # Generate at https://myaccount.google.com/apppasswords
+```
+
+**SendGrid**
+```bash
+SMTP_ADDRESS=smtp.sendgrid.net
+SMTP_PORT=587
+SMTP_USERNAME=apikey
+SMTP_PASSWORD=your-sendgrid-api-key
+```
+
+**Amazon SES**
+```bash
+SMTP_ADDRESS=email-smtp.us-east-1.amazonaws.com
+SMTP_PORT=587
+SMTP_USERNAME=your-ses-access-key-id
+SMTP_PASSWORD=your-ses-secret-access-key
+```
+
+**Mailgun**
+```bash
+SMTP_ADDRESS=smtp.mailgun.org
+SMTP_PORT=587
+SMTP_USERNAME=your-mailgun-smtp-username
+SMTP_PASSWORD=your-mailgun-smtp-password
+```
+
+#### Testing Email Configuration
+
+Test your email configuration with the Rails console:
+
+```ruby
+# Start Rails console
+bin/rails console
+
+# Test email delivery
+UserMailer.test_email('test@example.com').deliver_now
+
+# Test invitation email
+org = Organization.first
+user = User.first
+invitation = Invitation.create!(
+  email: 'test@example.com',
+  organization: org,
+  invited_by: user,
+  role: 'member'
+)
+InvitationMailer.invite_user(invitation).deliver_now
+```
+
+#### Email Templates
+
+QA Lab includes professional email templates for:
+- **User Confirmation**: Welcome emails with account activation links
+- **Password Reset**: Secure password recovery with token links  
+- **Invitations**: Branded invitation emails with organization context
+- **Account Lockout**: Security notification emails
+
+All emails are responsive and include both HTML and plain text versions.
+
+#### Troubleshooting Email Issues
+
+**Common Issues and Solutions:**
+
+1. **Authentication Failed**
+   - Verify username/password credentials
+   - Use app-specific passwords for Gmail
+   - Check provider-specific authentication requirements
+
+2. **Connection Refused**
+   - Verify SMTP server address and port
+   - Check firewall and network settings
+   - Ensure STARTTLS is properly configured
+
+3. **Emails Not Delivering**
+   - Check spam/junk folders
+   - Verify domain reputation and SPF records
+   - Monitor delivery logs with your provider
+
+4. **Development Testing**
+   - Use MailCatcher for local email testing:
+     ```bash
+     gem install mailcatcher
+     mailcatcher
+     ```
+   - Configure development to use MailCatcher:
+     ```ruby
+     config.action_mailer.delivery_method = :smtp
+     config.action_mailer.smtp_settings = { address: '127.0.0.1', port: 1025 }
+     config.action_mailer.default_url_options = { host: '127.0.0.1:3000' }
+     ```
+
+#### Security Considerations
+
+- **Never commit SMTP credentials** to version control
+- Use **app-specific passwords** for Gmail and similar providers
+- Enable **two-factor authentication** on your email provider account
+- Regularly **rotate SMTP credentials**
+- Monitor **email delivery logs** for security issues
+- Use **encrypted credentials** in production environments
 
 ### Security Configuration
 
