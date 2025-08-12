@@ -1,19 +1,19 @@
 namespace :database do
-  desc 'Generate database configuration'
+  desc "Generate database configuration"
   task :setup do
     on roles(:app) do
       template("database.yml.erb", "#{shared_path}/config/database.yml")
     end
   end
-  
-  desc 'Create and setup databases'
+
+  desc "Create and setup databases"
   task :create_and_migrate do
     on roles(:db) do
       within release_path do
         with rails_env: fetch(:stage) do
-          execute :bundle, :exec, :rake, 'db:create'
-          execute :bundle, :exec, :rake, 'db:migrate'
-          execute :bundle, :exec, :rake, 'db:seed'
+          execute :bundle, :exec, :rake, "db:create"
+          execute :bundle, :exec, :rake, "db:migrate"
+          execute :bundle, :exec, :rake, "db:seed"
         end
       end
     end
@@ -21,7 +21,7 @@ namespace :database do
 end
 
 namespace :system do
-  desc 'Install system dependencies'
+  desc "Install system dependencies"
   task :install do
     on roles(:app) do
       execute :sudo, :apt, :update
@@ -34,8 +34,8 @@ namespace :system do
       end
     end
   end
-  
-  desc 'Setup deploy user'
+
+  desc "Setup deploy user"
   task :setup_deploy_user do
     on roles(:app) do
       execute :sudo, "useradd", "-m", "-s", "/bin/bash", "deploy" rescue nil
@@ -47,12 +47,12 @@ namespace :system do
 end
 
 namespace :ssl do
-  desc 'Generate self-signed SSL certificate'
+  desc "Generate self-signed SSL certificate"
   task :generate_self_signed do
     on roles(:web) do
       execute :sudo, "mkdir", "-p", "/etc/ssl/certs", "/etc/ssl/private"
-      execute :sudo, "openssl", "req", "-x509", "-nodes", "-days", "365", 
-              "-newkey", "rsa:2048", 
+      execute :sudo, "openssl", "req", "-x509", "-nodes", "-days", "365",
+              "-newkey", "rsa:2048",
               "-keyout", "/etc/ssl/private/#{fetch(:application)}.key",
               "-out", "/etc/ssl/certs/#{fetch(:application)}.crt",
               "-subj", "/C=US/ST=State/L=City/O=Organization/CN=#{fetch(:deploy_server)}"

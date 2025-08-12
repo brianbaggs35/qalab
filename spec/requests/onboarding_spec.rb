@@ -80,7 +80,7 @@ RSpec.describe OnboardingController, type: :request do
 
   describe "GET #complete" do
     let!(:organization) { create(:organization) }
-    
+
     before do
       organization.organization_users.create!(user: user, role: "owner")
     end

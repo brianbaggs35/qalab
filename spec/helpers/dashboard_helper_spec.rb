@@ -1,9 +1,9 @@
 require 'rails_helper'
 
 RSpec.describe DashboardHelper, type: :helper do
-  # Since the helper module is currently empty, let's test that it exists 
+  # Since the helper module is currently empty, let's test that it exists
   # and can be included properly
-  
+
   describe "module inclusion" do
     it "can be included without errors" do
       expect { helper.class.include DashboardHelper }.not_to raise_error

@@ -17,7 +17,7 @@ RSpec.describe "User Onboarding", type: :system do
 
       # Fill in registration form
       fill_in "First name", with: "John"
-      fill_in "Last name", with: "Doe" 
+      fill_in "Last name", with: "Doe"
       fill_in "Email address", with: "john@example.com"
       fill_in "Password", with: "password123456"
       fill_in "Confirm password", with: "password123456"
@@ -57,8 +57,8 @@ RSpec.describe "User Onboarding", type: :system do
     let!(:organization) { create(:organization, name: "Existing Org") }
     let!(:inviting_user) { create(:user, :confirmed) }
     let!(:invitation) do
-      create(:invitation, 
-             email: "invited@example.com", 
+      create(:invitation,
+             email: "invited@example.com",
              organization: organization,
              invited_by: inviting_user,
              role: "member")
@@ -78,7 +78,7 @@ RSpec.describe "User Onboarding", type: :system do
       # Try to register without invitation code
       fill_in "First name", with: "Jane"
       fill_in "Last name", with: "Smith"
-      fill_in "Email address", with: "jane@example.com" 
+      fill_in "Email address", with: "jane@example.com"
       fill_in "Password", with: "password123456"
       fill_in "Confirm password", with: "password123456"
 
@@ -96,14 +96,14 @@ RSpec.describe "User Onboarding", type: :system do
       fill_in "First name", with: "Jane"
       fill_in "Last name", with: "Smith"
       fill_in "Email address", with: "invited@example.com"
-      fill_in "Password", with: "password123456"  
+      fill_in "Password", with: "password123456"
       fill_in "Confirm password", with: "password123456"
 
       click_button "Create account"
 
       # Should redirect directly to dashboard (no onboarding for invited users)
       expect(page).to have_content("Dashboard")
-      
+
       # Verify user was added to organization
       user = User.find_by(email: "invited@example.com")
       expect(user).to be_present

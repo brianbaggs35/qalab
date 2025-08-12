@@ -1,6 +1,6 @@
 class OnboardingController < ApplicationController
   before_action :authenticate_user!
-  before_action :ensure_onboarding_needed, except: [:complete]
+  before_action :ensure_onboarding_needed, except: [ :complete ]
   skip_after_action :verify_authorized
   skip_after_action :verify_policy_scoped
 
@@ -23,10 +23,10 @@ class OnboardingController < ApplicationController
         user: current_user,
         role: "owner"
       )
-      
+
       # Mark onboarding as complete
       current_user.update(onboarding_completed_at: Time.current)
-      
+
       redirect_to onboarding_complete_path
     else
       render :organization, status: :unprocessable_entity

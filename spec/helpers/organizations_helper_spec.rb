@@ -36,7 +36,7 @@ RSpec.describe OrganizationsHelper, type: :helper do
   #   end
   #
   #   it "returns organization image when present" do
-  #     organization = build(:organization, image: "org.png") 
+  #     organization = build(:organization, image: "org.png")
   #     avatar = helper.organization_avatar(organization)
   #     expect(avatar).to include("org.png")
   #   end

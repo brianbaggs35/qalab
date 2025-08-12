@@ -24,7 +24,7 @@ class InvitationsController < ApplicationController
   def create
     @invitation = @organization.invitations.build(invitation_params)
     @invitation.invited_by = current_user
-    
+
     # Manually assign role after authorization to prevent mass assignment vulnerability
     if params.dig(:invitation, :role).present?
       role = params[:invitation][:role]
@@ -32,7 +32,7 @@ class InvitationsController < ApplicationController
     end
 
     authorize @invitation
-    
+
     # Validate role after authorization
     if @invitation.role.present? && !valid_role_for_user?(@invitation.role)
       @invitation.errors.add(:role, "is not allowed for your permission level")

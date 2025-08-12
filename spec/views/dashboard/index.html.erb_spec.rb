@@ -2,11 +2,11 @@ require 'rails_helper'
 
 RSpec.describe "dashboard/index.html.erb", type: :view do
   let(:user) { create(:user, first_name: "John") }
-  
+
   before do
     # Simulate signed in user
     allow(view).to receive(:current_user).and_return(user)
-    
+
     # Set up required instance variables
     assign(:test_run_stats, {
       total: 10,
@@ -51,9 +51,9 @@ RSpec.describe "dashboard/index.html.erb", type: :view do
 
   context "when there are recent test runs" do
     let!(:test_run) { create(:test_run, name: "Test Suite", environment: "staging", status: "completed") }
-    
+
     before do
-      assign(:recent_test_runs, [test_run])
+      assign(:recent_test_runs, [ test_run ])
     end
 
     it "displays the recent test runs table" do

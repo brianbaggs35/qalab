@@ -69,7 +69,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
     if user_email != @invitation.email
       flash[:alert] = "Email address must match the invitation. Expected: #{@invitation.email}"
       redirect_to new_user_registration_path
-      return
+      nil
     end
   end
 

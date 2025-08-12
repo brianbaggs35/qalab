@@ -36,14 +36,14 @@ RSpec.describe TestResult, type: :model do
     it "filters by classname" do
       test_result = create(:test_result, classname: 'MyTest', test_run: test_run)
       create(:test_result, classname: 'OtherTest', test_run: test_run)
-      
+
       expect(TestResult.by_class('MyTest')).to contain_exactly(test_result)
     end
   end
 
   describe "status helper methods" do
     let(:test_run) { create(:test_run) }
-    
+
     it "returns true for passed? when status is passed" do
       result = build(:test_result, status: 'passed', test_run: test_run)
       expect(result.passed?).to be true
