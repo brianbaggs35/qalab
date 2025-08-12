@@ -17,6 +17,12 @@ Rails.application.routes.draw do
   resources :invitations, only: [ :index, :new, :create, :show, :destroy ]
   get "invitations/:token/accept", to: "invitations#accept", as: :accept_invitation
 
+  # Onboarding routes
+  get "onboarding/welcome", to: "onboarding#welcome", as: :onboarding_welcome
+  get "onboarding/organization", to: "onboarding#organization", as: :onboarding_organization
+  post "onboarding/organization", to: "onboarding#create_organization"
+  get "onboarding/complete", to: "onboarding#complete", as: :onboarding_complete
+
   # Automated Testing routes
   namespace :automated_testing do
     get "upload", to: "upload#index"
