@@ -134,7 +134,7 @@ RSpec.describe Invitation, type: :model do
     it 'prevents duplicate pending invitations for same email and organization' do
       organization = create(:organization)
       create(:invitation, email: 'test@example.com', organization: organization)
-      
+
       duplicate = build(:invitation, email: 'test@example.com', organization: organization)
       expect(duplicate).not_to be_valid
       expect(duplicate.errors[:email]).to include('has already been invited to this organization')
@@ -144,7 +144,7 @@ RSpec.describe Invitation, type: :model do
       org1 = create(:organization)
       org2 = create(:organization)
       create(:invitation, email: 'test@example.com', organization: org1)
-      
+
       invitation = build(:invitation, email: 'test@example.com', organization: org2)
       expect(invitation).to be_valid
     end

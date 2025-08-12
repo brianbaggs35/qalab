@@ -10,14 +10,14 @@ RSpec.describe Users::PasswordsController, type: :controller do
 
     it 'sends password reset instructions for valid email' do
       post :create, params: { user: { email: user.email } }
-      
+
       expect(response).to redirect_to(new_user_session_path)
       expect(flash[:notice]).to include('receive an email')
     end
 
     it 'still redirects for invalid email to prevent enumeration' do
       post :create, params: { user: { email: 'nonexistent@example.com' } }
-      
+
       expect(response).to render_template(:new)  # Devise renders new on invalid email in test env
     end
   end
@@ -34,7 +34,7 @@ RSpec.describe Users::PasswordsController, type: :controller do
           password_confirmation: 'newpassword123'
         }
       }
-      
+
       expect(response).to redirect_to(root_path)  # Actually redirects to root
       expect(flash[:notice]).to include('changed successfully')
     end
@@ -47,7 +47,7 @@ RSpec.describe Users::PasswordsController, type: :controller do
           password_confirmation: 'differentpassword123'
         }
       }
-      
+
       expect(response).to render_template(:edit)
       expect(assigns(:user).errors[:password_confirmation]).to be_present
     end

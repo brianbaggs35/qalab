@@ -12,7 +12,7 @@ RSpec.describe Users::ConfirmationsController, type: :controller do
 
       it 'confirms the user and redirects to sign in' do
         get :show, params: { confirmation_token: token }
-        
+
         expect(response).to redirect_to(new_user_session_path)
         expect(flash[:notice]).to be_present
         user.reload
@@ -23,7 +23,7 @@ RSpec.describe Users::ConfirmationsController, type: :controller do
     context 'with invalid confirmation token' do
       it 'renders the new template with errors' do
         get :show, params: { confirmation_token: 'invalid_token' }
-        
+
         expect(response).to have_http_status(:ok)
         expect(response).to render_template(:new)
       end
@@ -35,7 +35,7 @@ RSpec.describe Users::ConfirmationsController, type: :controller do
 
       it 'renders new template with error' do
         get :show, params: { confirmation_token: token }
-        
+
         expect(response).to have_http_status(:ok)
         expect(response).to render_template(:new)
       end
