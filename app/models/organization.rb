@@ -7,6 +7,7 @@ class Organization < ApplicationRecord
   has_many :members, -> { where(organization_users: { role: "member" }) }, through: :organization_users, source: :user
   has_many :test_runs, dependent: :destroy
   has_many :test_cases, dependent: :destroy
+  has_many :invitations, dependent: :destroy
 
   # Validations
   validates :name, presence: true, uniqueness: true

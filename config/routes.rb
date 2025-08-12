@@ -13,6 +13,10 @@ Rails.application.routes.draw do
   # Organization routes
   resources :organizations, only: [ :index, :show, :new, :create ]
 
+  # Invitations routes
+  resources :invitations, only: [ :index, :new, :create, :show, :destroy ]
+  get "invitations/:token/accept", to: "invitations#accept", as: :accept_invitation
+
   # Automated Testing routes
   namespace :automated_testing do
     get "upload", to: "upload#index"

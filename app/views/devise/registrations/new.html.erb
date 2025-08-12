@@ -5,11 +5,38 @@
     <div class="card-body">
       <div class="text-center mb-6">
         <h1 class="text-3xl font-bold text-primary">Join QA Lab</h1>
-        <p class="text-base-content/60 mt-2">Create your account to get started</p>
+        <p class="text-base-content/60 mt-2">Sign ups are by invitation only</p>
+      </div>
+
+      <!-- Invitation Notice -->
+      <div class="alert alert-info mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <div>
+          <h3 class="font-bold">Invitation Required</h3>
+          <div class="text-xs">You need an invitation code to create an account. Check your email for the invitation link or enter your code below.</div>
+        </div>
       </div>
 
       <%= form_for(resource, as: resource_name, url: registration_path(resource_name), local: true, html: { class: "space-y-4" }) do |f| %>
         <%= render "devise/shared/error_messages", resource: resource %>
+
+        <!-- Invitation Code -->
+        <div class="form-control">
+          <%= f.label :invitation_token, class: "label" do %>
+            <span class="label-text font-medium">Invitation Code</span>
+            <span class="label-text-alt text-error">Required</span>
+          <% end %>
+          <%= f.text_field :invitation_token, 
+              value: params[:invitation_token], 
+              class: "input input-bordered w-full", 
+              placeholder: "Enter your invitation code", 
+              required: true %>
+          <div class="label">
+            <span class="label-text-alt">Check your invitation email for this code</span>
+          </div>
+        </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div class="form-control">
@@ -30,6 +57,7 @@
         <div class="form-control">
           <%= f.label :email, class: "label" do %>
             <span class="label-text font-medium">Email address</span>
+            <span class="label-text-alt">Must match invitation</span>
           <% end %>
           <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "input input-bordered w-full", placeholder: "john@example.com", required: true %>
         </div>
@@ -57,7 +85,18 @@
       <div class="divider">or</div>
 
       <div class="text-center space-y-2">
-        <%= render "devise/shared/links" %>
+        <div class="text-sm text-base-content/60">
+          Already have an account?
+        </div>
+        <%= link_to "Sign in", new_user_session_path, class: "link link-primary" %>
+      </div>
+
+      <!-- Help Section -->
+      <div class="text-center mt-4 p-4 bg-base-200 rounded-lg">
+        <div class="text-sm text-base-content/70">
+          <p class="font-semibold mb-2">Need help?</p>
+          <p class="text-xs">If you don't have an invitation code, contact your organization administrator or email support for assistance.</p>
+        </div>
       </div>
     </div>
   </div>
