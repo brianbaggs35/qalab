@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="com.example.TestSuite" tests="3" failures="1" errors="0" skipped="1" time="12.345">
+    <testcase name="testSuccess1" classname="com.example.TestClass" time="2.1">
+    </testcase>
+    <testcase name="testFailure" classname="com.example.TestClass" time="3.2">
+      <failure message="AssertionError: Expected 5 but was 4" type="AssertionError">
+        java.lang.AssertionError: Expected 5 but was 4
+        at com.example.TestClass.testFailure(TestClass.java:42)
+      </failure>
+    </testcase>
+    <testcase name="testSkipped" classname="com.example.TestClass" time="0.0">
+      <skipped message="Test skipped"></skipped>
+    </testcase>
+  </testsuite>
+</testsuites>

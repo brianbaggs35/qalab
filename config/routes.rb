@@ -20,6 +20,7 @@ Rails.application.routes.draw do
     resources :results, only: [ :index, :show, :edit, :update, :destroy ] do
       member do
         get :download_xml
+        get "test_results/:test_result_id", to: "results#test_result", as: :test_result
       end
     end
   end

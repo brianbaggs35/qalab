@@ -1,6 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe AutomatedTesting::UploadController, type: :controller do
+  include ActionDispatch::TestProcess::FixtureFile
+
   let(:organization) { create(:organization) }
   let(:user) { create(:user) }
   let(:system_admin) { create(:user, role: 'system_admin') }
@@ -53,6 +55,11 @@ RSpec.describe AutomatedTesting::UploadController, type: :controller do
   end
 
   describe 'POST #create' do
+    let(:xml_content) { '<testsuites><testsuite name="Test" tests="10"><testcase name="test1"></testcase></testsuite></testsuites>' }
+    let(:uploaded_file) do
+      fixture_file_upload(Rails.root.join('spec', 'fixtures', 'test_results.xml'), 'application/xml')
+    end
+
     let(:valid_params) do
       {
         test_run: {
@@ -60,7 +67,7 @@ RSpec.describe AutomatedTesting::UploadController, type: :controller do
           description: 'A test run for testing',
           environment: 'staging',
           test_suite: 'smoke_tests',
-          xml_file: '<testsuites><testsuite name="Test" tests="10"></testsuite></testsuites>'
+          xml_file: uploaded_file
         }
       }
     end
@@ -69,8 +76,8 @@ RSpec.describe AutomatedTesting::UploadController, type: :controller do
       {
         test_run: {
           name: '',
-          description: 'Invalid test run',
-          xml_file: '<invalid xml>'
+          description: 'Invalid test run'
+          # No xml_file, which should make it invalid since name will be empty
         }
       }
     end
