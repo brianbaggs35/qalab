@@ -1,7 +1,10 @@
 class InvitationsController < ApplicationController
-  before_action :authenticate_user!
+  before_action :authenticate_user!, except: [:accept]
   before_action :set_invitation, only: [ :show, :destroy ]
   before_action :set_organization, only: [ :index, :new, :create ]
+  
+  # Skip Pundit for the accept action since it's public
+  skip_after_action :verify_authorized, only: [:accept]
 
   def index
     authorize Invitation
@@ -31,7 +34,7 @@ class InvitationsController < ApplicationController
       redirect_to invitations_path,
         notice: "Invitation sent to #{@invitation.email} successfully!"
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 

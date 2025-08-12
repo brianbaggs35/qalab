@@ -34,7 +34,8 @@ class Invitation < ApplicationRecord
   end
 
   def accept!
-    update!(accepted_at: Time.current) if valid_invitation?
+    # Skip the email validation when accepting for existing users
+    update_column(:accepted_at, Time.current) if valid_invitation?
   end
 
   # Token methods
