@@ -18,7 +18,8 @@
     ],
     "testPathIgnorePatterns": [
       "/node_modules/",
-      "/vendor/"
+      "/vendor/",
+      "/public/assets/"
     ],
     "setupFilesAfterEnv": [
       "<rootDir>/jest.setup.js"
