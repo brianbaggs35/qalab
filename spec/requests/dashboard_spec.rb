@@ -1,9 +1,14 @@
 require 'rails_helper'
 
 RSpec.describe "Dashboards", type: :request do
-  let(:user) { create(:user) }
+  let(:organization) { create(:organization) }
+  let(:user) { create(:user, :onboarded) }
 
-  before { sign_in user }
+  before do
+    sign_in user
+    # Add user to organization so they don't need onboarding
+    organization.organization_users.create!(user: user, role: "member")
+  end
 
   describe "GET /dashboard" do
     it "returns http success" do
