@@ -26,7 +26,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   def after_sign_up_path_for(resource)
     if @first_user_signup
-      onboarding_organization_path
+      onboarding_welcome_path
     elsif @invitation
       dashboard_path
     else
