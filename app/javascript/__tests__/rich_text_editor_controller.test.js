@@ -2,19 +2,43 @@
  * @jest-environment jsdom
  */
 
-// Import the actual controller to get coverage
-import "../controllers/rich_text_editor_controller";
+import RichTextEditorController from "../controllers/rich_text_editor_controller"
 
-// Test Rich Text Editor Controller functionality
-describe("RichTextEditorController Functions", () => {
-  let editorElement, toolbarElement;
-  
+describe("RichTextEditorController", () => {
+  let controller;
+  let mockElement;
+  let mockEditorTarget;
+
   beforeEach(() => {
-    // Create editor element
-    editorElement = document.createElement('textarea');
-    editorElement.className = 'rich-editor';
+    mockElement = document.createElement('div');
+    mockEditorTarget = document.createElement('textarea');
+    mockEditorTarget.value = '';
+    document.body.appendChild(mockElement);
+    document.body.appendChild(mockEditorTarget);
     
-    document.body.appendChild(editorElement);
+    controller = new RichTextEditorController();
+    
+    // Mock the element and editorTarget
+    Object.defineProperty(controller, 'element', {
+      value: mockElement,
+      writable: false,
+      configurable: true
+    });
+    
+    Object.defineProperty(controller, 'editorTarget', {
+      value: mockEditorTarget,
+      writable: false,
+      configurable: true
+    });
+    
+    Object.defineProperty(controller, 'contentValue', {
+      value: '',
+      writable: true,
+      configurable: true
+    });
+
+    // Mock focus method
+    mockEditorTarget.focus = jest.fn();
     
     // Mock prompt for testing
     global.prompt = jest.fn();
@@ -25,443 +49,397 @@ describe("RichTextEditorController Functions", () => {
     jest.clearAllMocks();
   });
 
-  describe("initializeEditor functionality", () => {
-    function initializeEditor() {
-      // Add formatting toolbar
-      const toolbar = document.createElement('div');
-      toolbar.className = 'flex flex-wrap gap-1 p-2 border border-base-300 rounded-t-lg bg-base-100';
-      toolbar.innerHTML = `
-        <button type="button" class="btn btn-ghost btn-xs" data-action="click->rich-text-editor#bold" title="Bold">
-          <strong>B</strong>
-        </button>
-        <button type="button" class="btn btn-ghost btn-xs" data-action="click->rich-text-editor#italic" title="Italic">
-          <em>I</em>
-        </button>
-        <button type="button" class="btn btn-ghost btn-xs" data-action="click->rich-text-editor#underline" title="Underline">
-          <u>U</u>
-        </button>
-        <div class="divider divider-horizontal"></div>
-        <button type="button" class="btn btn-ghost btn-xs" data-action="click->rich-text-editor#insertList" title="Bullet List">
-          • List
-        </button>
-        <button type="button" class="btn btn-ghost btn-xs" data-action="click->rich-text-editor#insertLink" title="Insert Link">
-          Link
-        </button>
-      `;
+  describe("connect behavior", () => {
+    it("should call initializeEditor on connect", () => {
+      const initSpy = jest.spyOn(controller, 'initializeEditor');
       
-      // Insert toolbar before the editor
-      editorElement.parentNode.insertBefore(toolbar, editorElement);
+      controller.connect();
       
-      // Style the editor
-      editorElement.className += ' rounded-t-none';
-      
-      return toolbar;
-    }
+      expect(initSpy).toHaveBeenCalled();
+    });
+  });
 
-    it("should create toolbar with formatting buttons", () => {
-      const toolbar = initializeEditor();
+  describe("disconnect behavior", () => {
+    it("should destroy editor on disconnect", () => {
+      // Mock editor object
+      controller.editor = {
+        destroy: jest.fn()
+      };
       
-      expect(toolbar).toBeDefined();
+      controller.disconnect();
+      
+      expect(controller.editor.destroy).toHaveBeenCalled();
+    });
+
+    it("should not throw when editor is undefined", () => {
+      controller.editor = undefined;
+      
+      expect(() => {
+        controller.disconnect();
+      }).not.toThrow();
+    });
+  });
+
+  describe("initializeEditor", () => {
+    it("should create toolbar before editor", async () => {
+      await controller.initializeEditor();
+      
+      const toolbar = mockEditorTarget.previousElementSibling;
+      expect(toolbar).toBeTruthy();
       expect(toolbar.className).toContain('flex');
+    });
+
+    it("should create formatting buttons", async () => {
+      await controller.initializeEditor();
       
+      const toolbar = mockEditorTarget.previousElementSibling;
       const buttons = toolbar.querySelectorAll('button');
+      
       expect(buttons.length).toBe(5); // Bold, Italic, Underline, List, Link
     });
 
-    it("should add toolbar before editor element", () => {
-      initializeEditor();
+    it("should modify editor styles", async () => {
+      const originalClassName = mockEditorTarget.className;
       
-      const toolbar = editorElement.previousElementSibling;
-      expect(toolbar).toBeTruthy();
-      expect(toolbar.tagName).toBe('DIV');
+      await controller.initializeEditor();
+      
+      expect(mockEditorTarget.className).toContain('rounded-t-none');
     });
 
-    it("should update editor styling", () => {
-      initializeEditor();
+    it("should set initial content if contentValue exists", async () => {
+      controller.contentValue = "Initial content";
       
-      expect(editorElement.className).toContain('rounded-t-none');
+      await controller.initializeEditor();
+      
+      expect(mockEditorTarget.value).toBe("Initial content");
     });
 
-    it("should create buttons with correct actions", () => {
-      const toolbar = initializeEditor();
+    it("should not set content if contentValue is empty", async () => {
+      controller.contentValue = "";
       
-      const boldBtn = toolbar.querySelector('[data-action*="bold"]');
-      const italicBtn = toolbar.querySelector('[data-action*="italic"]');
-      const underlineBtn = toolbar.querySelector('[data-action*="underline"]');
-      const listBtn = toolbar.querySelector('[data-action*="insertList"]');
-      const linkBtn = toolbar.querySelector('[data-action*="insertLink"]');
+      await controller.initializeEditor();
       
-      expect(boldBtn).toBeTruthy();
-      expect(italicBtn).toBeTruthy();
-      expect(underlineBtn).toBeTruthy();
-      expect(listBtn).toBeTruthy();
-      expect(linkBtn).toBeTruthy();
+      expect(mockEditorTarget.value).toBe("");
     });
 
-    it("should set initial content if provided", () => {
-      const initialContent = "Initial rich text content";
-      editorElement.value = initialContent;
+    it("should handle null contentValue", async () => {
+      controller.contentValue = null;
       
-      expect(editorElement.value).toBe(initialContent);
+      expect(() => {
+        controller.initializeEditor();
+      }).not.toThrow();
     });
   });
 
-  describe("formatting functions", () => {
-    function wrapSelection(before, after) {
-      const start = editorElement.selectionStart;
-      const end = editorElement.selectionEnd;
-      const selectedText = editorElement.value.substring(start, end);
+  describe("bold formatting", () => {
+    it("should wrap selected text with bold markers", () => {
+      mockEditorTarget.value = "Hello world!";
+      mockEditorTarget.selectionStart = 6;
+      mockEditorTarget.selectionEnd = 11; // Select "world"
       
-      const newText = before + selectedText + after;
-      editorElement.value = editorElement.value.substring(0, start) + newText + editorElement.value.substring(end);
+      controller.bold();
       
-      // Reset cursor position
-      editorElement.selectionStart = start + before.length;
-      editorElement.selectionEnd = start + before.length + selectedText.length;
-      editorElement.focus();
-    }
+      expect(mockEditorTarget.value).toBe("Hello **world**!");
+    });
 
-    function insertAtCursor(text) {
-      const start = editorElement.selectionStart;
+    it("should add bold markers at cursor when no selection", () => {
+      mockEditorTarget.value = "Hello !";
+      mockEditorTarget.selectionStart = 6;
+      mockEditorTarget.selectionEnd = 6;
       
-      editorElement.value = editorElement.value.substring(0, start) + text + editorElement.value.substring(start);
-      editorElement.selectionStart = editorElement.selectionEnd = start + text.length;
-      editorElement.focus();
-    }
-
-    beforeEach(() => {
-      // Mock focus method
-      editorElement.focus = jest.fn();
-    });
-
-    describe("bold formatting", () => {
-      function bold() {
-        wrapSelection('**', '**');
-      }
-
-      it("should wrap selected text with bold markdown", () => {
-        editorElement.value = "Hello world!";
-        editorElement.selectionStart = 6;
-        editorElement.selectionEnd = 11; // Select "world"
-        
-        bold();
-        
-        expect(editorElement.value).toBe("Hello **world**!");
-      });
-
-      it("should add bold markers at cursor when no selection", () => {
-        editorElement.value = "Hello !";
-        editorElement.selectionStart = 6;
-        editorElement.selectionEnd = 6;
-        
-        bold();
-        
-        expect(editorElement.value).toBe("Hello ****!");
-        expect(editorElement.selectionStart).toBe(8);
-        expect(editorElement.selectionEnd).toBe(8);
-      });
-
-      it("should focus editor after formatting", () => {
-        bold();
-        expect(editorElement.focus).toHaveBeenCalled();
-      });
-    });
-
-    describe("italic formatting", () => {
-      function italic() {
-        wrapSelection('*', '*');
-      }
-
-      it("should wrap selected text with italic markdown", () => {
-        editorElement.value = "This is important";
-        editorElement.selectionStart = 8;
-        editorElement.selectionEnd = 17; // Select "important"
-        
-        italic();
-        
-        expect(editorElement.value).toBe("This is *important*");
-      });
-
-      it("should handle empty selection", () => {
-        editorElement.value = "Text";
-        editorElement.selectionStart = 4;
-        editorElement.selectionEnd = 4;
-        
-        italic();
-        
-        expect(editorElement.value).toBe("Text**");
-      });
-    });
-
-    describe("underline formatting", () => {
-      function underline() {
-        wrapSelection('_', '_');
-      }
-
-      it("should wrap selected text with underline markdown", () => {
-        editorElement.value = "Underline this text";
-        editorElement.selectionStart = 10;
-        editorElement.selectionEnd = 14; // Select "this"
-        
-        underline();
-        
-        expect(editorElement.value).toBe("Underline _this_ text");
-      });
-    });
-
-    describe("list insertion", () => {
-      function insertList() {
-        insertAtCursor('\n• ');
-      }
-
-      it("should insert bullet point at cursor", () => {
-        editorElement.value = "Some text";
-        editorElement.selectionStart = 9;
-        
-        insertList();
-        
-        expect(editorElement.value).toBe("Some text\n• ");
-        expect(editorElement.selectionStart).toBe(12);
-      });
-
-      it("should insert bullet point in middle of text", () => {
-        editorElement.value = "Before After";
-        editorElement.selectionStart = 7; // Between "Before" and "After"
-        
-        insertList();
-        
-        expect(editorElement.value).toBe("Before \n• After");
-      });
-    });
-
-    describe("link insertion", () => {
-      function insertLink() {
-        const url = prompt('Enter URL:');
-        if (url) {
-          wrapSelection('[', `](${url})`);
-        }
-      }
-
-      it("should insert link with selected text", () => {
-        global.prompt.mockReturnValue('https://example.com');
-        
-        editorElement.value = "Check out this website";
-        editorElement.selectionStart = 10;
-        editorElement.selectionEnd = 14; // Select "this"
-        
-        insertLink();
-        
-        expect(editorElement.value).toBe("Check out [this](https://example.com) website");
-        expect(global.prompt).toHaveBeenCalledWith('Enter URL:');
-      });
-
-      it("should insert empty link markers when no text selected", () => {
-        global.prompt.mockReturnValue('https://example.com');
-        
-        editorElement.value = "Click here: ";
-        editorElement.selectionStart = 12;
-        editorElement.selectionEnd = 12;
-        
-        insertLink();
-        
-        expect(editorElement.value).toBe("Click here: [](https://example.com)");
-      });
-
-      it("should not insert link when user cancels prompt", () => {
-        global.prompt.mockReturnValue(null);
-        
-        editorElement.value = "No link here";
-        editorElement.selectionStart = 8;
-        editorElement.selectionEnd = 8;
-        
-        insertLink();
-        
-        expect(editorElement.value).toBe("No link here");
-      });
-
-      it("should handle empty URL", () => {
-        global.prompt.mockReturnValue('');
-        
-        editorElement.value = "Empty URL test";
-        editorElement.selectionStart = 5;
-        editorElement.selectionEnd = 8; // Select "URL"
-        
-        insertLink();
-        
-        expect(editorElement.value).toBe("Empty URL test"); // Should not change
-      });
+      controller.bold();
+      
+      expect(mockEditorTarget.value).toBe("Hello ****!");
     });
   });
 
-  describe("cursor and selection management", () => {
-    function wrapSelection(before, after) {
-      const start = editorElement.selectionStart;
-      const end = editorElement.selectionEnd;
-      const selectedText = editorElement.value.substring(start, end);
+  describe("italic formatting", () => {
+    it("should wrap selected text with italic markers", () => {
+      mockEditorTarget.value = "This is important";
+      mockEditorTarget.selectionStart = 8;
+      mockEditorTarget.selectionEnd = 17; // Select "important"
       
-      const newText = before + selectedText + after;
-      editorElement.value = editorElement.value.substring(0, start) + newText + editorElement.value.substring(end);
+      controller.italic();
       
-      // Reset cursor position
-      editorElement.selectionStart = start + before.length;
-      editorElement.selectionEnd = start + before.length + selectedText.length;
-      editorElement.focus();
-    }
-
-    beforeEach(() => {
-      editorElement.focus = jest.fn();
+      expect(mockEditorTarget.value).toBe("This is *important*");
     });
 
-    it("should maintain selection after wrapping", () => {
-      editorElement.value = "Hello world!";
-      editorElement.selectionStart = 0;
-      editorElement.selectionEnd = 5; // Select "Hello"
+    it("should handle empty selection", () => {
+      mockEditorTarget.value = "Text";
+      mockEditorTarget.selectionStart = 4;
+      mockEditorTarget.selectionEnd = 4;
       
-      wrapSelection('**', '**');
+      controller.italic();
       
-      expect(editorElement.selectionStart).toBe(2); // After first **
-      expect(editorElement.selectionEnd).toBe(7);  // Before second **
+      expect(mockEditorTarget.value).toBe("Text**");
+    });
+  });
+
+  describe("underline formatting", () => {
+    it("should wrap selected text with underline markers", () => {
+      mockEditorTarget.value = "Underline this text";
+      mockEditorTarget.selectionStart = 10;
+      mockEditorTarget.selectionEnd = 14; // Select "this"
+      
+      controller.underline();
+      
+      expect(mockEditorTarget.value).toBe("Underline _this_ text");
+    });
+  });
+
+  describe("insertList", () => {
+    it("should insert bullet point at cursor", () => {
+      mockEditorTarget.value = "Some text";
+      mockEditorTarget.selectionStart = 9;
+      
+      controller.insertList();
+      
+      expect(mockEditorTarget.value).toBe("Some text\n• ");
+      expect(mockEditorTarget.selectionStart).toBe(12);
+      expect(mockEditorTarget.selectionEnd).toBe(12);
     });
 
-    it("should handle cursor at end of text", () => {
-      editorElement.value = "End";
-      editorElement.selectionStart = 3;
-      editorElement.selectionEnd = 3;
+    it("should insert bullet point in middle of text", () => {
+      mockEditorTarget.value = "Before After";
+      mockEditorTarget.selectionStart = 7;
       
-      wrapSelection('[', ']');
+      controller.insertList();
       
-      expect(editorElement.value).toBe("End[]");
-      expect(editorElement.selectionStart).toBe(4);
-      expect(editorElement.selectionEnd).toBe(4);
+      expect(mockEditorTarget.value).toBe("Before \n• After");
+    });
+  });
+
+  describe("insertLink", () => {
+    it("should insert link with selected text", () => {
+      global.prompt.mockReturnValue('https://example.com');
+      
+      mockEditorTarget.value = "Check out this website";
+      mockEditorTarget.selectionStart = 10;
+      mockEditorTarget.selectionEnd = 14; // Select "this"
+      
+      controller.insertLink();
+      
+      expect(mockEditorTarget.value).toBe("Check out [this](https://example.com) website");
+      expect(global.prompt).toHaveBeenCalledWith('Enter URL:');
     });
 
-    it("should handle selection spanning entire text", () => {
-      editorElement.value = "Everything";
-      editorElement.selectionStart = 0;
-      editorElement.selectionEnd = 10;
+    it("should insert empty link markers when no text selected", () => {
+      global.prompt.mockReturnValue('https://example.com');
       
-      wrapSelection('_', '_');
+      mockEditorTarget.value = "Click here: ";
+      mockEditorTarget.selectionStart = 12;
+      mockEditorTarget.selectionEnd = 12;
       
-      expect(editorElement.value).toBe("_Everything_");
-      expect(editorElement.selectionStart).toBe(1);
-      expect(editorElement.selectionEnd).toBe(11);
+      controller.insertLink();
+      
+      expect(mockEditorTarget.value).toBe("Click here: [](https://example.com)");
+    });
+
+    it("should not insert link when user cancels prompt", () => {
+      global.prompt.mockReturnValue(null);
+      
+      mockEditorTarget.value = "No link here";
+      mockEditorTarget.selectionStart = 8;
+      mockEditorTarget.selectionEnd = 8;
+      
+      controller.insertLink();
+      
+      expect(mockEditorTarget.value).toBe("No link here");
+    });
+
+    it("should not insert link when URL is empty", () => {
+      global.prompt.mockReturnValue('');
+      
+      mockEditorTarget.value = "Empty URL test";
+      mockEditorTarget.selectionStart = 5;
+      mockEditorTarget.selectionEnd = 8;
+      
+      controller.insertLink();
+      
+      expect(mockEditorTarget.value).toBe("Empty URL test");
+    });
+  });
+
+  describe("wrapSelection helper", () => {
+    it("should wrap selected text correctly", () => {
+      mockEditorTarget.value = "Hello world!";
+      mockEditorTarget.selectionStart = 0;
+      mockEditorTarget.selectionEnd = 5; // Select "Hello"
+      
+      controller.wrapSelection('**', '**');
+      
+      expect(mockEditorTarget.value).toBe("**Hello** world!");
+      expect(mockEditorTarget.selectionStart).toBe(2);
+      expect(mockEditorTarget.selectionEnd).toBe(7);
+    });
+
+    it("should handle cursor positioning", () => {
+      mockEditorTarget.value = "Test";
+      mockEditorTarget.selectionStart = 4;
+      mockEditorTarget.selectionEnd = 4;
+      
+      controller.wrapSelection('[', ']');
+      
+      expect(mockEditorTarget.value).toBe("Test[]");
+      expect(mockEditorTarget.selectionStart).toBe(5);
+      expect(mockEditorTarget.selectionEnd).toBe(5);
+    });
+
+    it("should focus editor after wrapping", () => {
+      mockEditorTarget.value = "Text";
+      mockEditorTarget.selectionStart = 0;
+      mockEditorTarget.selectionEnd = 4;
+      
+      controller.wrapSelection('_', '_');
+      
+      expect(mockEditorTarget.focus).toHaveBeenCalled();
+    });
+  });
+
+  describe("insertAtCursor helper", () => {
+    it("should insert text at cursor position", () => {
+      mockEditorTarget.value = "Before After";
+      mockEditorTarget.selectionStart = 7;
+      
+      controller.insertAtCursor('MIDDLE ');
+      
+      expect(mockEditorTarget.value).toBe("Before MIDDLE After");
+      expect(mockEditorTarget.selectionStart).toBe(14);
+      expect(mockEditorTarget.selectionEnd).toBe(14);
+    });
+
+    it("should insert text at beginning", () => {
+      mockEditorTarget.value = "Text";
+      mockEditorTarget.selectionStart = 0;
+      
+      controller.insertAtCursor('START ');
+      
+      expect(mockEditorTarget.value).toBe("START Text");
+    });
+
+    it("should insert text at end", () => {
+      mockEditorTarget.value = "Text";
+      mockEditorTarget.selectionStart = 4;
+      
+      controller.insertAtCursor(' END');
+      
+      expect(mockEditorTarget.value).toBe("Text END");
+    });
+
+    it("should focus editor after insertion", () => {
+      mockEditorTarget.value = "Text";
+      mockEditorTarget.selectionStart = 4;
+      
+      controller.insertAtCursor(' more');
+      
+      expect(mockEditorTarget.focus).toHaveBeenCalled();
     });
   });
 
   describe("integration scenarios", () => {
-    function wrapSelection(before, after) {
-      const start = editorElement.selectionStart;
-      const end = editorElement.selectionEnd;
-      const selectedText = editorElement.value.substring(start, end);
-      
-      const newText = before + selectedText + after;
-      editorElement.value = editorElement.value.substring(0, start) + newText + editorElement.value.substring(end);
-      
-      editorElement.selectionStart = start + before.length;
-      editorElement.selectionEnd = start + before.length + selectedText.length;
-      editorElement.focus();
-    }
-
-    function insertAtCursor(text) {
-      const start = editorElement.selectionStart;
-      editorElement.value = editorElement.value.substring(0, start) + text + editorElement.value.substring(start);
-      editorElement.selectionStart = editorElement.selectionEnd = start + text.length;
-      editorElement.focus();
-    }
-
-    beforeEach(() => {
-      editorElement.focus = jest.fn();
-    });
-
     it("should handle multiple formatting operations", () => {
-      // Test simple case - don't try to simulate complex selections
-      editorElement.value = "Text to format";
+      mockEditorTarget.value = "Important text here";
       
-      // Just test that the wrapper function works correctly
-      editorElement.selectionStart = 0;
-      editorElement.selectionEnd = 4; // "Text"
-      wrapSelection('**', '**');
+      // Bold "Important"
+      mockEditorTarget.selectionStart = 0;
+      mockEditorTarget.selectionEnd = 9;
+      controller.bold();
       
-      expect(editorElement.value).toBe("**Text** to format");
+      expect(mockEditorTarget.value).toBe("**Important** text here");
+      
+      // Italic "text"
+      mockEditorTarget.selectionStart = 14;
+      mockEditorTarget.selectionEnd = 18;
+      controller.italic();
+      
+      expect(mockEditorTarget.value).toBe("**Important** *text* here");
     });
 
-    it("should handle text insertion", () => {
-      editorElement.value = "Some text";
-      editorElement.selectionStart = 9;
+    it("should handle list creation", () => {
+      mockEditorTarget.value = "List items:";
+      mockEditorTarget.selectionStart = 11;
       
-      insertAtCursor('\n• ');
+      // Add first item
+      controller.insertList();
+      controller.insertAtCursor('First item');
       
-      expect(editorElement.value).toBe("Some text\n• ");
+      // Add second item
+      controller.insertList();
+      controller.insertAtCursor('Second item');
+      
+      expect(mockEditorTarget.value).toBe("List items:\n• First item\n• Second item");
     });
 
-    it("should handle mixed content insertion", () => {
-      editorElement.value = "List items:";
-      editorElement.selectionStart = 11;
+    it("should handle link with formatting", () => {
+      global.prompt.mockReturnValue('https://example.com');
       
-      // Add multiple list items
-      insertAtCursor('\n• ');
-      insertAtCursor('First item');
-      insertAtCursor('\n• ');
-      insertAtCursor('Second item');
+      mockEditorTarget.value = "Visit our site";
+      mockEditorTarget.selectionStart = 6;
+      mockEditorTarget.selectionEnd = 9; // Select "our"
       
-      expect(editorElement.value).toBe("List items:\n• First item\n• Second item");
-    });
-
-    it("should handle nested formatting", () => {
-      editorElement.value = "Simple text";
+      // First make it bold
+      controller.bold();
+      expect(mockEditorTarget.value).toBe("Visit **our** site");
       
-      // Just test basic bold wrapping
-      editorElement.selectionStart = 0;
-      editorElement.selectionEnd = 11;
-      wrapSelection('**', '**');
+      // Then make it a link
+      mockEditorTarget.selectionStart = 6;
+      mockEditorTarget.selectionEnd = 13; // Select "**our**"
+      controller.insertLink();
       
-      expect(editorElement.value).toBe("**Simple text**");
+      expect(mockEditorTarget.value).toBe("Visit [**our**](https://example.com) site");
     });
   });
 
   describe("edge cases", () => {
-    function wrapSelection(before, after) {
-      const start = editorElement.selectionStart;
-      const end = editorElement.selectionEnd;
-      const selectedText = editorElement.value.substring(start, end);
-      
-      const newText = before + selectedText + after;
-      editorElement.value = editorElement.value.substring(0, start) + newText + editorElement.value.substring(end);
-      
-      editorElement.selectionStart = start + before.length;
-      editorElement.selectionEnd = start + before.length + selectedText.length;
-    }
-
     it("should handle empty editor", () => {
-      editorElement.value = "";
-      editorElement.selectionStart = 0;
-      editorElement.selectionEnd = 0;
+      mockEditorTarget.value = "";
+      mockEditorTarget.selectionStart = 0;
+      mockEditorTarget.selectionEnd = 0;
       
-      wrapSelection('**', '**');
+      controller.bold();
       
-      expect(editorElement.value).toBe("****");
+      expect(mockEditorTarget.value).toBe("****");
     });
 
-    it("should handle selection with special characters", () => {
-      editorElement.value = "Text with & < > \" symbols";
-      editorElement.selectionStart = 10;
-      editorElement.selectionEnd = 25; // Select "& < > \" symbols"
+    it("should handle special characters in selection", () => {
+      mockEditorTarget.value = "Text with & < > \" symbols";
+      mockEditorTarget.selectionStart = 10;
+      mockEditorTarget.selectionEnd = 25;
       
-      wrapSelection('**', '**');
+      controller.bold();
       
-      expect(editorElement.value).toBe("Text with **& < > \" symbols**");
+      expect(mockEditorTarget.value).toBe("Text with **& < > \" symbols**");
     });
 
     it("should handle very long text", () => {
       const longText = "A".repeat(1000);
-      editorElement.value = longText;
-      editorElement.selectionStart = 500;
-      editorElement.selectionEnd = 600;
+      mockEditorTarget.value = longText;
+      mockEditorTarget.selectionStart = 500;
+      mockEditorTarget.selectionEnd = 600;
       
-      wrapSelection('**', '**');
+      controller.bold();
       
-      expect(editorElement.value.length).toBe(1004); // Original + 4 characters (**)
-      expect(editorElement.value.substring(500, 504)).toBe("**AA");
+      expect(mockEditorTarget.value.length).toBe(1004); // Original + 4 characters (**)
+    });
+
+    it("should handle invalid selection ranges", () => {
+      mockEditorTarget.value = "Test text";
+      mockEditorTarget.selectionStart = 5;
+      mockEditorTarget.selectionEnd = 3; // End before start
+      
+      expect(() => {
+        controller.bold();
+      }).not.toThrow();
+    });
+
+    it("should handle selection beyond text length", () => {
+      mockEditorTarget.value = "Short";
+      mockEditorTarget.selectionStart = 3;
+      mockEditorTarget.selectionEnd = 100; // Beyond text length
+      
+      controller.bold();
+      
+      expect(mockEditorTarget.value).toBe("Sho**rt**");
     });
   });
 });

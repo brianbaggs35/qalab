@@ -2,43 +2,87 @@
  * @jest-environment jsdom
  */
 
-// Import the actual controller to get coverage
-import "../controllers/upload_controller";
+import UploadController from "../controllers/upload_controller"
 
-// Test Upload Controller functionality
-describe("UploadController Functions", () => {
-  let formElement, fileInputElement, submitButtonElement, progressContainerElement, progressBarElement;
-  let mockXHR, xhrInstances;
+describe("UploadController", () => {
+  let controller;
+  let mockElement;
+  let mockFormTarget;
+  let mockFileInputTarget;
+  let mockSubmitButtonTarget;
+  let mockProgressBarTarget;
+  let mockProgressContainerTarget;
+  let mockXHR;
+  let xhrInstances;
 
   beforeEach(() => {
-    // Create DOM elements
-    formElement = document.createElement('form');
-    formElement.action = '/test-upload';
+    mockElement = document.createElement('div');
+    mockFormTarget = document.createElement('form');
+    mockFormTarget.action = '/test-upload';
     
-    fileInputElement = document.createElement('input');
-    fileInputElement.type = 'file';
+    mockFileInputTarget = document.createElement('input');
+    mockFileInputTarget.type = 'file';
     
-    submitButtonElement = document.createElement('button');
-    submitButtonElement.textContent = 'Upload Test Results';
+    mockSubmitButtonTarget = document.createElement('button');
+    mockSubmitButtonTarget.textContent = 'Upload Test Results';
     
-    progressContainerElement = document.createElement('div');
-    progressContainerElement.classList.add('hidden');
+    mockProgressBarTarget = document.createElement('div');
+    mockProgressBarTarget.style.width = '0%';
     
-    progressBarElement = document.createElement('div');
-    progressBarElement.style.width = '0%';
+    mockProgressContainerTarget = document.createElement('div');
+    mockProgressContainerTarget.classList.add('hidden');
     
-    // Add elements to DOM
-    document.body.appendChild(formElement);
-    document.body.appendChild(fileInputElement);
-    document.body.appendChild(submitButtonElement);
-    document.body.appendChild(progressContainerElement);
-    document.body.appendChild(progressBarElement);
+    document.body.appendChild(mockElement);
+    document.body.appendChild(mockFormTarget);
+    document.body.appendChild(mockFileInputTarget);
+    document.body.appendChild(mockSubmitButtonTarget);
+    document.body.appendChild(mockProgressBarTarget);
+    document.body.appendChild(mockProgressContainerTarget);
 
     // Add CSRF token meta tag
     const csrfMeta = document.createElement('meta');
     csrfMeta.name = 'csrf-token';
     csrfMeta.content = 'test-csrf-token';
     document.head.appendChild(csrfMeta);
+
+    controller = new UploadController();
+    
+    // Mock the element and targets
+    Object.defineProperty(controller, 'element', {
+      value: mockElement,
+      writable: false,
+      configurable: true
+    });
+    
+    Object.defineProperty(controller, 'formTarget', {
+      value: mockFormTarget,
+      writable: false,
+      configurable: true
+    });
+    
+    Object.defineProperty(controller, 'fileInputTarget', {
+      value: mockFileInputTarget,
+      writable: false,
+      configurable: true
+    });
+    
+    Object.defineProperty(controller, 'submitButtonTarget', {
+      value: mockSubmitButtonTarget,
+      writable: false,
+      configurable: true
+    });
+    
+    Object.defineProperty(controller, 'progressBarTarget', {
+      value: mockProgressBarTarget,
+      writable: false,
+      configurable: true
+    });
+    
+    Object.defineProperty(controller, 'progressContainerTarget', {
+      value: mockProgressContainerTarget,
+      writable: false,
+      configurable: true
+    });
 
     // Mock XMLHttpRequest
     xhrInstances = [];
@@ -48,291 +92,541 @@ describe("UploadController Functions", () => {
         send: jest.fn(),
         setRequestHeader: jest.fn(),
         addEventListener: jest.fn(),
-        status: 200,
-        responseURL: '/automated_testing/results',
         upload: {
           addEventListener: jest.fn()
-        }
+        },
+        status: 200,
+        responseURL: ''
       };
       xhrInstances.push(xhr);
       return xhr;
     });
     global.XMLHttpRequest = mockXHR;
 
-    // Mock console methods
-    console.log = jest.fn();
-    console.error = jest.fn();
-
-    // Mock alert
+    // Mock alert, console.log, and window.location.href
     global.alert = jest.fn();
-
-    // Mock window.location
-    delete window.location;
-    window.location = { href: '' };
+    global.console.log = jest.fn();
+    
+    Object.defineProperty(window, 'location', {
+      value: { href: '' },
+      writable: true
+    });
   });
 
   afterEach(() => {
-    document.body.innerHTML = '';
     document.head.innerHTML = '';
+    document.body.innerHTML = '';
     jest.clearAllMocks();
-    jest.clearAllTimers();
   });
 
   describe("connect behavior", () => {
-    it("should initialize with disabled submit button", () => {
-      // Mock connect logic
-      submitButtonElement.disabled = true;
-      formElement.addEventListener('submit', () => {});
-      fileInputElement.addEventListener('change', () => {});
+    it("should log connection and set up event listeners", () => {
+      const consoleLogSpy = jest.spyOn(console, 'log');
+      const addEventListenerSpy = jest.spyOn(mockFormTarget, 'addEventListener');
+      const inputAddEventListenerSpy = jest.spyOn(mockFileInputTarget, 'addEventListener');
       
-      expect(submitButtonElement.disabled).toBe(true);
+      controller.connect();
+      
+      expect(consoleLogSpy).toHaveBeenCalledWith("Upload controller connected");
+      expect(addEventListenerSpy).toHaveBeenCalledWith('submit', expect.any(Function));
+      expect(inputAddEventListenerSpy).toHaveBeenCalledWith('change', expect.any(Function));
     });
 
-    it("should add event listeners", () => {
-      const addEventListenerSpy = jest.spyOn(formElement, 'addEventListener');
-      const fileAddEventListenerSpy = jest.spyOn(fileInputElement, 'addEventListener');
+    it("should disable submit button initially", () => {
+      controller.connect();
       
-      // Mock connect logic
-      formElement.addEventListener('submit', () => {});
-      fileInputElement.addEventListener('change', () => {});
-      
-      expect(addEventListenerSpy).toHaveBeenCalledWith('submit', expect.any(Function));
-      expect(fileAddEventListenerSpy).toHaveBeenCalledWith('change', expect.any(Function));
+      expect(mockSubmitButtonTarget.disabled).toBe(true);
     });
   });
 
   describe("handleFileChange", () => {
-    function handleFileChange(file) {
-      if (file) {
-        console.log("File selected:", file.name, file.type);
-        
-        // Validate file type
-        if (!file.name.toLowerCase().endsWith('.xml')) {
-          alert('Please select a valid XML file');
-          fileInputElement.value = '';
-          submitButtonElement.disabled = true;
-          submitButtonElement.textContent = 'Upload Test Results';
-          return;
-        }
-
-        // File is valid - enable button
-        submitButtonElement.textContent = `Upload ${file.name}`;
-        submitButtonElement.disabled = false;
-        submitButtonElement.classList.remove('btn-disabled');
-      } else {
-        console.log("No file selected");
-        submitButtonElement.textContent = 'Upload Test Results';
-        submitButtonElement.disabled = true;
-        submitButtonElement.classList.add('btn-disabled');
-      }
-    }
+    beforeEach(() => {
+      controller.connect();
+    });
 
     it("should handle valid XML file selection", () => {
-      const mockFile = { name: 'test-results.xml', type: 'text/xml' };
+      const mockFile = {
+        name: 'test-results.xml',
+        type: 'application/xml'
+      };
       
-      handleFileChange(mockFile);
+      const mockEvent = {
+        target: {
+          files: [mockFile]
+        }
+      };
       
-      expect(console.log).toHaveBeenCalledWith("File selected:", mockFile.name, mockFile.type);
-      expect(submitButtonElement.textContent).toBe('Upload test-results.xml');
-      expect(submitButtonElement.disabled).toBe(false);
-      expect(submitButtonElement.classList.contains('btn-disabled')).toBe(false);
+      const consoleLogSpy = jest.spyOn(console, 'log');
+      
+      controller.handleFileChange(mockEvent);
+      
+      expect(consoleLogSpy).toHaveBeenCalledWith("File change event triggered");
+      expect(consoleLogSpy).toHaveBeenCalledWith("File selected:", mockFile.name, mockFile.type);
+      expect(consoleLogSpy).toHaveBeenCalledWith("Button enabled for file:", mockFile.name);
+      
+      expect(mockSubmitButtonTarget.textContent).toBe(`Upload ${mockFile.name}`);
+      expect(mockSubmitButtonTarget.disabled).toBe(false);
+      expect(mockSubmitButtonTarget.classList.contains('btn-disabled')).toBe(false);
     });
 
     it("should reject non-XML files", () => {
-      const mockFile = { name: 'test.pdf', type: 'application/pdf' };
+      const mockFile = {
+        name: 'test-results.txt',
+        type: 'text/plain'
+      };
       
-      handleFileChange(mockFile);
+      const mockEvent = {
+        target: {
+          files: [mockFile],
+          value: 'fake-value'
+        }
+      };
       
-      expect(alert).toHaveBeenCalledWith('Please select a valid XML file');
-      expect(submitButtonElement.disabled).toBe(true);
-      expect(submitButtonElement.textContent).toBe('Upload Test Results');
+      controller.handleFileChange(mockEvent);
+      
+      expect(global.alert).toHaveBeenCalledWith('Please select a valid XML file');
+      expect(mockEvent.target.value).toBe('');
+      expect(mockSubmitButtonTarget.disabled).toBe(true);
+      expect(mockSubmitButtonTarget.textContent).toBe('Upload Test Results');
     });
 
     it("should handle no file selection", () => {
-      handleFileChange(null);
+      const mockEvent = {
+        target: {
+          files: []
+        }
+      };
       
-      expect(console.log).toHaveBeenCalledWith("No file selected");
-      expect(submitButtonElement.textContent).toBe('Upload Test Results');
-      expect(submitButtonElement.disabled).toBe(true);
+      const consoleLogSpy = jest.spyOn(console, 'log');
+      
+      controller.handleFileChange(mockEvent);
+      
+      expect(consoleLogSpy).toHaveBeenCalledWith("No file selected");
+      expect(mockSubmitButtonTarget.textContent).toBe('Upload Test Results');
+      expect(mockSubmitButtonTarget.disabled).toBe(true);
+      expect(mockSubmitButtonTarget.classList.contains('btn-disabled')).toBe(true);
     });
 
-    it("should handle case insensitive XML extension", () => {
-      const mockFile = { name: 'TEST-RESULTS.XML', type: 'text/xml' };
+    it("should handle null files array", () => {
+      const mockEvent = {
+        target: {
+          files: null
+        }
+      };
       
-      handleFileChange(mockFile);
+      expect(() => {
+        controller.handleFileChange(mockEvent);
+      }).not.toThrow();
+    });
+
+    it("should handle empty files array", () => {
+      const mockEvent = {
+        target: {
+          files: []
+        }
+      };
       
-      expect(submitButtonElement.disabled).toBe(false);
-      expect(submitButtonElement.textContent).toBe('Upload TEST-RESULTS.XML');
+      controller.handleFileChange(mockEvent);
+      
+      expect(mockSubmitButtonTarget.disabled).toBe(true);
+    });
+
+    it("should validate XML file extension case-insensitively", () => {
+      const mockFile = {
+        name: 'test-results.XML',
+        type: 'application/xml'
+      };
+      
+      const mockEvent = {
+        target: {
+          files: [mockFile]
+        }
+      };
+      
+      controller.handleFileChange(mockEvent);
+      
+      expect(mockSubmitButtonTarget.disabled).toBe(false);
+      expect(mockSubmitButtonTarget.textContent).toBe(`Upload ${mockFile.name}`);
     });
   });
 
   describe("handleSubmit", () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      controller.connect();
     });
 
-    afterEach(() => {
-      jest.useRealTimers();
-    });
-
-    function createMockFile() {
-      return new File(['<xml></xml>'], 'test.xml', { type: 'text/xml' });
-    }
-
-    it("should prevent default form submission", () => {
-      const mockEvent = { preventDefault: jest.fn() };
+    it("should prevent default and show alert when no file selected", () => {
+      const mockEvent = {
+        preventDefault: jest.fn()
+      };
       
-      // Mock the handleSubmit logic
-      mockEvent.preventDefault();
+      Object.defineProperty(mockFileInputTarget, 'files', {
+        value: null,
+        configurable: true
+      });
+      
+      controller.handleSubmit(mockEvent);
       
       expect(mockEvent.preventDefault).toHaveBeenCalled();
+      expect(global.alert).toHaveBeenCalledWith('Please select a file to upload');
     });
 
-    it("should alert when no file is selected", () => {
-      // Mock file input with no files
-      Object.defineProperty(fileInputElement, 'files', {
-        value: [],
-        writable: false
-      });
+    it("should handle successful upload with default redirect", () => {
+      const mockFile = new File(['content'], 'test.xml', { type: 'application/xml' });
+      const mockEvent = {
+        preventDefault: jest.fn()
+      };
       
-      // Mock submit logic
-      if (!fileInputElement.files?.[0]) {
-        alert('Please select a file to upload');
-        return;
-      }
-      
-      expect(alert).toHaveBeenCalledWith('Please select a file to upload');
-    });
-
-    it("should show progress when file is selected", () => {
-      const mockFile = createMockFile();
-      Object.defineProperty(fileInputElement, 'files', {
+      // Mock the files property properly
+      Object.defineProperty(mockFileInputTarget, 'files', {
         value: [mockFile],
-        writable: false
+        configurable: true
       });
       
-      // Mock showProgress functionality
-      progressContainerElement.classList.remove('hidden');
-      submitButtonElement.disabled = true;
-      submitButtonElement.innerHTML = `
-        <span class="loading loading-spinner loading-sm"></span>
-        Processing...
-      `;
+      const consoleLogSpy = jest.spyOn(console, 'log');
       
-      expect(progressContainerElement.classList.contains('hidden')).toBe(false);
-      expect(submitButtonElement.disabled).toBe(true);
-      expect(submitButtonElement.innerHTML).toContain('Processing...');
-    });
-
-    it("should create XMLHttpRequest with correct configuration", () => {
-      const mockFile = createMockFile();
-      Object.defineProperty(fileInputElement, 'files', {
-        value: [mockFile],
-        writable: false
-      });
+      controller.handleSubmit(mockEvent);
       
-      // Mock submit logic
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', formElement.action);
-      xhr.setRequestHeader('X-CSRF-Token', 'test-csrf-token');
+      expect(mockEvent.preventDefault).toHaveBeenCalled();
+      expect(consoleLogSpy).toHaveBeenCalledWith("Form submit triggered");
+      expect(consoleLogSpy).toHaveBeenCalledWith("Sending upload request...");
       
-      expect(mockXHR).toHaveBeenCalled();
-      expect(xhr.open).toHaveBeenCalledWith('POST', formElement.action);
+      const xhr = xhrInstances[0];
+      expect(xhr.open).toHaveBeenCalledWith('POST', 'http://localhost/test-upload');
       expect(xhr.setRequestHeader).toHaveBeenCalledWith('X-CSRF-Token', 'test-csrf-token');
     });
 
-    it("should handle successful upload", () => {
-      const mockFile = createMockFile();
-      Object.defineProperty(fileInputElement, 'files', {
-        value: [mockFile],
-        writable: false
-      });
+    it("should handle upload progress updates", () => {
+      const mockFile = new File(['content'], 'test.xml', { type: 'application/xml' });
+      const mockEvent = {
+        preventDefault: jest.fn()
+      };
       
-      const xhr = new XMLHttpRequest();
+      Object.defineProperty(mockFileInputTarget, "files", { value: [mockFile], configurable: true });
+      
+      controller.handleSubmit(mockEvent);
+      
+      const xhr = xhrInstances[0];
+      const progressCallback = xhr.upload.addEventListener.mock.calls[0][1];
+      
+      // Simulate progress event
+      const progressEvent = {
+        lengthComputable: true,
+        loaded: 500,
+        total: 1000
+      };
+      
+      progressCallback(progressEvent);
+      
+      expect(mockProgressBarTarget.style.width).toBe('50%');
+      expect(mockProgressBarTarget.textContent).toBe('50%');
+    });
+
+    it("should handle successful upload completion", () => {
+      const mockFile = new File(['content'], 'test.xml', { type: 'application/xml' });
+      const mockEvent = {
+        preventDefault: jest.fn()
+      };
+      
+      Object.defineProperty(mockFileInputTarget, "files", { value: [mockFile], configurable: true });
+      
+      // Mock setTimeout
+      jest.useFakeTimers();
+      
+      controller.handleSubmit(mockEvent);
+      
+      const xhr = xhrInstances[0];
       xhr.status = 200;
-      xhr.responseURL = '/automated_testing/results/123';
       
-      // Mock successful completion
-      progressBarElement.style.width = '100%';
-      progressBarElement.textContent = '100%';
-      submitButtonElement.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-        </svg>
-        Upload Complete!
-      `;
+      const loadCallback = xhr.addEventListener.mock.calls.find(call => call[0] === 'load')[1];
+      loadCallback();
       
-      expect(progressBarElement.style.width).toBe('100%');
-      expect(submitButtonElement.innerHTML).toContain('Upload Complete!');
-    });
-
-    it("should update progress during upload", () => {
-      // Mock progress update
-      const percentComplete = 75;
-      progressBarElement.style.width = `${percentComplete}%`;
-      progressBarElement.textContent = `${Math.round(percentComplete)}%`;
-      
-      expect(progressBarElement.style.width).toBe('75%');
-      expect(progressBarElement.textContent).toBe('75%');
-    });
-
-    it("should handle upload errors", () => {
-      const errorMessage = 'Upload failed. Please try again.';
-      
-      // Mock error handling
-      console.error("Upload error:", errorMessage);
-      progressContainerElement.classList.add('hidden');
-      submitButtonElement.disabled = false;
-      submitButtonElement.textContent = 'Upload Test Results';
-      alert(errorMessage);
-      
-      expect(console.error).toHaveBeenCalledWith("Upload error:", errorMessage);
-      expect(progressContainerElement.classList.contains('hidden')).toBe(true);
-      expect(submitButtonElement.disabled).toBe(false);
-      expect(alert).toHaveBeenCalledWith(errorMessage);
-    });
-
-    it("should redirect after successful upload", () => {
-      // Mock redirect logic
-      const redirectUrl = '/automated_testing/results/123';
-      
-      setTimeout(() => {
-        window.location.href = redirectUrl;
-      }, 2000);
+      expect(mockProgressBarTarget.style.width).toBe('100%');
+      expect(mockProgressBarTarget.textContent).toBe('100%');
+      expect(mockSubmitButtonTarget.textContent).toContain('Upload Complete!');
       
       jest.advanceTimersByTime(2000);
+      expect(window.location.href).toBe('/automated_testing/results');
       
-      expect(window.location.href).toBe(redirectUrl);
+      jest.useRealTimers();
+    });
+
+    it("should handle upload with custom redirect URL", () => {
+      const mockFile = new File(['content'], 'test.xml', { type: 'application/xml' });
+      const mockEvent = {
+        preventDefault: jest.fn()
+      };
+      
+      Object.defineProperty(mockFileInputTarget, "files", { value: [mockFile], configurable: true });
+      
+      jest.useFakeTimers();
+      
+      controller.handleSubmit(mockEvent);
+      
+      const xhr = xhrInstances[0];
+      xhr.status = 302;
+      xhr.responseURL = 'https://example.com/automated_testing/results/123';
+      
+      const loadCallback = xhr.addEventListener.mock.calls.find(call => call[0] === 'load')[1];
+      loadCallback();
+      
+      jest.advanceTimersByTime(2000);
+      expect(window.location.href).toBe('https://example.com/automated_testing/results/123');
+      
+      jest.useRealTimers();
+    });
+
+    it("should handle upload error", () => {
+      const mockFile = new File(['content'], 'test.xml', { type: 'application/xml' });
+      const mockEvent = {
+        preventDefault: jest.fn()
+      };
+      
+      Object.defineProperty(mockFileInputTarget, "files", { value: [mockFile], configurable: true });
+      
+      controller.handleSubmit(mockEvent);
+      
+      const xhr = xhrInstances[0];
+      xhr.status = 500;
+      
+      const consoleErrorSpy = jest.spyOn(console, 'error');
+      
+      const loadCallback = xhr.addEventListener.mock.calls.find(call => call[0] === 'load')[1];
+      loadCallback();
+      
+      expect(consoleErrorSpy).toHaveBeenCalledWith("Upload failed with status:", 500);
+      expect(mockSubmitButtonTarget.textContent).toBe('Upload Test Results');
+    });
+
+    it("should handle network error", () => {
+      const mockFile = new File(['content'], 'test.xml', { type: 'application/xml' });
+      const mockEvent = {
+        preventDefault: jest.fn()
+      };
+      
+      Object.defineProperty(mockFileInputTarget, "files", { value: [mockFile], configurable: true });
+      
+      controller.handleSubmit(mockEvent);
+      
+      const xhr = xhrInstances[0];
+      const consoleErrorSpy = jest.spyOn(console, 'error');
+      
+      const errorCallback = xhr.addEventListener.mock.calls.find(call => call[0] === 'error')[1];
+      errorCallback();
+      
+      expect(consoleErrorSpy).toHaveBeenCalledWith("Upload error occurred");
+      expect(mockSubmitButtonTarget.textContent).toBe('Upload Test Results');
     });
   });
 
-  describe("utility functions", () => {
-    it("should show and update progress correctly", () => {
-      // Test showProgress
-      progressContainerElement.classList.remove('hidden');
-      expect(progressContainerElement.classList.contains('hidden')).toBe(false);
+  describe("showProgress", () => {
+    it("should show progress container and update button", () => {
+      controller.showProgress();
       
-      // Test updateProgress
-      const testPercents = [0, 25, 50, 75, 100];
-      testPercents.forEach(percent => {
-        progressBarElement.style.width = `${percent}%`;
-        progressBarElement.textContent = `${Math.round(percent)}%`;
-        
-        expect(progressBarElement.style.width).toBe(`${percent}%`);
-        expect(progressBarElement.textContent).toBe(`${percent}%`);
+      expect(mockProgressContainerTarget.classList.contains('hidden')).toBe(false);
+      expect(mockSubmitButtonTarget.disabled).toBe(true);
+      expect(mockSubmitButtonTarget.innerHTML).toContain('loading loading-spinner');
+      expect(mockSubmitButtonTarget.innerHTML).toContain('Processing...');
+    });
+  });
+
+  describe("updateProgress", () => {
+    it("should update progress bar with percentage", () => {
+      controller.updateProgress(75);
+      
+      expect(mockProgressBarTarget.style.width).toBe('75%');
+      expect(mockProgressBarTarget.textContent).toBe('75%');
+    });
+
+    it("should round percentage values", () => {
+      controller.updateProgress(33.333);
+      
+      expect(mockProgressBarTarget.textContent).toBe('33%');
+    });
+  });
+
+  describe("showSuccess", () => {
+    it("should display success state", () => {
+      controller.showSuccess();
+      
+      expect(mockProgressBarTarget.style.width).toBe('100%');
+      expect(mockProgressBarTarget.textContent).toBe('100%');
+      expect(mockSubmitButtonTarget.innerHTML).toContain('Upload Complete!');
+      expect(mockSubmitButtonTarget.classList.contains('btn-success')).toBe(true);
+      expect(mockSubmitButtonTarget.classList.contains('btn-primary')).toBe(false);
+    });
+  });
+
+  describe("showError", () => {
+    it("should display error state and show alert", () => {
+      const testMessage = "Test error message";
+      const consoleErrorSpy = jest.spyOn(console, 'error');
+      
+      controller.showError(testMessage);
+      
+      expect(consoleErrorSpy).toHaveBeenCalledWith("Upload error:", testMessage);
+      expect(mockProgressContainerTarget.classList.contains('hidden')).toBe(true);
+      expect(mockSubmitButtonTarget.disabled).toBe(false);
+      expect(mockSubmitButtonTarget.textContent).toBe('Upload Test Results');
+      expect(mockSubmitButtonTarget.classList.contains('btn-primary')).toBe(true);
+      expect(mockSubmitButtonTarget.classList.contains('btn-success')).toBe(false);
+      expect(global.alert).toHaveBeenCalledWith(testMessage);
+    });
+  });
+
+  describe("integration scenarios", () => {
+    beforeEach(() => {
+      controller.connect();
+    });
+
+    it("should handle complete upload workflow", () => {
+      // File selection
+      const mockFile = {
+        name: 'test-results.xml',
+        type: 'application/xml'
+      };
+      
+      const fileChangeEvent = {
+        target: {
+          files: [mockFile]
+        }
+      };
+      
+      controller.handleFileChange(fileChangeEvent);
+      expect(mockSubmitButtonTarget.disabled).toBe(false);
+      
+      // File submission
+      Object.defineProperty(mockFileInputTarget, 'files', {
+        value: [new File(['content'], 'test.xml', { type: 'application/xml' })],
+        configurable: true
       });
-    });
-
-    it("should handle CSRF token correctly", () => {
-      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-      expect(csrfToken).toBe('test-csrf-token');
-    });
-
-    it("should handle missing CSRF token gracefully", () => {
-      document.querySelector('meta[name="csrf-token"]')?.remove();
       
-      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-      expect(csrfToken).toBeUndefined();
+      const submitEvent = {
+        preventDefault: jest.fn()
+      };
+      
+      jest.useFakeTimers();
+      
+      controller.handleSubmit(submitEvent);
+      
+      // Simulate successful upload
+      const xhr = xhrInstances[0];
+      xhr.status = 200;
+      
+      const loadCallback = xhr.addEventListener.mock.calls.find(call => call[0] === 'load')[1];
+      loadCallback();
+      
+      expect(mockSubmitButtonTarget.innerHTML).toContain('Upload Complete!');
+      
+      jest.advanceTimersByTime(2000);
+      expect(window.location.href).toBe('/automated_testing/results');
+      
+      jest.useRealTimers();
+    });
+
+    it("should handle error recovery", () => {
+      // Start with error state
+      controller.showError("Test error");
+      expect(mockSubmitButtonTarget.disabled).toBe(false);
+      expect(global.alert).toHaveBeenCalled();
+      
+      // Then show success
+      controller.showSuccess();
+      expect(mockSubmitButtonTarget.classList.contains('btn-success')).toBe(true);
+    });
+  });
+
+  describe("edge cases", () => {
+    beforeEach(() => {
+      controller.connect();
+    });
+
+    it("should handle missing CSRF token", () => {
+      document.head.innerHTML = ''; // Remove CSRF token
+      
+      const mockFile = new File(['content'], 'test.xml', { type: 'application/xml' });
+      const mockEvent = {
+        preventDefault: jest.fn()
+      };
+      
+      Object.defineProperty(mockFileInputTarget, "files", { value: [mockFile], configurable: true });
+      
+      expect(() => {
+        controller.handleSubmit(mockEvent);
+      }).not.toThrow();
+      
+      const xhr = xhrInstances[0];
+      expect(xhr.setRequestHeader).not.toHaveBeenCalledWith('X-CSRF-Token', expect.any(String));
+    });
+
+    it("should handle progress event without lengthComputable", () => {
+      const mockFile = new File(['content'], 'test.xml', { type: 'application/xml' });
+      const mockEvent = {
+        preventDefault: jest.fn()
+      };
+      
+      Object.defineProperty(mockFileInputTarget, "files", { value: [mockFile], configurable: true });
+      
+      controller.handleSubmit(mockEvent);
+      
+      const xhr = xhrInstances[0];
+      const progressCallback = xhr.upload.addEventListener.mock.calls[0][1];
+      
+      const progressEvent = {
+        lengthComputable: false,
+        loaded: 500,
+        total: 1000
+      };
+      
+      expect(() => {
+        progressCallback(progressEvent);
+      }).not.toThrow();
+    });
+
+    it("should handle invalid responseURL in success handler", () => {
+      const mockFile = new File(['content'], 'test.xml', { type: 'application/xml' });
+      const mockEvent = {
+        preventDefault: jest.fn()
+      };
+      
+      Object.defineProperty(mockFileInputTarget, "files", { value: [mockFile], configurable: true });
+      
+      jest.useFakeTimers();
+      
+      controller.handleSubmit(mockEvent);
+      
+      const xhr = xhrInstances[0];
+      xhr.status = 200;
+      xhr.responseURL = 'invalid-url';
+      
+      const loadCallback = xhr.addEventListener.mock.calls.find(call => call[0] === 'load')[1];
+      loadCallback();
+      
+      // Should use default URL since responseURL doesn't contain 'automated_testing/results'
+      jest.advanceTimersByTime(2000);
+      expect(window.location.href).toBe('/automated_testing/results');
+      
+      jest.useRealTimers();
+    });
+
+    it("should handle files with mixed case extensions", () => {
+      const extensions = ['.xml', '.XML', '.xMl', '.Xml'];
+      
+      extensions.forEach(ext => {
+        const mockFile = {
+          name: `test${ext}`,
+          type: 'application/xml'
+        };
+        
+        const mockEvent = {
+          target: {
+            files: [mockFile]
+          }
+        };
+        
+        controller.handleFileChange(mockEvent);
+        expect(mockSubmitButtonTarget.disabled).toBe(false);
+      });
     });
   });
 });
