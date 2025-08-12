@@ -46,7 +46,7 @@ class TestCasePolicy < ApplicationPolicy
 
   def user_owns_or_in_organization?
     return false unless record
-    
+
     record.user == user || user.organizations.include?(record.organization)
   end
 end

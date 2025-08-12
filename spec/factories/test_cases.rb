@@ -3,7 +3,7 @@ FactoryBot.define do
     title { "Login Functionality Test" }
     priority { "medium" }
     description { "Test the user login functionality with valid credentials" }
-    steps { ["Navigate to login page", "Enter valid credentials", "Click submit"] }
+    steps { [ "Navigate to login page", "Enter valid credentials", "Click submit" ] }
     expected_results { "User should be successfully logged in and redirected to dashboard" }
     notes { {} }
     category { "functional" }
@@ -11,7 +11,7 @@ FactoryBot.define do
     preconditions { "User account must exist in the system" }
     estimated_duration { 5 }
     tags { "login, authentication, regression" }
-    
+
     association :user
     association :organization
 

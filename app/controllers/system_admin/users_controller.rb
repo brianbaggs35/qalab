@@ -1,7 +1,7 @@
 class SystemAdmin::UsersController < ApplicationController
   before_action :authenticate_user!
   before_action :ensure_system_admin
-  before_action :set_user, only: [:show, :edit, :update, :destroy]
+  before_action :set_user, only: [ :show, :edit, :update, :destroy ]
 
   def index
     @users = User.includes(:organizations)
@@ -10,7 +10,7 @@ class SystemAdmin::UsersController < ApplicationController
                  .per(20)
 
     # Apply filters
-    @users = @users.where("first_name ILIKE ? OR last_name ILIKE ? OR email ILIKE ?", 
+    @users = @users.where("first_name ILIKE ? OR last_name ILIKE ? OR email ILIKE ?",
                           "%#{params[:search]}%", "%#{params[:search]}%", "%#{params[:search]}%") if params[:search].present?
     @users = @users.where(role: params[:role]) if params[:role].present?
 
@@ -42,9 +42,9 @@ class SystemAdmin::UsersController < ApplicationController
   def create
     @user = User.new(user_params)
     @user.confirmed_at = Time.current # Auto-confirm users created by system admin
-    
+
     if @user.save
-      redirect_to system_admin_user_path(@user), 
+      redirect_to system_admin_user_path(@user),
                   notice: "User '#{@user.full_name}' created successfully!"
     else
       render :new, status: :unprocessable_entity
@@ -63,7 +63,7 @@ class SystemAdmin::UsersController < ApplicationController
     end
 
     if @user.update(update_params)
-      redirect_to system_admin_user_path(@user), 
+      redirect_to system_admin_user_path(@user),
                   notice: "User '#{@user.full_name}' updated successfully!"
     else
       render :edit, status: :unprocessable_entity
@@ -72,20 +72,20 @@ class SystemAdmin::UsersController < ApplicationController
 
   def destroy
     if @user == current_user
-      redirect_to system_admin_users_path, 
+      redirect_to system_admin_users_path,
                   alert: "You cannot delete your own account!"
       return
     end
 
     if @user.organizations.any?
-      redirect_to system_admin_user_path(@user), 
+      redirect_to system_admin_user_path(@user),
                   alert: "Cannot delete user who belongs to organizations. Remove from organizations first."
       return
     end
 
     name = @user.full_name
     @user.destroy
-    redirect_to system_admin_users_path, 
+    redirect_to system_admin_users_path,
                 notice: "User '#{name}' deleted successfully!"
   end
 
@@ -93,28 +93,28 @@ class SystemAdmin::UsersController < ApplicationController
   def lock
     @user = User.find(params[:id])
     @user.lock_access!
-    redirect_to system_admin_user_path(@user), 
+    redirect_to system_admin_user_path(@user),
                 notice: "User account locked successfully!"
   end
 
   def unlock
     @user = User.find(params[:id])
     @user.unlock_access!
-    redirect_to system_admin_user_path(@user), 
+    redirect_to system_admin_user_path(@user),
                 notice: "User account unlocked successfully!"
   end
 
   def confirm
     @user = User.find(params[:id])
     @user.confirm unless @user.confirmed?
-    redirect_to system_admin_user_path(@user), 
+    redirect_to system_admin_user_path(@user),
                 notice: "User account confirmed successfully!"
   end
 
   def resend_confirmation
     @user = User.find(params[:id])
     @user.send_confirmation_instructions
-    redirect_to system_admin_user_path(@user), 
+    redirect_to system_admin_user_path(@user),
                 notice: "Confirmation email sent successfully!"
   end
 
@@ -125,10 +125,11 @@ class SystemAdmin::UsersController < ApplicationController
   end
 
   def user_params
-    params.require(:user).permit(
-      :first_name, :last_name, :email, :password, :password_confirmation, 
-      :role, :confirmed_at
-    )
+    # Only allow role assignment for system admins, exclude confirmed_at from mass assignment
+    permitted_params = [ :first_name, :last_name, :email, :password, :password_confirmation ]
+    permitted_params << :role if current_user&.system_admin?
+
+    params.require(:user).permit(permitted_params)
   end
 
   def ensure_system_admin

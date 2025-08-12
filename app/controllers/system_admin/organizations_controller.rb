@@ -1,7 +1,7 @@
 class SystemAdmin::OrganizationsController < ApplicationController
   before_action :authenticate_user!
   before_action :ensure_system_admin
-  before_action :set_organization, only: [:show, :edit, :update, :destroy]
+  before_action :set_organization, only: [ :show, :edit, :update, :destroy ]
 
   def index
     @organizations = Organization.includes(:users, :test_runs, :test_cases)
@@ -11,7 +11,7 @@ class SystemAdmin::OrganizationsController < ApplicationController
 
     # Apply filters
     if params[:search].present?
-      @organizations = @organizations.where("name ILIKE ? OR description ILIKE ?", 
+      @organizations = @organizations.where("name ILIKE ? OR description ILIKE ?",
                                           "%#{params[:search]}%", "%#{params[:search]}%")
     end
 
@@ -53,15 +53,15 @@ class SystemAdmin::OrganizationsController < ApplicationController
 
   def create
     @organization = Organization.new(organization_params)
-    
+
     if @organization.save
       # If a user_id is provided, make that user the owner
       if params[:owner_user_id].present?
         user = User.find(params[:owner_user_id])
-        @organization.organization_users.create!(user: user, role: 'owner')
+        @organization.organization_users.create!(user: user, role: "owner")
       end
-      
-      redirect_to system_admin_organization_path(@organization), 
+
+      redirect_to system_admin_organization_path(@organization),
                   notice: "Organization '#{@organization.name}' created successfully!"
     else
       render :new, status: :unprocessable_entity
@@ -73,7 +73,7 @@ class SystemAdmin::OrganizationsController < ApplicationController
 
   def update
     if @organization.update(organization_params)
-      redirect_to system_admin_organization_path(@organization), 
+      redirect_to system_admin_organization_path(@organization),
                   notice: "Organization '#{@organization.name}' updated successfully!"
     else
       render :edit, status: :unprocessable_entity
@@ -82,14 +82,14 @@ class SystemAdmin::OrganizationsController < ApplicationController
 
   def destroy
     if @organization.users.any?
-      redirect_to system_admin_organization_path(@organization), 
+      redirect_to system_admin_organization_path(@organization),
                   alert: "Cannot delete organization with users. Remove all users first."
       return
     end
 
     name = @organization.name
     @organization.destroy
-    redirect_to system_admin_organizations_path, 
+    redirect_to system_admin_organizations_path,
                 notice: "Organization '#{name}' deleted successfully!"
   end
 
@@ -97,37 +97,37 @@ class SystemAdmin::OrganizationsController < ApplicationController
   def add_user
     @organization = Organization.find(params[:id])
     user = User.find(params[:user_id])
-    role = params[:role] || 'member'
+    role = params[:role] || "member"
 
     if @organization.organization_users.exists?(user: user)
-      redirect_to system_admin_organization_path(@organization), 
+      redirect_to system_admin_organization_path(@organization),
                   alert: "User '#{user.full_name}' is already a member of this organization."
       return
     end
 
     @organization.organization_users.create!(user: user, role: role)
-    redirect_to system_admin_organization_path(@organization), 
+    redirect_to system_admin_organization_path(@organization),
                 notice: "User '#{user.full_name}' added as #{role} successfully!"
   end
 
   def remove_user
     @organization = Organization.find(params[:id])
     user = User.find(params[:user_id])
-    
+
     organization_user = @organization.organization_users.find_by(user: user)
     if organization_user
       # Check if user is the last owner
-      if organization_user.role == 'owner' && @organization.owners.count == 1
-        redirect_to system_admin_organization_path(@organization), 
+      if organization_user.role == "owner" && @organization.owners.count == 1
+        redirect_to system_admin_organization_path(@organization),
                     alert: "Cannot remove the last owner. Add another owner first."
         return
       end
-      
+
       organization_user.destroy
-      redirect_to system_admin_organization_path(@organization), 
+      redirect_to system_admin_organization_path(@organization),
                   notice: "User '#{user.full_name}' removed from organization successfully!"
     else
-      redirect_to system_admin_organization_path(@organization), 
+      redirect_to system_admin_organization_path(@organization),
                   alert: "User '#{user.full_name}' is not a member of this organization."
     end
   end
@@ -136,21 +136,21 @@ class SystemAdmin::OrganizationsController < ApplicationController
     @organization = Organization.find(params[:id])
     user = User.find(params[:user_id])
     new_role = params[:new_role]
-    
+
     organization_user = @organization.organization_users.find_by(user: user)
     if organization_user
       # Check if changing last owner
-      if organization_user.role == 'owner' && new_role != 'owner' && @organization.owners.count == 1
-        redirect_to system_admin_organization_path(@organization), 
+      if organization_user.role == "owner" && new_role != "owner" && @organization.owners.count == 1
+        redirect_to system_admin_organization_path(@organization),
                     alert: "Cannot change role of the last owner. Add another owner first."
         return
       end
-      
+
       organization_user.update!(role: new_role)
-      redirect_to system_admin_organization_path(@organization), 
+      redirect_to system_admin_organization_path(@organization),
                   notice: "User '#{user.full_name}' role changed to #{new_role} successfully!"
     else
-      redirect_to system_admin_organization_path(@organization), 
+      redirect_to system_admin_organization_path(@organization),
                   alert: "User '#{user.full_name}' is not a member of this organization."
     end
   end

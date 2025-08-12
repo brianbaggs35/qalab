@@ -74,9 +74,9 @@ RSpec.describe SystemAdmin::UsersController, type: :controller do
           expect {
             post :create, params: valid_params
           }.to change(User, :count).by(1)
-          
-          user = User.last
-          expect(response).to redirect_to(system_admin_user_path(user))
+
+          created_user = assigns(:user)
+          expect(response).to redirect_to(system_admin_user_path(created_user))
           expect(flash[:notice]).to include("created successfully")
         end
       end
@@ -96,7 +96,7 @@ RSpec.describe SystemAdmin::UsersController, type: :controller do
           expect {
             post :create, params: invalid_params
           }.not_to change(User, :count)
-          
+
           expect(response).to have_http_status(:unprocessable_entity)
         end
       end
@@ -178,7 +178,7 @@ RSpec.describe SystemAdmin::UsersController, type: :controller do
         expect {
           delete :destroy, params: { id: user_to_delete.id }
         }.to change(User, :count).by(-1)
-        
+
         expect(response).to redirect_to(system_admin_users_path)
         expect(flash[:notice]).to include("deleted successfully")
       end
@@ -187,7 +187,7 @@ RSpec.describe SystemAdmin::UsersController, type: :controller do
         expect {
           delete :destroy, params: { id: system_admin.id }
         }.not_to change(User, :count)
-        
+
         expect(response).to redirect_to(system_admin_users_path)
         expect(flash[:alert]).to include("cannot delete your own account")
       end
@@ -196,7 +196,7 @@ RSpec.describe SystemAdmin::UsersController, type: :controller do
         expect {
           delete :destroy, params: { id: regular_user.id }
         }.not_to change(User, :count)
-        
+
         expect(response).to redirect_to(system_admin_user_path(regular_user))
         expect(flash[:alert]).to include("belongs to organizations")
       end
