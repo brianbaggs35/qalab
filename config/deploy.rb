@@ -52,26 +52,26 @@ set :puma_access_log, -> { File.join(shared_path, "log/puma_access.log") }
 set :puma_error_log, -> { File.join(shared_path, "log/puma_error.log") }
 set :puma_role, :app
 set :puma_env, fetch(:stage)
-set :puma_threads, [0, 8]
+set :puma_threads, [ 0, 8 ]
 set :puma_workers, 0
 set :puma_worker_timeout, nil
 set :puma_init_active_record, true
 set :puma_preload_app, false
 
 namespace :deploy do
-  desc 'Restart application'
+  desc "Restart application"
   task :restart do
     on roles(:app), in: :sequence, wait: 10 do
       execute "sudo service #{fetch(:application)} restart"
     end
   end
 
-  desc 'Create database'
+  desc "Create database"
   task :create_database do
     on roles(:db) do
       within release_path do
         with rails_env: fetch(:stage) do
-          execute :bundle, :exec, :rake, 'db:create'
+          execute :bundle, :exec, :rake, "db:create"
         end
       end
     end
@@ -91,7 +91,7 @@ end
 
 # Custom tasks
 namespace :nginx do
-  desc 'Generate nginx configuration'
+  desc "Generate nginx configuration"
   task :setup do
     on roles(:web) do
       template("nginx_site.erb", "/tmp/nginx_site")
@@ -104,7 +104,7 @@ namespace :nginx do
 end
 
 namespace :postgresql do
-  desc 'Install PostgreSQL'
+  desc "Install PostgreSQL"
   task :install do
     on roles(:db) do
       execute :sudo, :apt, :update
@@ -112,7 +112,7 @@ namespace :postgresql do
     end
   end
 
-  desc 'Create PostgreSQL user and database'
+  desc "Create PostgreSQL user and database"
   task :create_user do
     on roles(:db) do
       execute :sudo, "-u", "postgres", "createuser", "-s", fetch(:application)

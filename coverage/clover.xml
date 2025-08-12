@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1755013517039" clover="3.2.0">
-  <project timestamp="1755013517039" name="All files">
-    <metrics statements="197" coveredstatements="37" conditionals="48" coveredconditionals="12" methods="50" coveredmethods="12" elements="295" coveredelements="61" complexity="0" loc="197" ncloc="197" packages="2" files="8" classes="8"/>
+<coverage generated="1755016690824" clover="3.2.0">
+  <project timestamp="1755016690824" name="All files">
+    <metrics statements="197" coveredstatements="45" conditionals="48" coveredconditionals="12" methods="50" coveredmethods="12" elements="295" coveredelements="69" complexity="0" loc="197" ncloc="197" packages="2" files="8" classes="8"/>
     <package name="controllers">
-      <metrics statements="159" coveredstatements="0" conditionals="35" coveredconditionals="0" methods="38" coveredmethods="0"/>
+      <metrics statements="159" coveredstatements="8" conditionals="35" coveredconditionals="0" methods="38" coveredmethods="0"/>
       <file name="alert_controller.js" path="/home/runner/work/qalab/qalab/app/javascript/controllers/alert_controller.js">
-        <metrics statements="11" coveredstatements="0" conditionals="4" coveredconditionals="0" methods="5" coveredmethods="0"/>
-        <line num="5" count="0" type="stmt"/>
+        <metrics statements="11" coveredstatements="1" conditionals="4" coveredconditionals="0" methods="5" coveredmethods="0"/>
+        <line num="5" count="1" type="stmt"/>
         <line num="8" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="9" count="0" type="stmt"/>
         <line num="10" count="0" type="stmt"/>
@@ -19,10 +19,10 @@
         <line num="29" count="0" type="stmt"/>
       </file>
       <file name="application.js" path="/home/runner/work/qalab/qalab/app/javascript/controllers/application.js">
-        <metrics statements="3" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
-        <line num="3" count="0" type="stmt"/>
-        <line num="6" count="0" type="stmt"/>
-        <line num="7" count="0" type="stmt"/>
+        <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="3" count="10" type="stmt"/>
+        <line num="6" count="10" type="stmt"/>
+        <line num="7" count="10" type="stmt"/>
       </file>
       <file name="hello_controller.js" path="/home/runner/work/qalab/qalab/app/javascript/controllers/hello_controller.js">
         <metrics statements="6" coveredstatements="0" conditionals="3" coveredconditionals="0" methods="4" coveredmethods="0"/>
@@ -38,9 +38,9 @@
         <line num="5" count="0" type="stmt"/>
       </file>
       <file name="rich_text_editor_controller.js" path="/home/runner/work/qalab/qalab/app/javascript/controllers/rich_text_editor_controller.js">
-        <metrics statements="34" coveredstatements="0" conditionals="6" coveredconditionals="0" methods="10" coveredmethods="0"/>
-        <line num="5" count="0" type="stmt"/>
-        <line num="6" count="0" type="stmt"/>
+        <metrics statements="34" coveredstatements="2" conditionals="6" coveredconditionals="0" methods="10" coveredmethods="0"/>
+        <line num="5" count="1" type="stmt"/>
+        <line num="6" count="1" type="stmt"/>
         <line num="9" count="0" type="stmt"/>
         <line num="13" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="14" count="0" type="stmt"/>
@@ -75,8 +75,8 @@
         <line num="101" count="0" type="stmt"/>
       </file>
       <file name="test_case_steps_controller.js" path="/home/runner/work/qalab/qalab/app/javascript/controllers/test_case_steps_controller.js">
-        <metrics statements="29" coveredstatements="0" conditionals="4" coveredconditionals="0" methods="8" coveredmethods="0"/>
-        <line num="5" count="0" type="stmt"/>
+        <metrics statements="29" coveredstatements="1" conditionals="4" coveredconditionals="0" methods="8" coveredmethods="0"/>
+        <line num="5" count="1" type="stmt"/>
         <line num="8" count="0" type="stmt"/>
         <line num="9" count="0" type="stmt"/>
         <line num="13" count="0" type="cond" truecount="0" falsecount="2"/>
@@ -107,8 +107,8 @@
         <line num="78" count="0" type="stmt"/>
       </file>
       <file name="upload_controller.js" path="/home/runner/work/qalab/qalab/app/javascript/controllers/upload_controller.js">
-        <metrics statements="75" coveredstatements="0" conditionals="18" coveredconditionals="0" methods="11" coveredmethods="0"/>
-        <line num="5" count="0" type="stmt"/>
+        <metrics statements="75" coveredstatements="1" conditionals="18" coveredconditionals="0" methods="11" coveredmethods="0"/>
+        <line num="5" count="1" type="stmt"/>
         <line num="8" count="0" type="stmt"/>
         <line num="10" count="0" type="stmt"/>
         <line num="11" count="0" type="stmt"/>

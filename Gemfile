@@ -78,7 +78,7 @@ end
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
-  
+
   # Capistrano for deployment
   gem "capistrano", "~> 3.18"
   gem "capistrano-rails", "~> 1.6"
