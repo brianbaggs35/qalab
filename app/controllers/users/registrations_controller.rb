@@ -25,7 +25,13 @@ class Users::RegistrationsController < Devise::RegistrationsController
   end
 
   def after_sign_up_path_for(resource)
-    dashboard_path
+    if @first_user_signup
+      onboarding_organization_path
+    elsif @invitation
+      dashboard_path
+    else
+      onboarding_welcome_path
+    end
   end
 
   private
@@ -37,10 +43,17 @@ class Users::RegistrationsController < Devise::RegistrationsController
   def validate_invitation_token
     invitation_token = params[:user][:invitation_token]
 
+    # Allow signup without invitation if no organizations exist (first user scenario)
     if invitation_token.blank?
-      flash[:alert] = "Sign ups are by invitation only. Please enter your invitation code."
-      redirect_to new_user_registration_path
-      return
+      if Organization.count > 0
+        flash[:alert] = "Sign ups are by invitation only. Please enter your invitation code."
+        redirect_to new_user_registration_path
+        return
+      else
+        # First user - will create organization after signup
+        @first_user_signup = true
+        return
+      end
     end
 
     @invitation = Invitation.find_valid_invitation(invitation_token)
@@ -56,7 +69,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
     if user_email != @invitation.email
       flash[:alert] = "Email address must match the invitation. Expected: #{@invitation.email}"
       redirect_to new_user_registration_path
-      nil
+      return
     end
   end
 

@@ -1,4 +1,6 @@
 class DashboardController < ApplicationController
+  before_action :redirect_to_onboarding_if_needed
+
   def index
     # Redirect system admins to their own dashboard
     redirect_to system_admin_dashboard_path and return if current_user.system_admin?
@@ -89,5 +91,11 @@ class DashboardController < ApplicationController
     end
 
     monthly_rates
+  end
+
+  def redirect_to_onboarding_if_needed
+    if current_user.needs_onboarding?
+      redirect_to onboarding_welcome_path
+    end
   end
 end

@@ -60,4 +60,13 @@ class User < ApplicationRecord
   def can_manage?(organization)
     %w[owner admin].include?(role_in_organization(organization))
   end
+
+  # Onboarding methods
+  def onboarding_completed?
+    onboarding_completed_at.present?
+  end
+
+  def needs_onboarding?
+    !onboarding_completed? && organizations.empty?
+  end
 end

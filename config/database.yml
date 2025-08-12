@@ -72,8 +72,10 @@ production:
   primary: &primary_production
     <<: *default
     database: qalab_production
-    username: qalab
+    username: <%= ENV["DATABASE_USERNAME"] || "qalab" %>
     password: <%= ENV["QALAB_DATABASE_PASSWORD"] %>
+    host: <%= ENV["DATABASE_HOST"] || "localhost" %>
+    port: <%= ENV["DATABASE_PORT"] || 5432 %>
   cache:
     <<: *primary_production
     database: qalab_production_cache
