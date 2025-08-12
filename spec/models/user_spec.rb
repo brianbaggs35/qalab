@@ -107,5 +107,40 @@ RSpec.describe User, type: :model do
         expect(member_user.can_manage?(organization)).to be false
       end
     end
+
+    describe 'onboarding methods' do
+      let(:user) { create(:user) }
+      let(:organization) { create(:organization) }
+
+      describe '#onboarding_completed?' do
+        it 'returns true when onboarding_completed_at is present' do
+          user.update!(onboarding_completed_at: Time.current)
+          expect(user.onboarding_completed?).to be true
+        end
+
+        it 'returns false when onboarding_completed_at is nil' do
+          user.update!(onboarding_completed_at: nil)
+          expect(user.onboarding_completed?).to be false
+        end
+      end
+
+      describe '#needs_onboarding?' do
+        it 'returns true when onboarding not completed and no organizations' do
+          user.update!(onboarding_completed_at: nil)
+          expect(user.needs_onboarding?).to be true
+        end
+
+        it 'returns false when onboarding is completed' do
+          user.update!(onboarding_completed_at: Time.current)
+          expect(user.needs_onboarding?).to be false
+        end
+
+        it 'returns false when user belongs to an organization' do
+          user.update!(onboarding_completed_at: nil)
+          create(:organization_user, user: user, organization: organization)
+          expect(user.needs_onboarding?).to be false
+        end
+      end
+    end
   end
 end
