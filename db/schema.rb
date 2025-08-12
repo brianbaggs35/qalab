@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_11_193727) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_12_002807) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -33,6 +33,30 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_11_193727) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_organizations_on_name"
+  end
+
+  create_table "test_cases", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "title", null: false
+    t.string "priority", default: "medium", null: false
+    t.text "description"
+    t.jsonb "steps", default: []
+    t.text "expected_results"
+    t.jsonb "notes", default: {}
+    t.string "category", default: "functional"
+    t.string "status", default: "draft"
+    t.text "preconditions"
+    t.integer "estimated_duration"
+    t.text "tags"
+    t.uuid "user_id", null: false
+    t.uuid "organization_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["category"], name: "index_test_cases_on_category"
+    t.index ["organization_id", "status"], name: "index_test_cases_on_organization_id_and_status"
+    t.index ["organization_id"], name: "index_test_cases_on_organization_id"
+    t.index ["priority"], name: "index_test_cases_on_priority"
+    t.index ["status"], name: "index_test_cases_on_status"
+    t.index ["user_id"], name: "index_test_cases_on_user_id"
   end
 
   create_table "test_runs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -87,6 +111,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_11_193727) do
 
   add_foreign_key "organization_users", "organizations"
   add_foreign_key "organization_users", "users"
+  add_foreign_key "test_cases", "organizations"
+  add_foreign_key "test_cases", "users"
   add_foreign_key "test_runs", "organizations"
   add_foreign_key "test_runs", "users"
 end

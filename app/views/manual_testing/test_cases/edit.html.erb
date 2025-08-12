@@ -1,19 +1,24 @@
-<% content_for :title, "New Test Case" %>
+<% content_for :title, "Edit #{@test_case.title}" %>
 
 <div class="space-y-6">
   <!-- Header -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
-      <h1 class="text-3xl font-bold text-primary">New Test Case</h1>
-      <p class="text-base-content/70 mt-1">Create a comprehensive manual test case</p>
+      <h1 class="text-3xl font-bold text-primary">Edit Test Case</h1>
+      <p class="text-base-content/70 mt-1">Update your test case details</p>
     </div>
     <div class="flex gap-2">
-      <%= link_to manual_testing_test_cases_path, 
+      <%= link_to manual_testing_test_case_path(@test_case), 
           class: "btn btn-ghost gap-2" do %>
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
-        Back to Test Cases
+        Back to Test Case
+      <% end %>
+      
+      <%= link_to manual_testing_test_cases_path, 
+          class: "btn btn-ghost gap-2" do %>
+        All Test Cases
       <% end %>
     </div>
   </div>
@@ -21,7 +26,7 @@
   <!-- Form -->
   <div class="card bg-base-100 shadow-xl">
     <div class="card-body">
-      <%= form_with model: @test_case, url: manual_testing_test_cases_path, local: true, class: "space-y-8" do |form| %>
+      <%= form_with model: @test_case, url: manual_testing_test_case_path(@test_case), method: :patch, local: true, class: "space-y-8" do |form| %>
         
         <!-- Basic Information -->
         <div class="space-y-6">
@@ -39,9 +44,7 @@
               </label>
               <%= form.text_field :title, 
                   class: "input input-bordered w-full #{'input-error' if @test_case.errors[:title].any?}", 
-                  placeholder: "e.g., User Login Functionality Test",
-                  required: true,
-                  data: { testid: "test-case-title" } %>
+                  required: true %>
               <% if @test_case.errors[:title].any? %>
                 <label class="label">
                   <span class="label-text-alt text-error"><%= @test_case.errors[:title].first %></span>
@@ -60,9 +63,9 @@
                     ['🟠 High', 'high'],
                     ['🟡 Medium', 'medium'],
                     ['🟢 Low', 'low']
-                  ], @test_case.priority || 'medium'), 
+                  ], @test_case.priority), 
                   {}, 
-                  { class: "select select-bordered w-full", data: { testid: "test-case-priority" } } %>
+                  { class: "select select-bordered w-full" } %>
             </div>
 
             <!-- Category -->
@@ -78,9 +81,9 @@
                     ['⚡ Performance', 'performance'],
                     ['🔒 Security', 'security'],
                     ['🔄 Regression', 'regression']
-                  ], @test_case.category || 'functional'), 
+                  ], @test_case.category), 
                   {}, 
-                  { class: "select select-bordered w-full", data: { testid: "test-case-category" } } %>
+                  { class: "select select-bordered w-full" } %>
             </div>
           </div>
 
@@ -93,8 +96,7 @@
               <div data-controller="rich-text-editor" data-rich-text-editor-content-value="<%= @test_case.description %>">
                 <%= form.textarea :description, 
                     class: "textarea textarea-bordered w-full h-32", 
-                    placeholder: "Provide a clear description of what this test case validates and its importance...",
-                    data: { "rich-text-editor-target": "editor", testid: "test-case-description" } %>
+                    data: { "rich-text-editor-target": "editor" } %>
               </div>
               <% if @test_case.errors[:description].any? %>
                 <label class="label">
@@ -116,8 +118,9 @@
 
           <div class="pl-11">
             <div data-controller="test-case-steps">
-              <!-- Hidden input to store steps -->
-              <%= form.hidden_field :steps, data: { "test-case-steps-target": "hiddenInput" } %>
+              <%= form.hidden_field :steps, 
+                  value: @test_case.steps.to_json, 
+                  data: { "test-case-steps-target": "hiddenInput" } %>
               
               <div class="space-y-4">
                 <!-- Steps list -->
@@ -134,8 +137,7 @@
                            class="input input-bordered w-full pr-12" 
                            placeholder="Enter a test step and press Enter..."
                            data-test-case-steps-target="stepInput"
-                           data-action="keydown->test-case-steps#addStep"
-                           data-testid="step-input" />
+                           data-action="keydown->test-case-steps#addStep" />
                     <button type="button" 
                             class="btn btn-ghost btn-sm btn-circle absolute right-2 top-1/2 -translate-y-1/2"
                             data-action="click->test-case-steps#createStep"
@@ -151,6 +153,21 @@
                 </div>
               </div>
             </div>
+
+            <!-- Load existing steps via JavaScript -->
+            <script>
+              document.addEventListener('DOMContentLoaded', function() {
+                const stepsController = document.querySelector('[data-controller="test-case-steps"]');
+                if (stepsController) {
+                  const controller = stepsController._stimulus_controller;
+                  if (controller) {
+                    controller.steps = <%= @test_case.steps.to_json.html_safe %>;
+                    controller.renderSteps();
+                    controller.updateHiddenInput();
+                  }
+                }
+              });
+            </script>
           </div>
         </div>
 
@@ -172,9 +189,8 @@
               <div data-controller="rich-text-editor" data-rich-text-editor-content-value="<%= @test_case.expected_results %>">
                 <%= form.textarea :expected_results, 
                     class: "textarea textarea-bordered w-full h-24 #{'textarea-error' if @test_case.errors[:expected_results].any?}", 
-                    placeholder: "Describe the expected outcome when all test steps are executed correctly...",
                     required: true,
-                    data: { "rich-text-editor-target": "editor", testid: "test-case-expected-results" } %>
+                    data: { "rich-text-editor-target": "editor" } %>
               </div>
               <% if @test_case.errors[:expected_results].any? %>
                 <label class="label">
@@ -201,12 +217,27 @@
                 <span class="label-text text-base font-semibold">Preconditions</span>
               </label>
               <%= form.textarea :preconditions, 
-                  class: "textarea textarea-bordered w-full h-20", 
-                  placeholder: "What needs to be set up before running this test...",
-                  data: { testid: "test-case-preconditions" } %>
+                  class: "textarea textarea-bordered w-full h-20" %>
               <label class="label">
                 <span class="label-text-alt">Setup requirements, user permissions, test data, etc.</span>
               </label>
+            </div>
+
+            <!-- Status -->
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text text-base font-semibold">Status</span>
+              </label>
+              <%= form.select :status, 
+                  options_for_select([
+                    ['📝 Draft', 'draft'],
+                    ['✅ Ready', 'ready'],
+                    ['👀 In Review', 'in_review'],
+                    ['🎯 Approved', 'approved'],
+                    ['📦 Deprecated', 'deprecated']
+                  ], @test_case.status), 
+                  {}, 
+                  { class: "select select-bordered w-full" } %>
             </div>
 
             <!-- Estimated Duration -->
@@ -217,23 +248,19 @@
               <div class="join">
                 <%= form.number_field :estimated_duration, 
                     class: "input input-bordered join-item flex-1", 
-                    placeholder: "15",
                     min: 1,
-                    max: 300,
-                    data: { testid: "test-case-duration" } %>
+                    max: 300 %>
                 <span class="btn btn-ghost join-item">minutes</span>
               </div>
             </div>
 
             <!-- Tags -->
-            <div class="form-control">
+            <div class="form-control lg:col-span-2">
               <label class="label">
                 <span class="label-text text-base font-semibold">Tags</span>
               </label>
               <%= form.text_field :tags, 
-                  class: "input input-bordered w-full", 
-                  placeholder: "login, authentication, regression",
-                  data: { testid: "test-case-tags" } %>
+                  class: "input input-bordered w-full" %>
               <label class="label">
                 <span class="label-text-alt">Comma-separated tags for organization</span>
               </label>
@@ -246,9 +273,8 @@
               </label>
               <div data-controller="rich-text-editor" data-rich-text-editor-content-value="<%= @test_case.notes %>">
                 <%= form.textarea :notes, 
-                    class: "textarea textarea-bordered w-full h-20", 
-                    placeholder: "Additional notes, edge cases, known issues...",
-                    data: { "rich-text-editor-target": "editor", testid: "test-case-notes" } %>
+                    class: "textarea textarea-bordered w-full h-20",
+                    data: { "rich-text-editor-target": "editor" } %>
               </div>
             </div>
           </div>
@@ -256,26 +282,15 @@
 
         <!-- Actions -->
         <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-base-300">
-          <%= form.submit "Create Test Case", 
-              class: "btn btn-primary gap-2 flex-1 sm:flex-none",
-              data: { testid: "create-test-case-btn" } do %>
+          <%= form.submit "Update Test Case", 
+              class: "btn btn-primary gap-2 flex-1 sm:flex-none" do %>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
-            Create Test Case
+            Update Test Case
           <% end %>
           
-          <%= form.submit "Save as Draft", 
-              name: "draft", 
-              class: "btn btn-outline gap-2 flex-1 sm:flex-none",
-              data: { testid: "save-draft-btn" } do %>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12" />
-            </svg>
-            Save as Draft
-          <% end %>
-          
-          <%= link_to manual_testing_test_cases_path, 
+          <%= link_to manual_testing_test_case_path(@test_case), 
               class: "btn btn-ghost gap-2 flex-1 sm:flex-none" do %>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
