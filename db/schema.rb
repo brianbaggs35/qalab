@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_12_002807) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_12_122912) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -57,6 +57,26 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_12_002807) do
     t.index ["priority"], name: "index_test_cases_on_priority"
     t.index ["status"], name: "index_test_cases_on_status"
     t.index ["user_id"], name: "index_test_cases_on_user_id"
+  end
+
+  create_table "test_results", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "test_run_id", null: false
+    t.string "name", null: false
+    t.string "classname"
+    t.string "status", default: "passed", null: false
+    t.decimal "time", precision: 10, scale: 3
+    t.text "failure_message"
+    t.string "failure_type"
+    t.text "failure_stacktrace"
+    t.text "system_out"
+    t.text "system_err"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["classname"], name: "index_test_results_on_classname"
+    t.index ["status"], name: "index_test_results_on_status"
+    t.index ["test_run_id", "classname"], name: "index_test_results_on_test_run_id_and_classname"
+    t.index ["test_run_id", "status"], name: "index_test_results_on_test_run_id_and_status"
+    t.index ["test_run_id"], name: "index_test_results_on_test_run_id"
   end
 
   create_table "test_runs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -113,6 +133,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_12_002807) do
   add_foreign_key "organization_users", "users"
   add_foreign_key "test_cases", "organizations"
   add_foreign_key "test_cases", "users"
+  add_foreign_key "test_results", "test_runs"
   add_foreign_key "test_runs", "organizations"
   add_foreign_key "test_runs", "users"
 end

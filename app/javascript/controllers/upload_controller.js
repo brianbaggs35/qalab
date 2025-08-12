@@ -5,33 +5,48 @@ export default class extends Controller {
   static targets = ["form", "fileInput", "submitButton", "progressBar", "progressContainer"]
 
   connect() {
+    console.log("Upload controller connected")
     // Add event listeners
     this.formTarget.addEventListener('submit', this.handleSubmit.bind(this))
     this.fileInputTarget.addEventListener('change', this.handleFileChange.bind(this))
+    
+    // Ensure button is initially disabled
+    this.submitButtonTarget.disabled = true
   }
 
   handleFileChange(event) {
+    console.log("File change event triggered")
     const input = event.target
     const file = input.files?.[0]
     
     if (file) {
+      console.log("File selected:", file.name, file.type)
+      
       // Validate file type
       if (!file.name.toLowerCase().endsWith('.xml')) {
         alert('Please select a valid XML file')
         input.value = ''
+        this.submitButtonTarget.disabled = true
+        this.submitButtonTarget.textContent = 'Upload Test Results'
         return
       }
 
-      // Update submit button text
+      // File is valid - enable button
       this.submitButtonTarget.textContent = `Upload ${file.name}`
       this.submitButtonTarget.disabled = false
+      this.submitButtonTarget.classList.remove('btn-disabled')
+      
+      console.log("Button enabled for file:", file.name)
     } else {
+      console.log("No file selected")
       this.submitButtonTarget.textContent = 'Upload Test Results'
       this.submitButtonTarget.disabled = true
+      this.submitButtonTarget.classList.add('btn-disabled')
     }
   }
 
   handleSubmit(event) {
+    console.log("Form submit triggered")
     event.preventDefault()
     
     const file = this.fileInputTarget.files?.[0]
@@ -63,17 +78,29 @@ export default class extends Controller {
         // Show success message
         this.showSuccess()
         
+        // Parse response to get redirect URL or use default
+        let redirectUrl = '/automated_testing/results'
+        try {
+          if (xhr.responseURL && xhr.responseURL.includes('automated_testing/results')) {
+            redirectUrl = xhr.responseURL
+          }
+        } catch (e) {
+          console.log("Using default redirect URL")
+        }
+        
         // Redirect after a short delay
         setTimeout(() => {
-          window.location.href = '/automated_testing/results'
+          window.location.href = redirectUrl
         }, 2000)
       } else {
+        console.error("Upload failed with status:", xhr.status)
         this.showError('Upload failed. Please try again.')
       }
     })
 
     // Handle errors
     xhr.addEventListener('error', () => {
+      console.error("Upload error occurred")
       this.showError('Upload failed. Please check your connection and try again.')
     })
 
@@ -86,6 +113,7 @@ export default class extends Controller {
       xhr.setRequestHeader('X-CSRF-Token', csrfToken)
     }
     
+    console.log("Sending upload request...")
     xhr.send(formData)
   }
 
@@ -117,9 +145,12 @@ export default class extends Controller {
   }
 
   showError(message) {
+    console.error("Upload error:", message)
     this.progressContainerTarget.classList.add('hidden')
     this.submitButtonTarget.disabled = false
     this.submitButtonTarget.textContent = 'Upload Test Results'
+    this.submitButtonTarget.classList.remove('btn-success')
+    this.submitButtonTarget.classList.add('btn-primary')
     alert(message)
   }
 }
