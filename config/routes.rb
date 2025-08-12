@@ -33,8 +33,23 @@ Rails.application.routes.draw do
   # System Admin routes
   namespace :system_admin do
     get "dashboard", to: "dashboard#index"
-    resources :organizations, only: [ :index, :show, :new, :create, :edit, :update, :destroy ]
-    resources :users, only: [ :index, :show, :new, :create, :edit, :update, :destroy ]
+    
+    resources :organizations do
+      member do
+        post 'add_user'
+        delete 'remove_user'
+        patch 'change_user_role'
+      end
+    end
+    
+    resources :users do
+      member do
+        patch 'lock'
+        patch 'unlock'
+        patch 'confirm'
+        patch 'resend_confirmation'
+      end
+    end
   end
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

@@ -24,6 +24,8 @@ class User < ApplicationRecord
   # Scopes
   scope :system_admins, -> { where(role: "system_admin") }
   scope :regular_users, -> { where(role: "member") }
+  scope :confirmed, -> { where.not(confirmed_at: nil) }
+  scope :unconfirmed, -> { where(confirmed_at: nil) }
 
   # Role checking methods
   def system_admin?
