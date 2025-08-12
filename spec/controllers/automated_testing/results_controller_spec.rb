@@ -99,9 +99,11 @@ RSpec.describe AutomatedTesting::ResultsController, type: :controller do
         expect(assigns(:test_run)).to eq(test_run)
       end
 
-      it 'assigns test details' do
+      it 'assigns test results' do
+        # Create test results for this test run
+        create(:test_result, test_run: test_run, name: 'Test 1', status: 'passed')
         get :show, params: { id: test_run.id }
-        expect(assigns(:test_details)).to be_an(Array)
+        expect(assigns(:test_results)).to be_present
       end
 
       it 'redirects unauthorized test run access' do
@@ -204,21 +206,6 @@ RSpec.describe AutomatedTesting::ResultsController, type: :controller do
 
     before do
       allow(controller_instance).to receive(:current_user).and_return(user)
-    end
-
-    describe '#parse_test_details' do
-      it 'returns sample test details for test runs with XML' do
-        test_run_with_xml = create(:test_run, xml_file: '<xml>content</xml>')
-        details = controller_instance.send(:parse_test_details, test_run_with_xml)
-        expect(details).to be_an(Array)
-        expect(details.first).to include(:name, :class, :status, :duration)
-      end
-
-      it 'returns empty array for test runs without XML' do
-        test_run_without_xml = create(:test_run, xml_file: nil)
-        details = controller_instance.send(:parse_test_details, test_run_without_xml)
-        expect(details).to eq([])
-      end
     end
   end
 end

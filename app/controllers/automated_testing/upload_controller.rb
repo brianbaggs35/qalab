@@ -14,18 +14,51 @@ class AutomatedTesting::UploadController < ApplicationController
   end
 
   def create
-    @test_run = current_user.test_runs.build(test_run_params)
+    @test_run = current_user.test_runs.build(test_run_params.except(:xml_file))
     @test_run.organization = current_user.organizations.first # For now, use first org
+
+    # Handle file upload and store content in xml_file field
+    if params[:test_run][:xml_file].present?
+      uploaded_file = params[:test_run][:xml_file]
+      
+      # Validate file type
+      unless uploaded_file.content_type.in?(['text/xml', 'application/xml']) ||
+             uploaded_file.original_filename.downcase.ends_with?('.xml')
+        @test_run.errors.add(:xml_file, 'must be an XML file')
+      end
+
+      # Validate file size (50MB limit)
+      if uploaded_file.size > 50.megabytes
+        @test_run.errors.add(:xml_file, 'must be less than 50MB')
+      end
+
+      # Read file content and store it
+      if @test_run.errors.empty?
+        @test_run.xml_file = uploaded_file.read
+        
+        # Generate name from filename if not provided
+        if @test_run.name.blank?
+          base_name = File.basename(uploaded_file.original_filename, File.extname(uploaded_file.original_filename))
+          @test_run.name = "#{base_name} - #{Time.current.strftime('%Y-%m-%d %H:%M')}"
+        end
+      end
+    end
 
     authorize @test_run
 
-    if @test_run.save
+    if @test_run.errors.empty? && @test_run.save
       # Process the XML file in background (for now, synchronously)
       if @test_run.xml_file.present?
-        @test_run.process_xml_file
+        processed = @test_run.process_xml_file
+        
+        if processed
+          redirect_to automated_testing_results_path, notice: "Test run uploaded and processed successfully! #{@test_run.total_tests} tests processed."
+        else
+          redirect_to automated_testing_results_path, alert: "Test run uploaded but failed to process XML. Please check the file format."
+        end
+      else
+        redirect_to automated_testing_results_path, notice: "Test run created successfully!"
       end
-
-      redirect_to automated_testing_results_path, notice: "Test run uploaded and processed successfully!"
     else
       @recent_uploads = policy_scope(TestRun).recent.limit(5)
       @upload_stats = {
@@ -33,7 +66,7 @@ class AutomatedTesting::UploadController < ApplicationController
         this_month: policy_scope(TestRun).where(created_at: 1.month.ago..Time.current).count,
         success_rate: calculate_success_rate
       }
-      render :index, alert: "Error uploading test run: #{@test_run.errors.full_messages.join(', ')}"
+      render :index, status: :unprocessable_entity
     end
   end
 

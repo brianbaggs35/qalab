@@ -2,19 +2,394 @@
 <% content_for :breadcrumbs do %>
   <li>Automated Testing</li>
   <li><%= link_to "Test Results", automated_testing_results_path %></li>
-  <li class="text-primary font-semibold">Result #<%= params[:id] %></li>
+  <li class="text-primary font-semibold"><%= @test_run.name %></li>
 <% end %>
 
-<div class="space-y-6">
+<div class="space-y-6 test-run-details-content">
+  <!-- Test Run Summary -->
   <div class="card bg-base-100 shadow-xl">
     <div class="card-body">
-      <h1 class="text-2xl font-bold text-primary mb-4">Test Result Details</h1>
-      <p>Detailed test result information for ID: <%= params[:id] %></p>
-      <div class="card-actions justify-end mt-4">
-        <%= link_to automated_testing_results_path, class: "btn btn-primary" do %>
-          Back to Results
-        <% end %>
+      <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+        <div class="flex-1">
+          <h1 class="text-2xl font-bold text-primary mb-2"><%= @test_run.name %></h1>
+          <% if @test_run.description.present? %>
+            <p class="text-base-content/80 mb-4"><%= @test_run.description %></p>
+          <% end %>
+          
+          <div class="flex flex-wrap gap-4 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-base-content/60">Status:</span>
+              <% case @test_run.status %>
+              <% when 'completed' %>
+                <div class="badge badge-success">Completed</div>
+              <% when 'failed' %>
+                <div class="badge badge-error">Failed</div>
+              <% when 'processing' %>
+                <div class="badge badge-warning">Processing</div>
+              <% when 'pending' %>
+                <div class="badge badge-ghost">Pending</div>
+              <% end %>
+            </div>
+            
+            <% if @test_run.environment.present? %>
+              <div class="flex items-center gap-2">
+                <span class="text-sm text-base-content/60">Environment:</span>
+                <div class="badge badge-outline"><%= @test_run.environment.titleize %></div>
+              </div>
+            <% end %>
+            
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-base-content/60">Created:</span>
+              <span class="text-sm font-medium"><%= @test_run.created_at.strftime('%B %d, %Y at %I:%M %p') %></span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex gap-2">
+          <%= link_to edit_automated_testing_result_path(@test_run), class: "btn btn-outline btn-sm" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Edit
+          <% end %>
+          <%= link_to automated_testing_result_path(@test_run), method: :delete,
+              confirm: "Are you sure you want to delete this test run?", 
+              class: "btn btn-outline btn-error btn-sm" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Delete
+          <% end %>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- Test Results Summary Stats -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="stat bg-base-100 shadow-sm rounded-lg">
+      <div class="stat-figure text-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <div class="stat-title text-xs">Total Tests</div>
+      <div class="stat-value text-lg text-primary"><%= @test_run.total_tests %></div>
+    </div>
+
+    <div class="stat bg-base-100 shadow-sm rounded-lg">
+      <div class="stat-figure text-success">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <div class="stat-title text-xs">Passed</div>
+      <div class="stat-value text-lg text-success"><%= @test_run.passed_tests %></div>
+    </div>
+
+    <div class="stat bg-base-100 shadow-sm rounded-lg">
+      <div class="stat-figure text-error">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </div>
+      <div class="stat-title text-xs">Failed</div>
+      <div class="stat-value text-lg text-error"><%= @test_run.failed_tests %></div>
+    </div>
+
+    <div class="stat bg-base-100 shadow-sm rounded-lg">
+      <div class="stat-figure text-warning">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <div class="stat-title text-xs">Skipped</div>
+      <div class="stat-value text-lg text-warning"><%= @test_run.skipped_tests %></div>
+    </div>
+  </div>
+
+  <!-- Individual Test Results -->
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="card-title text-xl">Individual Test Results</h2>
+        <div class="text-sm text-base-content/60">
+          <% if @test_results.any? %>
+            Showing <%= @test_results.offset_value + 1 %>-<%= [@test_results.offset_value + @test_results.length, @test_results.total_count].min %> of <%= @test_results.total_count %> tests
+          <% else %>
+            No test results
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Search and Filter for Individual Tests -->
+      <%= form_with url: automated_testing_result_path(@test_run), method: :get, class: "flex gap-4 mb-4", local: true do |form| %>
+        <div class="flex-1">
+          <%= form.text_field :test_search, placeholder: "Search test names or classes...", 
+              class: "input input-bordered w-full", value: params[:test_search] %>
+        </div>
+        <%= form.select :test_status,
+            options_for_select([
+              ['All Statuses', ''],
+              ['Passed', 'passed'],
+              ['Failed', 'failed'],
+              ['Error', 'error'],
+              ['Skipped', 'skipped']
+            ], params[:test_status]),
+            {}, { class: "select select-bordered" } %>
+        <button type="submit" class="btn btn-primary">Filter</button>
+      <% end %>
+
+      <% if @test_results.any? %>
+        <!-- Individual Test Results Table -->
+        <div class="overflow-x-auto">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Test Name</th>
+                <th>Class</th>
+                <th>Status</th>
+                <th>Duration</th>
+                <th>Message</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @test_results.each do |test_result| %>
+                <tr class="hover">
+                  <td>
+                    <div class="font-semibold text-sm"><%= test_result.name %></div>
+                  </td>
+                  <td>
+                    <div class="text-sm text-base-content/70 max-w-xs truncate">
+                      <%= test_result.classname %>
+                    </div>
+                  </td>
+                  <td>
+                    <% case test_result.status %>
+                    <% when 'passed' %>
+                      <div class="badge badge-success badge-sm">Passed</div>
+                    <% when 'failed' %>
+                      <div class="badge badge-error badge-sm">Failed</div>
+                    <% when 'error' %>
+                      <div class="badge badge-error badge-sm">Error</div>
+                    <% when 'skipped' %>
+                      <div class="badge badge-warning badge-sm">Skipped</div>
+                    <% end %>
+                  </td>
+                  <td>
+                    <% if test_result.time && test_result.time > 0 %>
+                      <span class="text-sm"><%= "%.3f" % test_result.time %>s</span>
+                    <% else %>
+                      <span class="text-base-content/50 text-sm">-</span>
+                    <% end %>
+                  </td>
+                  <td>
+                    <% if test_result.failure_message.present? %>
+                      <div class="text-sm text-error max-w-md truncate">
+                        <%= test_result.failure_message %>
+                      </div>
+                    <% else %>
+                      <span class="text-base-content/50 text-sm">-</span>
+                    <% end %>
+                  </td>
+                  <td>
+                    <button class="btn btn-ghost btn-xs" 
+                            onclick="showTestResultDetails('<%= @test_run.id %>', '<%= test_result.id %>')">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      View
+                    </button>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination for Individual Tests -->
+        <% if @test_results.respond_to?(:total_pages) && @test_results.total_pages > 1 %>
+          <div class="flex justify-center mt-6">
+            <%= paginate @test_results, theme: 'twitter_bootstrap_4',
+                nav_class: 'pagination-wrapper d-flex justify-content-center' %>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="text-center py-8">
+          <div class="text-4xl mb-2">🔍</div>
+          <h3 class="text-lg font-semibold text-base-content/80 mb-1">No Test Results Found</h3>
+          <% if params[:test_search].present? || params[:test_status].present? %>
+            <p class="text-base-content/60 mb-4">Try adjusting your search or filters</p>
+            <%= link_to "Clear Filters", automated_testing_result_path(@test_run), class: "btn btn-outline btn-sm" %>
+          <% else %>
+            <p class="text-base-content/60">This test run doesn't have any individual test results yet</p>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Back to Results Button -->
+  <div class="flex justify-between items-center">
+    <%= link_to automated_testing_results_path, class: "btn btn-outline" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+      Back to All Results
+    <% end %>
+    
+    <% duration = @test_run.results_summary.dig('duration') %>
+    <% if duration.present? %>
+      <div class="text-sm text-base-content/60">
+        Total duration: <span class="font-semibold"><%= duration %></span>
+      </div>
+    <% end %>
+  </div>
 </div>
+
+<!-- Test Result Detail Modal -->
+<dialog id="test_result_detail_modal" class="modal">
+  <div class="modal-box max-w-4xl h-5/6">
+    <form method="dialog">
+      <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+    </form>
+    
+    <div id="test_result_detail_content" class="space-y-4">
+      <!-- Content will be loaded dynamically -->
+      <div class="loading loading-spinner loading-md"></div>
+      <p>Loading test result details...</p>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
+
+<script>
+  function showTestResultDetails(testRunId, testResultId) {
+    const modal = document.getElementById('test_result_detail_modal');
+    const content = document.getElementById('test_result_detail_content');
+    
+    // Show modal
+    modal.showModal();
+    
+    // Load test result details via AJAX
+    fetch(`/automated_testing/results/${testRunId}/test_results/${testResultId}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          content.innerHTML = `<p class="text-error">${data.error}</p>`;
+          return;
+        }
+        
+        let statusBadge;
+        switch(data.status) {
+          case 'passed':
+            statusBadge = '<div class="badge badge-success">Passed</div>';
+            break;
+          case 'failed':
+            statusBadge = '<div class="badge badge-error">Failed</div>';
+            break;
+          case 'error':
+            statusBadge = '<div class="badge badge-error">Error</div>';
+            break;
+          case 'skipped':
+            statusBadge = '<div class="badge badge-warning">Skipped</div>';
+            break;
+        }
+        
+        let html = `
+          <h3 class="font-bold text-lg mb-4">${data.name}</h3>
+          <div class="grid grid-cols-2 gap-4 mb-6">
+            <div>
+              <label class="label"><span class="label-text font-semibold">Status</span></label>
+              ${statusBadge}
+            </div>
+            <div>
+              <label class="label"><span class="label-text font-semibold">Duration</span></label>
+              <p>${data.time ? (data.time + 's') : 'N/A'}</p>
+            </div>
+            <div class="col-span-2">
+              <label class="label"><span class="label-text font-semibold">Class</span></label>
+              <p class="text-sm font-mono bg-base-200 p-2 rounded">${data.classname || 'N/A'}</p>
+            </div>
+          </div>
+        `;
+        
+        if (data.failure_message || data.failure_stacktrace) {
+          html += `
+            <div class="space-y-4">
+              <div>
+                <label class="label"><span class="label-text font-semibold">Failure Details</span></label>
+                <div class="bg-base-200 p-4 rounded-lg space-y-3">
+          `;
+          
+          if (data.failure_type) {
+            html += `
+              <div>
+                <span class="text-sm font-semibold text-error">Type:</span>
+                <span class="text-sm font-mono ml-2">${data.failure_type}</span>
+              </div>
+            `;
+          }
+          
+          if (data.failure_message) {
+            html += `
+              <div>
+                <span class="text-sm font-semibold text-error">Message:</span>
+                <p class="text-sm mt-1 font-mono bg-base-300 p-2 rounded">${data.failure_message}</p>
+              </div>
+            `;
+          }
+          
+          if (data.failure_stacktrace) {
+            html += `
+              <div>
+                <span class="text-sm font-semibold text-error">Stack Trace:</span>
+                <div class="mt-2 bg-base-300 p-3 rounded font-mono text-xs overflow-auto max-h-64" style="white-space: pre-line;">${data.failure_stacktrace}</div>
+              </div>
+            `;
+          }
+          
+          html += `
+                </div>
+              </div>
+            </div>
+          `;
+        }
+        
+        if (data.system_out || data.system_err) {
+          html += '<div class="space-y-4">';
+          
+          if (data.system_out) {
+            html += `
+              <div>
+                <label class="label"><span class="label-text font-semibold">System Output</span></label>
+                <div class="bg-base-300 p-3 rounded font-mono text-xs overflow-auto max-h-32" style="white-space: pre-line;">${data.system_out}</div>
+              </div>
+            `;
+          }
+          
+          if (data.system_err) {
+            html += `
+              <div>
+                <label class="label"><span class="label-text font-semibold">System Error</span></label>
+                <div class="bg-base-300 p-3 rounded font-mono text-xs overflow-auto max-h-32" style="white-space: pre-line;">${data.system_err}</div>
+              </div>
+            `;
+          }
+          
+          html += '</div>';
+        }
+        
+        content.innerHTML = html;
+      })
+      .catch(error => {
+        console.error('Error loading test result details:', error);
+        content.innerHTML = '<p class="text-error">Error loading test result details.</p>';
+      });
+  }
+</script>

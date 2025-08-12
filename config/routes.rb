@@ -13,6 +13,10 @@ Rails.application.routes.draw do
   # Organization routes
   resources :organizations, only: [ :index, :show, :new, :create ]
 
+  # Invitations routes
+  resources :invitations, only: [ :index, :new, :create, :show, :destroy ]
+  get "invitations/:token/accept", to: "invitations#accept", as: :accept_invitation
+
   # Automated Testing routes
   namespace :automated_testing do
     get "upload", to: "upload#index"
@@ -20,6 +24,7 @@ Rails.application.routes.draw do
     resources :results, only: [ :index, :show, :edit, :update, :destroy ] do
       member do
         get :download_xml
+        get "test_results/:test_result_id", to: "results#test_result", as: :test_result
       end
     end
   end

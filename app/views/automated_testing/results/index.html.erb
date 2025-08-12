@@ -25,13 +25,14 @@
   <!-- Filters and Search -->
   <div class="card bg-base-100 shadow-sm">
     <div class="card-body">
-      <div class="flex flex-col lg:flex-row gap-4">
+      <%= form_with url: automated_testing_results_path, method: :get, class: "flex flex-col lg:flex-row gap-4", local: true do |form| %>
         <!-- Search -->
         <div class="flex-1">
           <div class="form-control">
             <div class="input-group">
-              <input type="text" placeholder="Search test runs..." class="input input-bordered flex-1">
-              <button class="btn btn-square btn-primary">
+              <%= form.text_field :search, placeholder: "Search test runs...", 
+                  class: "input input-bordered flex-1", value: params[:search] %>
+              <button type="submit" class="btn btn-square btn-primary">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
@@ -42,29 +43,25 @@
 
         <!-- Filters -->
         <div class="flex gap-2">
-          <select class="select select-bordered">
-            <option>All Environments</option>
-            <option>Development</option>
-            <option>Staging</option>
-            <option>Production</option>
-            <option>QA</option>
-          </select>
+          <%= form.select :environment, 
+              options_for_select([['All Environments', '']] + @environments.map { |env| [env.titleize, env] }, params[:environment]),
+              {}, { class: "select select-bordered" } %>
           
-          <select class="select select-bordered">
-            <option>All Statuses</option>
-            <option>Passed</option>
-            <option>Failed</option>
-            <option>Skipped</option>
-          </select>
+          <%= form.select :status,
+              options_for_select([
+                ['All Statuses', ''],
+                ['Completed', 'completed'],
+                ['Failed', 'failed'],
+                ['Processing', 'processing'],
+                ['Pending', 'pending']
+              ], params[:status]),
+              {}, { class: "select select-bordered" } %>
 
-          <select class="select select-bordered">
-            <option>Last 30 days</option>
-            <option>Last 7 days</option>
-            <option>Last 24 hours</option>
-            <option>Custom Range</option>
-          </select>
+          <%= form.select :per_page,
+              options_for_select(@per_page_options.map { |size| ["#{size} per page", size] }, @current_per_page),
+              {}, { class: "select select-bordered", onchange: "this.form.submit();" } %>
         </div>
-      </div>
+      <% end %>
     </div>
   </div>
 
@@ -77,8 +74,14 @@
         </svg>
       </div>
       <div class="stat-title">Total Runs</div>
-      <div class="stat-value text-primary">0</div>
-      <div class="stat-desc">No test runs yet</div>
+      <div class="stat-value text-primary"><%= @stats[:total] %></div>
+      <div class="stat-desc">
+        <% if @stats[:total] == 0 %>
+          No test runs yet
+        <% else %>
+          All test runs
+        <% end %>
+      </div>
     </div>
 
     <div class="stat bg-base-100 shadow-sm rounded-lg">
@@ -87,9 +90,15 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       </div>
-      <div class="stat-title">Passed</div>
-      <div class="stat-value text-success">0</div>
-      <div class="stat-desc">0% pass rate</div>
+      <div class="stat-title">Completed</div>
+      <div class="stat-value text-success"><%= @stats[:completed] %></div>
+      <div class="stat-desc">
+        <% if @stats[:total] > 0 %>
+          <%= ((@stats[:completed].to_f / @stats[:total]) * 100).round(1) %>% success rate
+        <% else %>
+          0% success rate
+        <% end %>
+      </div>
     </div>
 
     <div class="stat bg-base-100 shadow-sm rounded-lg">
@@ -99,8 +108,14 @@
         </svg>
       </div>
       <div class="stat-title">Failed</div>
-      <div class="stat-value text-error">0</div>
-      <div class="stat-desc">0% failure rate</div>
+      <div class="stat-value text-error"><%= @stats[:failed] %></div>
+      <div class="stat-desc">
+        <% if @stats[:total] > 0 %>
+          <%= ((@stats[:failed].to_f / @stats[:total]) * 100).round(1) %>% failure rate
+        <% else %>
+          0% failure rate
+        <% end %>
+      </div>
     </div>
 
     <div class="stat bg-base-100 shadow-sm rounded-lg">
@@ -109,9 +124,15 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       </div>
-      <div class="stat-title">Skipped</div>
-      <div class="stat-value text-warning">0</div>
-      <div class="stat-desc">0% skipped</div>
+      <div class="stat-title">Processing</div>
+      <div class="stat-value text-warning"><%= @stats[:processing] %></div>
+      <div class="stat-desc">
+        <% if @stats[:pending] > 0 %>
+          <%= @stats[:pending] %> pending
+        <% else %>
+          All processed
+        <% end %>
+      </div>
     </div>
   </div>
 
@@ -121,50 +142,183 @@
       <div class="flex items-center justify-between mb-4">
         <h2 class="card-title text-xl">Test Runs</h2>
         <div class="text-sm text-base-content/60">
-          Showing 0 of 0 results
+          <% if @test_runs.any? %>
+            Showing <%= @test_runs.offset_value + 1 %>-<%= [@test_runs.offset_value + @test_runs.length, @test_runs.total_count].min %> of <%= @test_runs.total_count %> results
+          <% else %>
+            Showing 0 of 0 results
+          <% end %>
         </div>
       </div>
 
-      <!-- Empty State -->
-      <div class="text-center py-16">
-        <div class="text-6xl mb-4">📊</div>
-        <h3 class="text-xl font-semibold text-base-content/80 mb-2">No Test Results Yet</h3>
-        <p class="text-base-content/60 mb-6">Upload your first test results to see them here</p>
-        <%= link_to automated_testing_upload_path, 
-            class: "btn btn-primary gap-2" do %>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-          </svg>
-          Upload Test Results
+      <% if @test_runs.any? %>
+        <!-- Test Runs Table -->
+        <div class="overflow-x-auto">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Test Run</th>
+                <th>Environment</th>
+                <th>Status</th>
+                <th>Tests</th>
+                <th>Success Rate</th>
+                <th>Duration</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @test_runs.each do |test_run| %>
+                <tr class="hover cursor-pointer" onclick="showTestRunDetails('<%= test_run.id %>')">
+                  <td>
+                    <div class="font-semibold"><%= test_run.name %></div>
+                    <% if test_run.description.present? %>
+                      <div class="text-sm text-base-content/70"><%= truncate(test_run.description, length: 60) %></div>
+                    <% end %>
+                  </td>
+                  <td>
+                    <% if test_run.environment.present? %>
+                      <div class="badge badge-outline"><%= test_run.environment.titleize %></div>
+                    <% else %>
+                      <span class="text-base-content/50">-</span>
+                    <% end %>
+                  </td>
+                  <td>
+                    <% case test_run.status %>
+                    <% when 'completed' %>
+                      <div class="badge badge-success">Completed</div>
+                    <% when 'failed' %>
+                      <div class="badge badge-error">Failed</div>
+                    <% when 'processing' %>
+                      <div class="badge badge-warning">Processing</div>
+                    <% when 'pending' %>
+                      <div class="badge badge-ghost">Pending</div>
+                    <% end %>
+                  </td>
+                  <td>
+                    <div class="text-sm">
+                      <div class="font-semibold"><%= test_run.total_tests %> total</div>
+                      <div class="flex gap-2 text-xs">
+                        <span class="text-success"><%= test_run.passed_tests %> passed</span>
+                        <span class="text-error"><%= test_run.failed_tests %> failed</span>
+                        <span class="text-warning"><%= test_run.skipped_tests %> skipped</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <% if test_run.total_tests > 0 %>
+                      <div class="flex items-center gap-2">
+                        <div class="text-sm font-semibold"><%= test_run.success_rate.round(1) %>%</div>
+                        <progress class="progress progress-success w-16" value="<%= test_run.success_rate %>" max="100"></progress>
+                      </div>
+                    <% else %>
+                      <span class="text-base-content/50">-</span>
+                    <% end %>
+                  </td>
+                  <td>
+                    <% duration = test_run.results_summary.dig('duration') %>
+                    <% if duration.present? %>
+                      <%= duration %>
+                    <% else %>
+                      <span class="text-base-content/50">-</span>
+                    <% end %>
+                  </td>
+                  <td>
+                    <div class="text-sm">
+                      <div class="font-medium"><%= test_run.created_at.strftime('%b %d, %Y') %></div>
+                      <div class="text-base-content/70"><%= test_run.created_at.strftime('%I:%M %p') %></div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="dropdown dropdown-end">
+                      <div tabindex="0" role="button" class="btn btn-ghost btn-xs">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zM12 13a1 1 0 110-2 1 1 0 010 2zM12 20a1 1 0 110-2 1 1 0 010 2z" />
+                        </svg>
+                      </div>
+                      <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-32 p-2 shadow">
+                        <li><%= link_to "View Details", automated_testing_result_path(test_run) %></li>
+                        <li><%= link_to "Edit", edit_automated_testing_result_path(test_run) %></li>
+                        <li><%= link_to "Delete", automated_testing_result_path(test_run), method: :delete, 
+                                    confirm: "Are you sure?", class: "text-error" %></li>
+                      </ul>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <% if @test_runs.respond_to?(:total_pages) && @test_runs.total_pages > 1 %>
+          <div class="flex justify-center mt-6">
+            <%= paginate @test_runs, theme: 'twitter_bootstrap_4', 
+                nav_class: 'pagination-wrapper d-flex justify-content-center' %>
+          </div>
         <% end %>
-      </div>
-
-      <!-- Pagination placeholder (hidden when empty) -->
-      <div class="hidden justify-center mt-6">
-        <div class="btn-group">
-          <button class="btn btn-outline">«</button>
-          <button class="btn btn-outline btn-active">1</button>
-          <button class="btn btn-outline">2</button>
-          <button class="btn btn-outline">3</button>
-          <button class="btn btn-outline">»</button>
+      <% else %>
+        <!-- Empty State -->
+        <div class="text-center py-16">
+          <div class="text-6xl mb-4">📊</div>
+          <h3 class="text-xl font-semibold text-base-content/80 mb-2">No Test Results Yet</h3>
+          <p class="text-base-content/60 mb-6">Upload your first test results to see them here</p>
+          <%= link_to automated_testing_upload_path, 
+              class: "btn btn-primary gap-2" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+            Upload Test Results
+          <% end %>
         </div>
-      </div>
+      <% end %>
     </div>
   </div>
 </div>
 
-<!-- Test Result Detail Modal (placeholder) -->
-<dialog id="test_result_modal" class="modal">
-  <div class="modal-box max-w-4xl">
+<!-- Test Run Details Modal -->
+<dialog id="test_run_details_modal" class="modal">
+  <div class="modal-box max-w-6xl h-5/6">
     <form method="dialog">
       <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
     </form>
-    <h3 class="font-bold text-lg">Test Result Details</h3>
-    <div class="py-4">
-      <p>Test result details will be displayed here when a row is clicked.</p>
+    
+    <h3 class="font-bold text-lg mb-4">Test Run Details</h3>
+    <div id="test_run_details_content" class="space-y-4">
+      <!-- Content will be loaded dynamically -->
+      <div class="loading loading-spinner loading-md"></div>
+      <p>Loading test run details...</p>
     </div>
   </div>
   <form method="dialog" class="modal-backdrop">
     <button>close</button>
   </form>
 </dialog>
+
+<script>
+  function showTestRunDetails(testRunId) {
+    const modal = document.getElementById('test_run_details_modal');
+    const content = document.getElementById('test_run_details_content');
+    
+    // Show modal
+    modal.showModal();
+    
+    // Load test run details via AJAX
+    fetch(`/automated_testing/results/${testRunId}`)
+      .then(response => response.text())
+      .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const detailsContent = doc.querySelector('.test-run-details-content');
+        
+        if (detailsContent) {
+          content.innerHTML = detailsContent.innerHTML;
+        } else {
+          content.innerHTML = '<p class="text-error">Failed to load test run details.</p>';
+        }
+      })
+      .catch(error => {
+        console.error('Error loading test run details:', error);
+        content.innerHTML = '<p class="text-error">Error loading test run details.</p>';
+      });
+  }
+</script>

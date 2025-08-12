@@ -34,6 +34,9 @@ gem "image_processing", "~> 1.2"
 # Rich text editing
 gem "ckeditor5-rails"
 
+# XML parsing for test results
+gem "nokogiri"
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 

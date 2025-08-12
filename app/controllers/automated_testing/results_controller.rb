@@ -4,7 +4,7 @@ class AutomatedTesting::ResultsController < ApplicationController
   before_action :set_test_run, only: [ :show, :edit, :update, :destroy ]
 
   def index
-    @test_runs = policy_scope(TestRun)
+    @test_runs = policy_scope(TestRun).includes(:test_results)
 
     # Apply filters
     @test_runs = @test_runs.by_environment(params[:environment]) if params[:environment].present?
@@ -23,7 +23,10 @@ class AutomatedTesting::ResultsController < ApplicationController
       @test_runs = @test_runs.where(created_at: start_date.beginning_of_day..end_date.end_of_day)
     end
 
-    @test_runs = @test_runs.recent.page(params[:page]).per(20)
+    # Pagination with configurable page size
+    per_page = [ params[:per_page].to_i, 25 ].max
+    per_page = [ per_page, 100 ].min  # Cap at 100
+    @test_runs = @test_runs.recent.page(params[:page]).per(per_page)
 
     # Statistics
     all_test_runs = policy_scope(TestRun)
@@ -37,11 +40,49 @@ class AutomatedTesting::ResultsController < ApplicationController
 
     # Environment options for filter
     @environments = policy_scope(TestRun).distinct.pluck(:environment).compact.sort
+
+    # Per page options
+    @per_page_options = [ 25, 50, 100 ]
+    @current_per_page = per_page
   end
 
   def show
     authorize @test_run
-    @test_details = parse_test_details(@test_run)
+    @test_results = @test_run.test_results.includes(:test_run)
+                            .page(params[:page])
+                            .per(params[:per_page] || 25)
+
+    # Apply test result filters if present
+    if params[:test_search].present?
+      search_term = "%#{params[:test_search]}%"
+      @test_results = @test_results.where("name ILIKE ? OR classname ILIKE ?", search_term, search_term)
+    end
+
+    if params[:test_status].present?
+      @test_results = @test_results.where(status: params[:test_status])
+    end
+  end
+
+  def test_result
+    @test_run = TestRun.find(params[:id])
+    authorize @test_run
+    @test_result = @test_run.test_results.find(params[:test_result_id])
+
+    render json: {
+      id: @test_result.id,
+      name: @test_result.name,
+      classname: @test_result.classname,
+      status: @test_result.status,
+      time: @test_result.time,
+      failure_message: @test_result.failure_message,
+      failure_type: @test_result.failure_type,
+      failure_stacktrace: @test_result.failure_stacktrace,
+      system_out: @test_result.system_out,
+      system_err: @test_result.system_err,
+      test_run_name: @test_run.name
+    }
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: "Test result not found" }, status: :not_found
   end
 
   def edit
@@ -82,28 +123,5 @@ class AutomatedTesting::ResultsController < ApplicationController
 
   def ensure_not_system_admin
     redirect_to system_admin_dashboard_path if current_user.system_admin?
-  end
-
-  def parse_test_details(test_run)
-    # This would parse the XML file and extract individual test details
-    # For now, return sample data structure
-    return [] if test_run.xml_file.blank?
-
-    [
-      {
-        name: "TestLogin",
-        class: "com.example.LoginTest",
-        status: "passed",
-        duration: "0.5s",
-        message: nil
-      },
-      {
-        name: "TestLogout",
-        class: "com.example.LoginTest",
-        status: "failed",
-        duration: "0.3s",
-        message: "Expected logout button to be visible"
-      }
-    ]
   end
 end
