@@ -1,19 +1,19 @@
 class ManualTesting::TestCasesController < ApplicationController
   before_action :authenticate_user!
   before_action :ensure_not_system_admin
-  before_action :set_test_case, only: [:show, :edit, :update, :destroy]
+  before_action :set_test_case, only: [ :show, :edit, :update, :destroy ]
 
   def index
     @test_cases = policy_scope(TestCase).includes(:user, :organization)
                                        .recent
                                        .page(params[:page])
                                        .per(20)
-    
+
     # Filter options
     @test_cases = @test_cases.by_priority(params[:priority]) if params[:priority].present?
     @test_cases = @test_cases.by_category(params[:category]) if params[:category].present?
     @test_cases = @test_cases.by_status(params[:status]) if params[:status].present?
-    
+
     # Stats
     all_test_cases = policy_scope(TestCase)
     @stats = {
@@ -36,7 +36,7 @@ class ManualTesting::TestCasesController < ApplicationController
   def create
     @test_case = current_user.test_cases.build(test_case_params)
     @test_case.organization = current_user.organizations.first
-    
+
     # Parse steps from JSON if provided
     if params[:test_case][:steps].present?
       begin
@@ -45,18 +45,18 @@ class ManualTesting::TestCasesController < ApplicationController
         @test_case.steps = []
       end
     end
-    
+
     # Set status based on which button was clicked
     if params[:draft]
-      @test_case.status = 'draft'
+      @test_case.status = "draft"
     elsif @test_case.status.blank?
-      @test_case.status = 'ready'
+      @test_case.status = "ready"
     end
-    
+
     authorize @test_case
 
     if @test_case.save
-      redirect_to manual_testing_test_cases_path, 
+      redirect_to manual_testing_test_cases_path,
                   notice: "Test case '#{@test_case.title}' created successfully!"
     else
       render :new, status: :unprocessable_entity
@@ -69,7 +69,7 @@ class ManualTesting::TestCasesController < ApplicationController
 
   def update
     authorize @test_case
-    
+
     # Parse steps from JSON if provided
     if params[:test_case][:steps].present?
       begin
@@ -78,9 +78,9 @@ class ManualTesting::TestCasesController < ApplicationController
         # Keep existing steps if parsing fails
       end
     end
-    
+
     if @test_case.update(test_case_params)
-      redirect_to manual_testing_test_case_path(@test_case), 
+      redirect_to manual_testing_test_case_path(@test_case),
                   notice: "Test case '#{@test_case.title}' updated successfully!"
     else
       render :edit, status: :unprocessable_entity
@@ -91,7 +91,7 @@ class ManualTesting::TestCasesController < ApplicationController
     authorize @test_case
     title = @test_case.title
     @test_case.destroy
-    redirect_to manual_testing_test_cases_path, 
+    redirect_to manual_testing_test_cases_path,
                 notice: "Test case '#{title}' deleted successfully!"
   end
 

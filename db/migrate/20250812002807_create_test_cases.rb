@@ -21,6 +21,6 @@ class CreateTestCases < ActiveRecord::Migration[8.0]
     add_index :test_cases, :priority
     add_index :test_cases, :category
     add_index :test_cases, :status
-    add_index :test_cases, [:organization_id, :status]
+    add_index :test_cases, [ :organization_id, :status ]
   end
 end

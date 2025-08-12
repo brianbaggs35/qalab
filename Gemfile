@@ -91,7 +91,7 @@ group :test do
 
   # Controller testing support
   gem "rails-controller-testing"
-  
+
   # Model testing matchers
   gem "shoulda-matchers", "~> 6.0"
 end

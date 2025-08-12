@@ -70,7 +70,7 @@ RSpec.describe ManualTesting::TestCasesController, type: :controller do
         expect {
           post :create, params: valid_params
         }.to change(TestCase, :count).by(1)
-        
+
         expect(response).to redirect_to(manual_testing_test_cases_path)
         expect(flash[:notice]).to include("created successfully")
       end
@@ -82,7 +82,7 @@ RSpec.describe ManualTesting::TestCasesController, type: :controller do
         expect(test_case.priority).to eq("high")
         expect(test_case.user).to eq(user)
         expect(test_case.organization).to eq(organization)
-        expect(test_case.steps).to eq(["Step 1", "Step 2"])
+        expect(test_case.steps).to eq([ "Step 1", "Step 2" ])
       end
     end
 
@@ -100,7 +100,7 @@ RSpec.describe ManualTesting::TestCasesController, type: :controller do
         expect {
           post :create, params: invalid_params
         }.not_to change(TestCase, :count)
-        
+
         expect(response).to have_http_status(:unprocessable_entity)
       end
     end
@@ -176,7 +176,7 @@ RSpec.describe ManualTesting::TestCasesController, type: :controller do
       expect {
         delete :destroy, params: { id: test_case.id }
       }.to change(TestCase, :count).by(-1)
-      
+
       expect(response).to redirect_to(manual_testing_test_cases_path)
       expect(flash[:notice]).to include("deleted successfully")
     end

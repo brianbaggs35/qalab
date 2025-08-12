@@ -3,21 +3,21 @@ class TestCase < ApplicationRecord
   belongs_to :organization
 
   # Enums
-  enum :priority, { low: 'low', medium: 'medium', high: 'high', critical: 'critical' }, default: :medium
-  enum :category, { 
-    functional: 'functional', 
-    ui_ux: 'ui_ux', 
-    integration: 'integration', 
-    performance: 'performance', 
-    security: 'security', 
-    regression: 'regression' 
+  enum :priority, { low: "low", medium: "medium", high: "high", critical: "critical" }, default: :medium
+  enum :category, {
+    functional: "functional",
+    ui_ux: "ui_ux",
+    integration: "integration",
+    performance: "performance",
+    security: "security",
+    regression: "regression"
   }, default: :functional
-  enum :status, { 
-    draft: 'draft', 
-    ready: 'ready', 
-    in_review: 'in_review', 
-    approved: 'approved', 
-    deprecated: 'deprecated' 
+  enum :status, {
+    draft: "draft",
+    ready: "ready",
+    in_review: "in_review",
+    approved: "approved",
+    deprecated: "deprecated"
   }, default: :draft
 
   # Validations
@@ -42,11 +42,11 @@ class TestCase < ApplicationRecord
   # Methods
   def tag_list
     return [] if tags.blank?
-    tags.split(',').map(&:strip).reject(&:blank?)
+    tags.split(",").map(&:strip).reject(&:blank?)
   end
 
   def tag_list=(list)
-    self.tags = Array(list).map(&:strip).reject(&:blank?).join(', ')
+    self.tags = Array(list).map(&:strip).reject(&:blank?).join(", ")
   end
 
   def steps_list
@@ -55,7 +55,7 @@ class TestCase < ApplicationRecord
   end
 
   def add_step(step_text)
-    self.steps = steps_list + [step_text.strip] if step_text.present?
+    self.steps = steps_list + [ step_text.strip ] if step_text.present?
   end
 
   def remove_step(index)
@@ -66,31 +66,31 @@ class TestCase < ApplicationRecord
 
   def priority_badge_class
     case priority
-    when 'critical'
-      'badge-error'
-    when 'high'
-      'badge-warning'
-    when 'medium'
-      'badge-info'
-    when 'low'
-      'badge-neutral'
+    when "critical"
+      "badge-error"
+    when "high"
+      "badge-warning"
+    when "medium"
+      "badge-info"
+    when "low"
+      "badge-neutral"
     else
-      'badge-ghost'
+      "badge-ghost"
     end
   end
 
   def status_badge_class
     case status
-    when 'approved'
-      'badge-success'
-    when 'ready', 'in_review'
-      'badge-info'
-    when 'draft'
-      'badge-warning'
-    when 'deprecated'
-      'badge-neutral'
+    when "approved"
+      "badge-success"
+    when "ready", "in_review"
+      "badge-info"
+    when "draft"
+      "badge-warning"
+    when "deprecated"
+      "badge-neutral"
     else
-      'badge-ghost'
+      "badge-ghost"
     end
   end
 end
