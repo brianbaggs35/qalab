@@ -11,8 +11,7 @@ class SystemAdmin::OrganizationsController < ApplicationController
 
     # Apply filters
     if params[:search].present?
-      @organizations = @organizations.where("name ILIKE ? OR description ILIKE ?",
-                                          "%#{params[:search]}%", "%#{params[:search]}%")
+      @organizations = @organizations.where("name ILIKE ?", "%#{params[:search]}%")
     end
 
     # Statistics
