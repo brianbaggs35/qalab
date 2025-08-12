@@ -65,7 +65,7 @@ class TestRun < ApplicationRecord
 
       # Parse the XML content directly from the text field
       doc = Nokogiri::XML(xml_file)
-      
+
       # Parse JUnit XML format
       parse_junit_xml(doc)
 
@@ -81,8 +81,8 @@ class TestRun < ApplicationRecord
 
   def parse_junit_xml(doc)
     # Handle both single testsuite and testsuites with multiple suites
-    testsuites = doc.xpath('//testsuite')
-    
+    testsuites = doc.xpath("//testsuite")
+
     total_tests = 0
     passed = 0
     failed = 0
@@ -91,11 +91,11 @@ class TestRun < ApplicationRecord
     total_time = 0.0
 
     testsuites.each do |testsuite|
-      suite_tests = testsuite.attr('tests').to_i
-      suite_failures = testsuite.attr('failures').to_i
-      suite_errors = testsuite.attr('errors').to_i
-      suite_skipped = testsuite.attr('skipped').to_i
-      suite_time = testsuite.attr('time').to_f
+      suite_tests = testsuite.attr("tests").to_i
+      suite_failures = testsuite.attr("failures").to_i
+      suite_errors = testsuite.attr("errors").to_i
+      suite_skipped = testsuite.attr("skipped").to_i
+      suite_time = testsuite.attr("time").to_f
 
       total_tests += suite_tests
       failed += suite_failures
@@ -104,7 +104,7 @@ class TestRun < ApplicationRecord
       total_time += suite_time
 
       # Parse individual test cases
-      testsuite.xpath('.//testcase').each do |testcase|
+      testsuite.xpath(".//testcase").each do |testcase|
         parse_test_case(testcase)
       end
     end
@@ -130,11 +130,11 @@ class TestRun < ApplicationRecord
   end
 
   def parse_test_case(testcase_node)
-    name = testcase_node.attr('name')
-    classname = testcase_node.attr('classname')
-    time = testcase_node.attr('time').to_f
+    name = testcase_node.attr("name")
+    classname = testcase_node.attr("classname")
+    time = testcase_node.attr("time").to_f
 
-    status = 'passed'
+    status = "passed"
     failure_message = nil
     failure_type = nil
     failure_stacktrace = nil
@@ -142,35 +142,35 @@ class TestRun < ApplicationRecord
     system_err = nil
 
     # Check for failure
-    failure = testcase_node.at_xpath('failure')
+    failure = testcase_node.at_xpath("failure")
     if failure
-      status = 'failed'
-      failure_message = failure.attr('message')
-      failure_type = failure.attr('type')
+      status = "failed"
+      failure_message = failure.attr("message")
+      failure_type = failure.attr("type")
       failure_stacktrace = failure.content
     end
 
     # Check for error
-    error = testcase_node.at_xpath('error')
+    error = testcase_node.at_xpath("error")
     if error
-      status = 'error'
-      failure_message = error.attr('message')
-      failure_type = error.attr('type')
+      status = "error"
+      failure_message = error.attr("message")
+      failure_type = error.attr("type")
       failure_stacktrace = error.content
     end
 
     # Check for skipped
-    skipped = testcase_node.at_xpath('skipped')
+    skipped = testcase_node.at_xpath("skipped")
     if skipped
-      status = 'skipped'
-      failure_message = skipped.attr('message') if skipped.attr('message')
+      status = "skipped"
+      failure_message = skipped.attr("message") if skipped.attr("message")
     end
 
     # Get system output
-    system_out_node = testcase_node.at_xpath('system-out')
+    system_out_node = testcase_node.at_xpath("system-out")
     system_out = system_out_node.content if system_out_node
 
-    system_err_node = testcase_node.at_xpath('system-err')
+    system_err_node = testcase_node.at_xpath("system-err")
     system_err = system_err_node.content if system_err_node
 
     # Create test result

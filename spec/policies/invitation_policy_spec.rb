@@ -1,27 +1,54 @@
 require 'rails_helper'
 
 RSpec.describe InvitationPolicy, type: :policy do
-  let(:user) { User.new }
+  let(:organization) { create(:organization) }
+  let(:user) { create(:user) }
+  let(:system_admin) { create(:user, role: "system_admin") }
+  let(:invitation) { create(:invitation, organization: organization) }
 
   subject { described_class }
 
-  permissions ".scope" do
-    pending "add some examples to (or delete) #{__FILE__}"
+  describe ".scope" do
+    it "returns all invitations for system admin" do
+      expect(described_class::Scope.new(system_admin, Invitation).resolve).to eq(Invitation.all)
+    end
+
+    it "returns organization invitations for admin users" do
+      create(:organization_user, user: user, organization: organization, role: "admin")
+      expect(described_class::Scope.new(user, Invitation).resolve).to include(invitation)
+    end
   end
 
-  permissions :show? do
-    pending "add some examples to (or delete) #{__FILE__}"
+  describe "show?" do
+    it "permits system admin" do
+      expect(described_class.new(system_admin, invitation)).to be_show
+    end
+
+    it "permits admin users in same organization" do
+      create(:organization_user, user: user, organization: organization, role: "admin")
+      expect(described_class.new(user, invitation)).to be_show
+    end
   end
 
-  permissions :create? do
-    pending "add some examples to (or delete) #{__FILE__}"
+  describe "create?" do
+    it "permits system admin" do
+      expect(described_class.new(system_admin, invitation)).to be_create
+    end
+
+    it "permits admin users to create invitations" do
+      create(:organization_user, user: user, organization: organization, role: "admin")
+      expect(described_class.new(user, invitation)).to be_create
+    end
   end
 
-  permissions :update? do
-    pending "add some examples to (or delete) #{__FILE__}"
-  end
+  describe "destroy?" do
+    it "permits system admin" do
+      expect(described_class.new(system_admin, invitation)).to be_destroy
+    end
 
-  permissions :destroy? do
-    pending "add some examples to (or delete) #{__FILE__}"
+    it "permits admin users in same organization" do
+      create(:organization_user, user: user, organization: organization, role: "admin")
+      expect(described_class.new(user, invitation)).to be_destroy
+    end
   end
 end

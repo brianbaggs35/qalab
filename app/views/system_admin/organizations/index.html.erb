@@ -1,0 +1,231 @@
+<% content_for :title, "Organizations Management" %>
+
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex justify-between items-center">
+    <div>
+      <h1 class="text-3xl font-bold text-primary flex items-center gap-3">
+        🏢 Organizations Management
+      </h1>
+      <p class="text-base-content/70 mt-2">
+        Manage all organizations and their settings across the platform
+      </p>
+    </div>
+    <div class="flex gap-3">
+      <%= link_to new_system_admin_organization_path, class: "btn btn-primary" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+        Create Organization
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="stat bg-base-100 shadow-lg rounded-lg border-l-4 border-l-primary">
+      <div class="stat-figure text-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+      </div>
+      <div class="stat-title">Total Organizations</div>
+      <div class="stat-value text-primary"><%= @stats[:total] %></div>
+      <div class="stat-desc">Across all tenants</div>
+    </div>
+
+    <div class="stat bg-base-100 shadow-lg rounded-lg border-l-4 border-l-secondary">
+      <div class="stat-figure text-secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <div class="stat-title">Active Organizations</div>
+      <div class="stat-value text-secondary"><%= @stats[:active] %></div>
+      <div class="stat-desc">With registered users</div>
+    </div>
+
+    <div class="stat bg-base-100 shadow-lg rounded-lg border-l-4 border-l-accent">
+      <div class="stat-figure text-accent">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+        </svg>
+      </div>
+      <div class="stat-title">Total Users</div>
+      <div class="stat-value text-accent"><%= @stats[:total_users] %></div>
+      <div class="stat-desc">Across all organizations</div>
+    </div>
+
+    <div class="stat bg-base-100 shadow-lg rounded-lg border-l-4 border-l-warning">
+      <div class="stat-figure text-warning">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      </div>
+      <div class="stat-title">Test Runs</div>
+      <div class="stat-value text-warning"><%= @stats[:total_test_runs] %></div>
+      <div class="stat-desc">Total executed</div>
+    </div>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="card bg-base-100 shadow-lg">
+    <div class="card-body">
+      <%= form_with url: system_admin_organizations_path, method: :get, local: true, class: "flex flex-wrap gap-4 items-end" do |f| %>
+        <div class="form-control flex-1 min-w-64">
+          <label class="label">
+            <span class="label-text font-semibold">Search Organizations</span>
+          </label>
+          <%= f.text_field :search, value: params[:search], 
+                          placeholder: "Search by name...", 
+                          class: "input input-bordered w-full" %>
+        </div>
+        
+        <div class="form-control">
+          <%= f.submit "Search", class: "btn btn-primary" %>
+        </div>
+        
+        <% if params[:search].present? %>
+          <div class="form-control">
+            <%= link_to "Clear", system_admin_organizations_path, class: "btn btn-ghost" %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Organizations Table -->
+  <div class="card bg-base-100 shadow-lg overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="table table-zebra">
+        <thead class="bg-base-200">
+          <tr>
+            <th class="font-bold">Organization</th>
+            <th class="font-bold text-center">Users</th>
+            <th class="font-bold text-center">Test Runs</th>
+            <th class="font-bold text-center">Test Cases</th>
+            <th class="font-bold text-center">Created</th>
+            <th class="font-bold text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @organizations.each do |organization| %>
+            <tr class="hover">
+              <td>
+                <div class="flex items-center gap-3">
+                  <div class="avatar placeholder">
+                    <div class="bg-primary text-primary-content rounded-full w-12">
+                      <span class="text-sm font-bold"><%= organization.name.first(2).upcase %></span>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="font-bold text-primary">
+                      <%= link_to organization.name, system_admin_organization_path(organization), 
+                                  class: "hover:underline" %>
+                    </div>
+                    <div class="text-sm text-base-content/70">
+                      ID: <%= organization.id.truncate(8) %>
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td class="text-center">
+                <div class="badge badge-secondary badge-lg">
+                  <%= organization.users.count %>
+                </div>
+                <div class="text-xs text-base-content/70">
+                  <%= organization.owners.count %>O, 
+                  <%= organization.admins.count %>A, 
+                  <%= organization.members.count %>M
+                </div>
+              </td>
+              <td class="text-center">
+                <div class="badge badge-accent badge-lg">
+                  <%= organization.test_runs.count %>
+                </div>
+              </td>
+              <td class="text-center">
+                <div class="badge badge-info badge-lg">
+                  <%= organization.test_cases.count %>
+                </div>
+              </td>
+              <td class="text-center text-sm text-base-content/70">
+                <%= organization.created_at.strftime("%b %d, %Y") %>
+              </td>
+              <td class="text-center">
+                <div class="dropdown dropdown-end">
+                  <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                    </svg>
+                  </div>
+                  <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+                    <li>
+                      <%= link_to system_admin_organization_path(organization), class: "text-sm" do %>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        View Details
+                      <% end %>
+                    </li>
+                    <li>
+                      <%= link_to edit_system_admin_organization_path(organization), class: "text-sm" do %>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Edit
+                      <% end %>
+                    </li>
+                    <% if organization.users.empty? %>
+                      <div class="divider my-0"></div>
+                      <li>
+                        <%= link_to system_admin_organization_path(organization), method: :delete, 
+                                    data: { confirm: "Are you sure you want to delete '#{organization.name}'? This action cannot be undone." }, 
+                                    class: "text-sm text-error hover:text-error" do %>
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          Delete
+                        <% end %>
+                      </li>
+                    <% end %>
+                  </ul>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      
+      <% if @organizations.empty? %>
+        <div class="text-center py-12">
+          <div class="text-6xl mb-4">🏢</div>
+          <h3 class="text-lg font-semibold mb-2">No Organizations Found</h3>
+          <p class="text-base-content/70 mb-6">
+            <% if params[:search].present? %>
+              No organizations match your search criteria.
+            <% else %>
+              There are no organizations in the system yet.
+            <% end %>
+          </p>
+          <% unless params[:search].present? %>
+            <%= link_to new_system_admin_organization_path, class: "btn btn-primary" do %>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              Create First Organization
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <% if @organizations.respond_to?(:current_page) %>
+    <div class="flex justify-center">
+      <%= paginate @organizations %>
+    </div>
+  <% end %>
+</div>
