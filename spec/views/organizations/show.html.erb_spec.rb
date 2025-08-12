@@ -9,7 +9,7 @@ RSpec.describe "organizations/show.html.erb", type: :view do
     # Create organization users with different roles
     create(:organization_user, user: user1, organization: organization, role: 'owner')
     create(:organization_user, user: user2, organization: organization, role: 'admin')
-    
+
     assign(:organization, organization)
   end
 
@@ -28,7 +28,7 @@ RSpec.describe "organizations/show.html.erb", type: :view do
   it "shows member counts" do
     render
     expect(rendered).to include("Owners")
-    expect(rendered).to include("Admins")  
+    expect(rendered).to include("Admins")
     expect(rendered).to include("Members")
   end
 end

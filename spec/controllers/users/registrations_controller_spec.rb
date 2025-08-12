@@ -110,13 +110,13 @@ RSpec.describe Users::RegistrationsController, type: :controller do
           invitation_token: 'token123'
         }
       })
-      
+
       controller.params = params
       controller.send(:configure_sign_up_params)
-      
+
       sanitizer = controller.devise_parameter_sanitizer
       permitted = sanitizer.sanitize(:sign_up)
-      
+
       expect(permitted.keys).to include('invitation_token')
     end
   end

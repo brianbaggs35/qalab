@@ -47,15 +47,15 @@ RSpec.describe OnboardingController, type: :controller do
   describe '#create_organization' do
     it 'creates organization and completes onboarding' do
       Organization.destroy_all
-      
+
       expect {
         post :create_organization, params: { organization: { name: 'Test Org' } }
       }.to change(Organization, :count).by(1)
-      
+
       organization = Organization.last
       expect(organization.name).to eq('Test Org')
       expect(organization.organization_users.where(user: user, role: 'owner')).to exist
-      
+
       user.reload
       expect(user.onboarding_completed_at).to be_present
       expect(response).to redirect_to(onboarding_complete_path)
@@ -71,7 +71,7 @@ RSpec.describe OnboardingController, type: :controller do
 
   describe '#complete' do
     let(:organization) { create(:organization) }
-    
+
     before do
       create(:organization_user, user: user, organization: organization, role: 'owner')
       user.update!(onboarding_completed_at: Time.current)
