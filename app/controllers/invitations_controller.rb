@@ -24,8 +24,21 @@ class InvitationsController < ApplicationController
   def create
     @invitation = @organization.invitations.build(invitation_params)
     @invitation.invited_by = current_user
+    
+    # Manually assign role after authorization to prevent mass assignment vulnerability
+    if params.dig(:invitation, :role).present?
+      role = params[:invitation][:role]
+      @invitation.role = role  # Temporarily assign for authorization check
+    end
 
     authorize @invitation
+    
+    # Validate role after authorization
+    if @invitation.role.present? && !valid_role_for_user?(@invitation.role)
+      @invitation.errors.add(:role, "is not allowed for your permission level")
+      render :new, status: :unprocessable_content
+      return
+    end
 
     if @invitation.save
       # TODO: Send invitation email
@@ -106,6 +119,28 @@ class InvitationsController < ApplicationController
   end
 
   def invitation_params
-    params.require(:invitation).permit(:email, :role)
+    # Only permit email to prevent mass assignment of role
+    params.require(:invitation).permit(:email)
+  end
+
+  def valid_role_for_user?(role)
+    return true if current_user.system_admin?
+
+    # Get user's role in the current organization
+    user_role = current_user.organization_users
+                           .find_by(organization: @organization)
+                           &.role
+
+    case user_role
+    when "owner"
+      # Owners can invite anyone
+      %w[owner admin member].include?(role)
+    when "admin"
+      # Admins can invite admins and members, but not owners
+      %w[admin member].include?(role)
+    else
+      # Members cannot invite anyone
+      false
+    end
   end
 end
