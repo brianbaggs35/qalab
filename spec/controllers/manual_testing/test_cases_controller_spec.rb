@@ -101,7 +101,7 @@ RSpec.describe ManualTesting::TestCasesController, type: :controller do
           post :create, params: invalid_params
         }.not_to change(TestCase, :count)
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
 
@@ -111,6 +111,7 @@ RSpec.describe ManualTesting::TestCasesController, type: :controller do
           test_case: {
             title: "Draft Test Case",
             priority: "medium",
+            description: "Draft test case description",
             expected_results: "Some result"
           },
           draft: true
