@@ -1,0 +1,2 @@
+This is a plain text file used for testing file type validation.
+It should not be accepted as an XML file for test uploads.

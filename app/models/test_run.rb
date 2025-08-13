@@ -147,7 +147,7 @@ class TestRun < ApplicationRecord
   def parse_testng_xml(doc)
     # Handle TestNG XML format - can have multiple suites
     suites = doc.xpath("//suite")
-    
+
     total_tests = 0
     passed = 0
     failed = 0
@@ -157,24 +157,24 @@ class TestRun < ApplicationRecord
     suites.each do |suite|
       # Parse tests within each suite
       tests = suite.xpath(".//test")
-      
+
       tests.each do |test|
         classes = test.xpath(".//class")
-        
+
         classes.each do |test_class|
           class_name = test_class.attr("name")
-          
+
           # Parse test methods
           test_methods = test_class.xpath(".//test-method[@is-config='false']")
-          
+
           test_methods.each do |method|
             method_name = method.attr("name")
             status = method.attr("status")
             duration = method.attr("duration-ms").to_f / 1000.0 # Convert ms to seconds
-            
+
             total_tests += 1
             total_time += duration
-            
+
             case status
             when "PASS"
               passed += 1
@@ -189,19 +189,19 @@ class TestRun < ApplicationRecord
               test_status = "passed" # Default to passed if unknown
               passed += 1
             end
-            
+
             # Look for exception information
             failure_message = nil
             failure_type = nil
             failure_stacktrace = nil
-            
+
             exception = method.at_xpath(".//exception")
             if exception
               failure_message = exception.attr("message")
               failure_type = exception.attr("class")
               failure_stacktrace = exception.text.strip
             end
-            
+
             # Create test result
             test_results.create!(
               name: method_name,
@@ -236,6 +236,7 @@ class TestRun < ApplicationRecord
   end
 
   def parse_test_case(testcase_node)
+    name = testcase_node.attr("name")
     classname = testcase_node.attr("classname")
     time = testcase_node.attr("time").to_f
 
