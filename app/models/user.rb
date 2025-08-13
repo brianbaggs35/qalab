@@ -66,10 +66,11 @@ class User < ApplicationRecord
 
   # Onboarding methods
   def onboarding_completed?
-    onboarding_completed_at.present?
+    self.onboarding_completed_at.present?
   end
 
   def needs_onboarding?
+    return false if system_admin? # System admins bypass onboarding
     !onboarding_completed? && organizations.empty?
   end
 end
