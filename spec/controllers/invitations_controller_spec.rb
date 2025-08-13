@@ -238,7 +238,7 @@ RSpec.describe InvitationsController, type: :controller do
 
         it "accepts invitation and redirects to onboarding" do
           get :accept, params: { token: org_owner_invitation.token }
-          
+
           org_owner_invitation.reload
           expect(org_owner_invitation.accepted?).to be true
           expect(response).to redirect_to(onboarding_welcome_path)

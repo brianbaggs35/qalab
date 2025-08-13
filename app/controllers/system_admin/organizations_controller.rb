@@ -161,7 +161,7 @@ class SystemAdmin::OrganizationsController < ApplicationController
   end
 
   def organization_params
-    params.require(:organization).permit(:name, :description, :settings)
+    params.require(:organization).permit(:name, :settings)
   end
 
   def ensure_system_admin

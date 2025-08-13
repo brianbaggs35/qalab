@@ -17,7 +17,7 @@ RSpec.describe "Organization Owner Invitations", type: :request do
 
     it "validates email address" do
       post send_organization_owner_invitation_system_admin_users_path, params: { email: 'invalid-email' }
-      
+
       expect(response).to redirect_to(invite_organization_owner_system_admin_users_path)
       follow_redirect!
       expect(flash[:alert]).to eq('Please provide a valid email address.')
@@ -25,9 +25,9 @@ RSpec.describe "Organization Owner Invitations", type: :request do
 
     it "prevents inviting existing users" do
       existing_user = create(:user, :confirmed, email: "existing@example.com")
-      
+
       post send_organization_owner_invitation_system_admin_users_path, params: { email: "existing@example.com" }
-      
+
       expect(response).to redirect_to(invite_organization_owner_system_admin_users_path)
       follow_redirect!
       expect(flash[:alert]).to eq('A user with this email address already exists.')
@@ -37,13 +37,13 @@ RSpec.describe "Organization Owner Invitations", type: :request do
       expect {
         post send_organization_owner_invitation_system_admin_users_path, params: { email: "owner@newcompany.com" }
       }.to change(Invitation, :count).by(1)
-      
+
       invitation = Invitation.find_by(email: "owner@newcompany.com")
       expect(invitation).to be_present
       expect(invitation.role).to eq("organization_owner")
       expect(invitation.organization).to be_nil
       expect(invitation.invited_by).to eq(admin_user)
-      
+
       expect(response).to redirect_to(system_admin_users_path)
       follow_redirect!
       expect(flash[:notice]).to include("invitation sent to owner@newcompany.com successfully")
@@ -59,7 +59,7 @@ RSpec.describe "Organization Owner Invitations", type: :request do
 
     it "redirects to registration when not signed in" do
       get accept_invitation_path(token: invitation.token)
-      
+
       expect(response).to redirect_to(new_user_registration_path(invitation_token: invitation.token))
     end
 
@@ -67,7 +67,7 @@ RSpec.describe "Organization Owner Invitations", type: :request do
       user_params = {
         user: {
           first_name: "John",
-          last_name: "Owner", 
+          last_name: "Owner",
           email: "newowner@example.com",
           password: "password123456",
           password_confirmation: "password123456",
