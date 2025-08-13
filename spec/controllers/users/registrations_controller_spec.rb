@@ -128,17 +128,16 @@ RSpec.describe Users::RegistrationsController, type: :controller do
       expect(controller_instance.send(:skip_pundit_authorization?)).to be true
     end
 
-    it "skips authorization" do  
+    it "skips authorization" do
       expect(controller_instance.send(:skip_authorization?)).to be true
     end
   end
 
   describe "after_sign_up_path_for" do
-    let(:controller_instance) { described_class.new }
     let(:user) { create(:user) }
 
     it "redirects to onboarding welcome path" do
-      path = controller_instance.send(:after_sign_up_path_for, user)
+      path = controller.send(:after_sign_up_path_for, user)
       expect(path).to eq(onboarding_welcome_path)
     end
   end

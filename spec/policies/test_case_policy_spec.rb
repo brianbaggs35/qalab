@@ -17,7 +17,6 @@ RSpec.describe TestCasePolicy, type: :policy do
 
     context "with system admin" do
       let(:admin_policy) { described_class.new(system_admin, test_case) }
-      
       it "denies access" do
         expect(admin_policy.index?).to be false
       end
