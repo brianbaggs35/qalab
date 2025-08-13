@@ -38,7 +38,7 @@ RSpec.describe InvitationMailer, type: :mailer do
       # The encoded body may have quoted-printable line breaks that split the token
       text_part = mail.parts.find { |part| part.content_type.start_with?('text/plain') }
       html_part = mail.parts.find { |part| part.content_type.start_with?('text/html') }
-      
+
       expect(text_part.body.decoded).to include(invitation.token)
       expect(html_part.body.decoded).to include(invitation.token)
     end

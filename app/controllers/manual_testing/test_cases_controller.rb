@@ -59,7 +59,7 @@ class ManualTesting::TestCasesController < ApplicationController
       redirect_to manual_testing_test_cases_path,
                   notice: "Test case '#{@test_case.title}' created successfully!"
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -83,7 +83,7 @@ class ManualTesting::TestCasesController < ApplicationController
       redirect_to manual_testing_test_case_path(@test_case),
                   notice: "Test case '#{@test_case.title}' updated successfully!"
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 
