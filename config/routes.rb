@@ -27,6 +27,7 @@ Rails.application.routes.draw do
   namespace :automated_testing do
     get "upload", to: "upload#index"
     post "upload", to: "upload#create"
+    get "test_runs", to: "results#index", as: :test_runs
     resources :results, only: [ :index, :show, :edit, :update, :destroy ] do
       member do
         get :download_xml

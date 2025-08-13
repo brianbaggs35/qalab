@@ -534,6 +534,104 @@ describe("UploadController", () => {
       controller.showSuccess();
       expect(mockSubmitButtonTarget.classList.contains('btn-success')).toBe(true);
     });
+
+    it("should handle 422 validation errors correctly", () => {
+      controller.connect();
+      
+      // Set up file for upload
+      Object.defineProperty(mockFileInputTarget, 'files', {
+        value: [new File(['content'], 'test.xml', { type: 'application/xml' })],
+        configurable: true
+      });
+      
+      const submitEvent = {
+        preventDefault: jest.fn()
+      };
+      
+      controller.handleSubmit(submitEvent);
+      
+      // Simulate 422 validation error
+      const xhr = xhrInstances[0];
+      xhr.status = 422;
+      xhr.responseText = 'Validation errors: must be an XML file';
+      
+      const loadCallback = xhr.addEventListener.mock.calls.find(call => call[0] === 'load')[1];
+      loadCallback();
+      
+      expect(global.alert).toHaveBeenCalledWith('Please upload a valid XML file.');
+    });
+
+    it("should handle 422 file size errors correctly", () => {
+      controller.connect();
+      
+      Object.defineProperty(mockFileInputTarget, 'files', {
+        value: [new File(['content'], 'test.xml', { type: 'application/xml' })],
+        configurable: true
+      });
+      
+      const submitEvent = {
+        preventDefault: jest.fn()
+      };
+      
+      controller.handleSubmit(submitEvent);
+      
+      // Simulate 422 file size error
+      const xhr = xhrInstances[0];
+      xhr.status = 422;
+      xhr.responseText = 'Validation errors: must be less than 50MB';
+      
+      const loadCallback = xhr.addEventListener.mock.calls.find(call => call[0] === 'load')[1];
+      loadCallback();
+      
+      expect(global.alert).toHaveBeenCalledWith('File size must be less than 50MB.');
+    });
+
+    it("should handle generic 422 validation errors", () => {
+      controller.connect();
+      
+      Object.defineProperty(mockFileInputTarget, 'files', {
+        value: [new File(['content'], 'test.xml', { type: 'application/xml' })],
+        configurable: true
+      });
+      
+      const submitEvent = {
+        preventDefault: jest.fn()
+      };
+      
+      controller.handleSubmit(submitEvent);
+      
+      // Simulate generic 422 error
+      const xhr = xhrInstances[0];
+      xhr.status = 422;
+      xhr.responseText = 'Some other validation error';
+      
+      const loadCallback = xhr.addEventListener.mock.calls.find(call => call[0] === 'load')[1];
+      loadCallback();
+      
+      expect(global.alert).toHaveBeenCalledWith('Upload failed due to validation errors. Please check your file and try again.');
+    });
+
+    it("should validate XML file extension", () => {
+      controller.connect();
+      
+      const mockFile = {
+        name: 'test-results.txt', // Invalid extension
+        type: 'text/plain'
+      };
+      
+      const fileChangeEvent = {
+        target: {
+          files: [mockFile],
+          value: 'test-results.txt'
+        }
+      };
+      
+      controller.handleFileChange(fileChangeEvent);
+      
+      expect(global.alert).toHaveBeenCalledWith('Please select a valid XML file');
+      expect(fileChangeEvent.target.value).toBe('');
+      expect(mockSubmitButtonTarget.disabled).toBe(true);
+    });
   });
 
   describe("edge cases", () => {

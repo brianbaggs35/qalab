@@ -92,6 +92,22 @@ export default class extends Controller {
         setTimeout(() => {
           window.location.href = redirectUrl
         }, 2000)
+      } else if (xhr.status === 422) {
+        // Handle validation errors
+        console.error("Upload validation failed")
+        try {
+          // Try to parse error response for specific error messages
+          const response = xhr.responseText
+          if (response.includes('must be an XML file')) {
+            this.showError('Please upload a valid XML file.')
+          } else if (response.includes('must be less than 50MB')) {
+            this.showError('File size must be less than 50MB.')
+          } else {
+            this.showError('Upload failed due to validation errors. Please check your file and try again.')
+          }
+        } catch (e) {
+          this.showError('Upload failed due to validation errors. Please check your file and try again.')
+        }
       } else {
         console.error("Upload failed with status:", xhr.status)
         this.showError('Upload failed. Please try again.')
