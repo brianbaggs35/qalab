@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe Invitation, type: :model do
   describe 'validations' do
     it 'is valid with valid attributes' do
-      invitation = build(:invitation)
+      invitation = create(:invitation)
       expect(invitation).to be_valid
     end
 

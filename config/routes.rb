@@ -61,7 +61,7 @@ Rails.application.routes.draw do
         patch "confirm"
         patch "resend_confirmation"
       end
-      
+
       collection do
         get "invite_organization_owner"
         post "send_organization_owner_invitation"

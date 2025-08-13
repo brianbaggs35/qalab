@@ -222,5 +222,40 @@ RSpec.describe InvitationsController, type: :controller do
         expect(flash[:notice]).to include("Welcome")
       end
     end
+
+    context "with organization owner invitation" do
+      let!(:org_owner_invitation) { create(:invitation, :organization_owner, invited_by: system_admin) }
+
+      it "redirects to sign up for new user" do
+        get :accept, params: { token: org_owner_invitation.token }
+        expect(response).to redirect_to(new_user_registration_path(invitation_token: org_owner_invitation.token))
+      end
+
+      context "when user is signed in with correct email" do
+        let!(:existing_user) { create(:user, email: org_owner_invitation.email) }
+
+        before { sign_in existing_user }
+
+        it "accepts invitation and redirects to onboarding" do
+          get :accept, params: { token: org_owner_invitation.token }
+          
+          org_owner_invitation.reload
+          expect(org_owner_invitation.accepted?).to be true
+          expect(response).to redirect_to(onboarding_welcome_path)
+          expect(flash[:notice]).to include("Please set up your organization")
+        end
+      end
+
+      context "when user is signed in with different email" do
+        let!(:different_user) { create(:user, email: "different@example.com") }
+
+        before { sign_in different_user }
+
+        it "signs out user and redirects to registration" do
+          get :accept, params: { token: org_owner_invitation.token }
+          expect(response).to redirect_to(new_user_registration_path(invitation_token: org_owner_invitation.token))
+        end
+      end
+    end
   end
 end

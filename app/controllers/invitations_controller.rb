@@ -81,18 +81,26 @@ class InvitationsController < ApplicationController
       flash[:notice] = "Please sign up with the invited email address: #{@invitation.email}"
     end
 
-    # If user is already signed in with the correct email, just accept the invitation
+    # If user is already signed in with the correct email, accept the invitation
     if user_signed_in? && current_user.email == @invitation.email
       @invitation.accept!
 
-      OrganizationUser.create!(
-        user: current_user,
-        organization: @invitation.organization,
-        role: @invitation.role
-      )
+      # Handle organization owner invitations differently
+      if @invitation.organization_owner?
+        # Organization owners need to go through onboarding
+        redirect_to onboarding_welcome_path,
+          notice: "Welcome! Please set up your organization."
+      else
+        # Regular invitations add user to existing organization
+        OrganizationUser.create!(
+          user: current_user,
+          organization: @invitation.organization,
+          role: @invitation.role
+        )
 
-      redirect_to dashboard_path,
-        notice: "Welcome to #{@invitation.organization.name}!"
+        redirect_to dashboard_path,
+          notice: "Welcome to #{@invitation.organization.name}!"
+      end
       return
     end
 
