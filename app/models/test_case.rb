@@ -22,6 +22,7 @@ class TestCase < ApplicationRecord
 
   # Validations
   validates :title, presence: true, length: { minimum: 3, maximum: 255 }
+  validates :description, presence: true
   validates :priority, inclusion: { in: priorities.keys }
   validates :category, inclusion: { in: categories.keys }
   validates :status, inclusion: { in: statuses.keys }
