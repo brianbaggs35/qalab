@@ -100,10 +100,17 @@ jobs:
           # REDIS_URL: redis://localhost:6379/0
         run: |
           bin/rails db:create
+          bin/rails db:schema:load
           bundle exec rspec
 
       - name: Run JavaScript tests with coverage
-        run: npm run test:coverage
+        env:
+          RAILS_ENV: test
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432
+          NODE_ENV: test
+        run: |
+          bin/rails db:test:prepare
+          npm run test:coverage
 
       - name: Keep screenshots from failed system tests
         uses: actions/upload-artifact@v4
