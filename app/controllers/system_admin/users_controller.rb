@@ -118,6 +118,46 @@ class SystemAdmin::UsersController < ApplicationController
                 notice: "Confirmation email sent successfully!"
   end
 
+  def invite_organization_owner
+    # Show form to invite organization owner
+  end
+
+  def send_organization_owner_invitation
+    email = params[:email]
+
+    # Validate email
+    unless email.present? && email.match?(URI::MailTo::EMAIL_REGEXP)
+      redirect_to invite_organization_owner_system_admin_users_path,
+                  alert: "Please provide a valid email address."
+      return
+    end
+
+    # Check if user already exists
+    if User.exists?(email: email)
+      redirect_to invite_organization_owner_system_admin_users_path,
+                  alert: "A user with this email address already exists."
+      return
+    end
+
+    # Create organization owner invitation
+    invitation = Invitation.new(
+      email: email,
+      role: "organization_owner",
+      invited_by: current_user
+    )
+
+    if invitation.save
+      # TODO: Send invitation email
+      InvitationMailer.invite_organization_owner(invitation).deliver_later
+
+      redirect_to system_admin_users_path,
+                  notice: "Organization owner invitation sent to #{email} successfully!"
+    else
+      flash.now[:alert] = "Failed to send invitation: #{invitation.errors.full_messages.join(', ')}"
+      render :invite_organization_owner, status: :unprocessable_content
+    end
+  end
+
   private
 
   def set_user

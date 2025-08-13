@@ -8,6 +8,9 @@ class User < ApplicationRecord
   # Virtual attributes for registration
   attr_accessor :invitation_token
 
+  # Store the accepted invitation for onboarding purposes
+  attr_accessor :accepted_organization_owner_invitation
+
   # Relationships
   has_many :organization_users, dependent: :destroy
   has_many :organizations, through: :organization_users
@@ -66,10 +69,11 @@ class User < ApplicationRecord
 
   # Onboarding methods
   def onboarding_completed?
-    onboarding_completed_at.present?
+    self.onboarding_completed_at.present?
   end
 
   def needs_onboarding?
-    !onboarding_completed? && organizations.empty?
+    return false if system_admin? # System admins bypass onboarding
+    !onboarding_completed? && (organizations.empty? || accepted_organization_owner_invitation.present?)
   end
 end
