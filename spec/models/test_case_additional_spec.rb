@@ -28,24 +28,24 @@ RSpec.describe TestCase, type: :model do
 
     it 'validates status enum' do
       expect(test_case).to respond_to(:status)
-      test_case.status = :active
-      expect(test_case.status).to eq('active')
+      test_case.status = :approved
+      expect(test_case.status).to eq('approved')
     end
   end
 
   describe 'scopes' do
-    let!(:active_case) { create(:test_case, status: :active) }
+    let!(:approved_case) { create(:test_case, status: :approved) }
     let!(:draft_case) { create(:test_case, status: :draft) }
 
     it 'filters by status' do
-      expect(TestCase.active).to include(active_case)
-      expect(TestCase.active).not_to include(draft_case)
+      expect(TestCase.by_status(:approved)).to include(approved_case)
+      expect(TestCase.by_status(:approved)).not_to include(draft_case)
     end
   end
 
   describe 'callbacks' do
     it 'sets default status' do
-      new_case = TestCase.new(title: 'Test', description: 'Desc', organization: organization, user: user)
+      new_case = TestCase.new(title: 'Test', description: 'Test description', expected_results: 'Should work', organization: organization, user: user)
       new_case.save!
       expect(new_case.status).to be_present
     end
