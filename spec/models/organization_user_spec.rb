@@ -75,6 +75,7 @@ RSpec.describe OrganizationUser, type: :model do
       member = create(:organization_user, role: 'member')
       expect(member.owner?).to be false
       expect(member.admin?).to be false
+      expect(member.member?).to be true
       expect(member.manager?).to be false
     end
   end
