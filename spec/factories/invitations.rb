@@ -16,6 +16,11 @@ FactoryBot.define do
       role { 'owner' }
     end
 
+    trait :organization_owner do
+      role { 'organization_owner' }
+      organization { nil }
+    end
+
     trait :expired do
       expires_at { 1.day.ago }
     end

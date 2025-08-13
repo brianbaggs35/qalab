@@ -1,0 +1,60 @@
+<% content_for :title, "Invite Organization Owner" %>
+
+<div class="max-w-2xl mx-auto">
+  <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+      <h1 class="text-xl font-semibold text-gray-900">Invite Organization Owner</h1>
+      <p class="mt-1 text-sm text-gray-600">
+        Send an invitation to create a new organization on QA Lab
+      </p>
+    </div>
+
+    <div class="px-6 py-4">
+      <%= form_with url: send_organization_owner_invitation_system_admin_users_path, local: true, class: "space-y-4" do |form| %>
+        <div>
+          <%= form.label :email, "Email Address", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= form.email_field :email, 
+                placeholder: "owner@company.com",
+                class: "block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500",
+                required: true %>
+          <p class="mt-1 text-xs text-gray-500">
+            This person will receive an invitation to create their own organization as an owner.
+          </p>
+        </div>
+
+        <div class="flex items-center justify-between pt-4">
+          <%= link_to "Cancel", system_admin_users_path, 
+                class: "px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500" %>
+          
+          <%= form.submit "Send Invitation", 
+                class: "px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="mt-6 bg-blue-50 border border-blue-200 rounded-md p-4">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+        </svg>
+      </div>
+      <div class="ml-3">
+        <h3 class="text-sm font-medium text-blue-800">
+          About Organization Owner Invitations
+        </h3>
+        <div class="mt-2 text-sm text-blue-700">
+          <p>Organization owners will:</p>
+          <ul class="list-disc pl-5 mt-1">
+            <li>Receive an invitation email with a secure token</li>
+            <li>Create their account using the invitation link</li>
+            <li>Go through onboarding to set up their organization</li>
+            <li>Become the owner of their new organization</li>
+            <li>Be able to invite additional users to their organization</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_12_130810) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_13_075253) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -21,8 +21,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_12_130810) do
     t.string "role", default: "member", null: false
     t.datetime "expires_at", null: false
     t.datetime "accepted_at"
-    t.uuid "invited_by_id", null: false
-    t.uuid "organization_id", null: false
+    t.uuid "invited_by_id"
+    t.uuid "organization_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["email", "organization_id"], name: "index_invitations_on_email_and_organization_id", unique: true, where: "(accepted_at IS NULL)"

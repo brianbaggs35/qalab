@@ -12,22 +12,32 @@ class Users::RegistrationsController < Devise::RegistrationsController
     super(resource_name, resource)
 
     # Accept the invitation if registration is successful
-    if resource.persisted? && @invitation
+    if resource.persisted? && @invitation && !@invitation.organization_owner?
       @invitation.accept!
 
-      # Add user to organization with the invited role
+      # Add user to organization with the invited role (only for regular invitations)
       organization_user = OrganizationUser.create!(
         user: resource,
         organization: @invitation.organization,
         role: @invitation.role
       )
+    elsif resource.persisted? && @invitation&.organization_owner?
+      # For organization owner invitations, just accept the invitation
+      # Organization creation will happen during onboarding
+      @invitation.accept!
+      # Store invitation information for onboarding
+      resource.accepted_organization_owner_invitation = @invitation
     end
   end
 
   def after_sign_up_path_for(resource)
     if @first_user_signup
       onboarding_welcome_path
+    elsif @invitation&.organization_owner?
+      # Organization owner invitations go through onboarding to create organization
+      onboarding_welcome_path
     elsif @invitation
+      # Regular invitations join existing organization and go to dashboard
       dashboard_path
     else
       onboarding_welcome_path

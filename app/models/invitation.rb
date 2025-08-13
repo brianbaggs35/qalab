@@ -1,15 +1,16 @@
 class Invitation < ApplicationRecord
   # Relationships
-  belongs_to :invited_by, class_name: "User"
-  belongs_to :organization
+  belongs_to :invited_by, class_name: "User", optional: true
+  belongs_to :organization, optional: true
 
   # Validations
   validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :token, presence: true, uniqueness: true
-  validates :role, inclusion: { in: %w[owner admin member] }
+  validates :role, inclusion: { in: %w[owner admin member organization_owner] }
   validates :expires_at, presence: true
   validate :email_not_already_registered
   validate :email_unique_per_organization, unless: :accepted?
+  validate :organization_owner_validations
 
   # Scopes
   scope :pending, -> { where(accepted_at: nil) }
@@ -31,6 +32,10 @@ class Invitation < ApplicationRecord
 
   def valid_invitation?
     !accepted? && !expired?
+  end
+
+  def organization_owner?
+    role == "organization_owner"
   end
 
   def accept!
@@ -72,6 +77,14 @@ class Invitation < ApplicationRecord
 
     if self.class.pending.where(email: email, organization: organization).where.not(id: id).exists?
       errors.add(:email, "has already been invited to this organization")
+    end
+  end
+
+  def organization_owner_validations
+    if organization_owner? && organization_id.present?
+      errors.add(:organization, "should not be set for organization owner invitations")
+    elsif !organization_owner? && organization_id.blank?
+      errors.add(:organization, "must be set for regular invitations")
     end
   end
 end
