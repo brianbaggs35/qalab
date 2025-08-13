@@ -66,7 +66,7 @@ class AutomatedTesting::UploadController < ApplicationController
         this_month: policy_scope(TestRun).where(created_at: 1.month.ago..Time.current).count,
         success_rate: calculate_success_rate
       }
-      render :index, status: :unprocessable_entity
+      render :index, status: :unprocessable_content
     end
   end
 
