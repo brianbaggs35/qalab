@@ -44,7 +44,11 @@ RSpec.describe "Organization Owner Invitations", type: :system do
 
       # Wait for the redirect to complete
       expect(page).to have_current_path(invite_organization_owner_system_admin_users_path)
-      expect(page).to have_content("Please provide a valid email address.")
+      
+      # The flash message should be visible in the page
+      within('[data-controller="alert"]') do
+        expect(page).to have_content("Please provide a valid email address.")
+      end
     end
 
     it "prevents inviting existing users" do
@@ -55,7 +59,10 @@ RSpec.describe "Organization Owner Invitations", type: :system do
       fill_in "Email Address", with: "existing@example.com"
       click_button "Send Invitation"
 
-      expect(page).to have_content("A user with this email address already exists")
+      # The flash message should be visible in the page
+      within('[data-controller="alert"]') do
+        expect(page).to have_content("A user with this email address already exists")
+      end
     end
   end
 
