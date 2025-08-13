@@ -234,7 +234,8 @@ class TestRun < ApplicationRecord
       results_summary: summary
     )
   end
-    name = testcase_node.attr("name")
+
+  def parse_test_case(testcase_node)
     classname = testcase_node.attr("classname")
     time = testcase_node.attr("time").to_f
 
