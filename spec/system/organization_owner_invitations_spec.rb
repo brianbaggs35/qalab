@@ -42,7 +42,7 @@ RSpec.describe "Organization Owner Invitations", type: :system do
       fill_in "Email Address", with: "invalid-email"
       click_button "Send Invitation"
 
-      # Wait for the redirect to complete  
+      # Wait for the redirect to complete
       expect(page).to have_current_path(invite_organization_owner_system_admin_users_path)
       expect(page).to have_content("Please provide a valid email address.")
     end
