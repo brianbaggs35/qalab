@@ -103,4 +103,7 @@ group :test do
 
   # Model testing matchers
   gem "shoulda-matchers", "~> 6.0"
+
+  # Email testing helpers
+  gem "email_spec"
 end
