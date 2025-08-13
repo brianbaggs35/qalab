@@ -177,7 +177,7 @@ RSpec.describe TestRun, type: :model do
         # Use valid XML that will be detected but then fail during processing
         test_run.xml_file = '<testsuites><testsuite name="Test" tests="1"></testsuite></testsuites>'
         test_run.save!
-        
+
         # Mock the parsing method to raise an error
         allow(test_run).to receive(:parse_junit_xml).and_raise(StandardError, 'Processing failed')
 
@@ -188,10 +188,10 @@ RSpec.describe TestRun, type: :model do
       end
 
       it 'returns false on error' do
-        # Use valid XML that will be detected but then fail during processing  
+        # Use valid XML that will be detected but then fail during processing
         test_run.xml_file = '<testsuites><testsuite name="Test" tests="1"></testsuite></testsuites>'
         test_run.save!
-        
+
         # Mock the parsing method to raise an error
         allow(test_run).to receive(:parse_junit_xml).and_raise(StandardError, 'Processing failed')
 
@@ -238,20 +238,20 @@ RSpec.describe TestRun, type: :model do
         test_run.reload
 
         expect(test_run.test_results.count).to eq(3)
-        
+
         success_result = test_run.test_results.find_by(name: 'testSuccess')
         expect(success_result).to be_present
         expect(success_result.status).to eq('passed')
         expect(success_result.classname).to eq('com.example.SampleTest')
         expect(success_result.time).to eq(0.5)
-        
+
         failure_result = test_run.test_results.find_by(name: 'testFailure')
         expect(failure_result).to be_present
         expect(failure_result.status).to eq('failed')
         expect(failure_result.failure_message).to eq('Test failed')
         expect(failure_result.failure_type).to eq('java.lang.AssertionError')
         expect(failure_result.failure_stacktrace).to include('java.lang.AssertionError: Test failed')
-        
+
         skipped_result = test_run.test_results.find_by(name: 'testSkipped')
         expect(skipped_result).to be_present
         expect(skipped_result.status).to eq('skipped')
@@ -311,21 +311,21 @@ RSpec.describe TestRun, type: :model do
         test_run.reload
 
         expect(test_run.test_results.count).to eq(4)
-        
+
         pass_result = test_run.test_results.find_by(name: 'testPass')
         expect(pass_result).to be_present
         expect(pass_result.status).to eq('passed')
-        
+
         fail_result = test_run.test_results.find_by(name: 'testFail')
         expect(fail_result).to be_present
         expect(fail_result.status).to eq('failed')
         expect(fail_result.failure_message).to include('Expected 5 but was 4')
-        
+
         error_result = test_run.test_results.find_by(name: 'testError')
         expect(error_result).to be_present
         expect(error_result.status).to eq('error')
         expect(error_result.failure_type).to eq('NullPointerException')
-        
+
         skip_result = test_run.test_results.find_by(name: 'testSkip')
         expect(skip_result).to be_present
         expect(skip_result.status).to eq('skipped')
@@ -350,7 +350,7 @@ RSpec.describe TestRun, type: :model do
         junit_xml = '<testsuites><testsuite name="Test" tests="1"></testsuite></testsuites>'
         test_run.xml_file = junit_xml
         test_run.save!
-        
+
         expect(test_run.process_xml_file).to be true
         expect(test_run.reload.results_summary['format']).to eq('JUnit')
       end
@@ -359,7 +359,7 @@ RSpec.describe TestRun, type: :model do
         testng_xml = '<testng-results><suite name="Test"><test name="TestSuite"><class name="TestClass"></class></test></suite></testng-results>'
         test_run.xml_file = testng_xml
         test_run.save!
-        
+
         expect(test_run.process_xml_file).to be true
         expect(test_run.reload.results_summary['format']).to eq('TestNG')
       end
@@ -368,7 +368,7 @@ RSpec.describe TestRun, type: :model do
         unsupported_xml = '<some-other-format><test>data</test></some-other-format>'
         test_run.xml_file = unsupported_xml
         test_run.save!
-        
+
         expect(test_run.process_xml_file).to be false
         expect(test_run.reload.status).to eq('failed')
         expect(test_run.results_summary['error']).to include('Unsupported XML format')

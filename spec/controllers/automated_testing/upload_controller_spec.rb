@@ -120,18 +120,18 @@ RSpec.describe AutomatedTesting::UploadController, type: :controller do
         it 'handles TestNG XML files correctly' do
           testng_file = fixture_file_upload(Rails.root.join('spec', 'fixtures', 'testng_results.xml'), 'application/xml')
           testng_params = valid_params.merge(test_run: valid_params[:test_run].merge(xml_file: testng_file))
-          
+
           expect {
             post :create, params: testng_params
           }.to change(TestRun, :count).by(1)
-          
+
           test_run = TestRun.last
           expect(test_run.xml_file).to include('testng-results')
         end
 
         it 'validates file size limit' do
           allow_any_instance_of(ActionDispatch::Http::UploadedFile).to receive(:size).and_return(51.megabytes)
-          
+
           post :create, params: valid_params
           expect(assigns(:test_run).errors[:xml_file]).to include('must be less than 50MB')
         end
@@ -139,7 +139,7 @@ RSpec.describe AutomatedTesting::UploadController, type: :controller do
         it 'validates XML file content type' do
           text_file = fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'test_file.txt'), 'text/plain')
           invalid_params = valid_params.merge(test_run: valid_params[:test_run].merge(xml_file: text_file))
-          
+
           post :create, params: invalid_params
           expect(assigns(:test_run).errors[:xml_file]).to include('must be an XML file')
         end
