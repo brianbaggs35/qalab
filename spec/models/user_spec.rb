@@ -140,6 +140,19 @@ RSpec.describe User, type: :model do
           create(:organization_user, user: user, organization: organization)
           expect(user.needs_onboarding?).to be false
         end
+
+        it 'returns false for system admins' do
+          system_admin = create(:user, :system_admin)
+          system_admin.update!(onboarding_completed_at: nil)
+          expect(system_admin.needs_onboarding?).to be false
+        end
+
+        it 'returns true when user has accepted organization owner invitation' do
+          user.update!(onboarding_completed_at: nil)
+          invitation = create(:invitation, :organization_owner)
+          user.accepted_organization_owner_invitation = invitation
+          expect(user.needs_onboarding?).to be true
+        end
       end
     end
   end

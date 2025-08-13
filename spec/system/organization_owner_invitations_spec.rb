@@ -8,11 +8,12 @@ RSpec.describe "Organization Owner Invitations", type: :system do
     User.where.not(id: admin_user.id).destroy_all
     Organization.destroy_all
     Invitation.destroy_all
-
-    sign_in admin_user
   end
 
   describe "System admin inviting organization owner" do
+    before do
+      sign_in admin_user
+    end
     it "allows system admin to invite organization owner" do
       visit system_admin_users_path
 
@@ -41,6 +42,8 @@ RSpec.describe "Organization Owner Invitations", type: :system do
       fill_in "Email Address", with: "invalid-email"
       click_button "Send Invitation"
 
+      # Wait for the redirect to complete  
+      expect(page).to have_current_path(invite_organization_owner_system_admin_users_path)
       expect(page).to have_content("Please provide a valid email address.")
     end
 
