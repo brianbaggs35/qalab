@@ -173,6 +173,9 @@ class SystemAdmin::UsersController < ApplicationController
   end
 
   def ensure_system_admin
+    # Ensure current_user is a User object, not a Hash or other type
+    return redirect_to(root_path, alert: "Access denied.") unless current_user.is_a?(User)
+
     redirect_to root_path, alert: "Access denied." unless current_user.system_admin?
   end
 end

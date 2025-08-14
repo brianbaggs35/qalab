@@ -313,4 +313,19 @@ RSpec.describe SystemAdmin::UsersController, type: :controller do
       expect(response).to redirect_to(new_user_session_path)
     end
   end
+
+  describe "defensive programming for current_user type" do
+    before do
+      # Mock authentication to be successful but current_user returns a Hash instead of User object
+      allow(controller).to receive(:authenticate_user!).and_return(true)
+      allow(controller).to receive(:current_user).and_return({ 'id' => 1, 'role' => 'system_admin' })
+      allow(controller).to receive(:user_signed_in?).and_return(true)
+    end
+
+    it "handles current_user being a Hash instead of User object" do
+      get :index
+      expect(response).to redirect_to(root_path)
+      expect(flash[:alert]).to eq("Access denied.")
+    end
+  end
 end
