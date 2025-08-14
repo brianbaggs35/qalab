@@ -48,9 +48,14 @@ class AutomatedTesting::ResultsController < ApplicationController
 
   def show
     authorize @test_run
+
+    # Handle per_page parameter with validation
+    per_page = params[:per_page].present? ? [ params[:per_page].to_i, 25 ].max : 25
+    per_page = [ per_page, 100 ].min  # Cap at 100
+
     @test_results = @test_run.test_results.includes(:test_run)
                             .page(params[:page])
-                            .per(params[:per_page] || 25)
+                            .per(per_page)
 
     # Apply test result filters if present
     if params[:test_search].present?
@@ -61,6 +66,9 @@ class AutomatedTesting::ResultsController < ApplicationController
     if params[:test_status].present?
       @test_results = @test_results.where(status: params[:test_status])
     end
+
+    # Store per_page for the view
+    @current_per_page = per_page
   end
 
   def test_result
@@ -93,9 +101,15 @@ class AutomatedTesting::ResultsController < ApplicationController
     authorize @test_run
 
     if @test_run.update(test_run_params)
-      redirect_to automated_testing_result_path(@test_run), notice: "Test run updated successfully!"
+      respond_to do |format|
+        format.html { redirect_to automated_testing_result_path(@test_run), notice: "Test run updated successfully!" }
+        format.json { render json: { success: true, message: "Test run updated successfully!" } }
+      end
     else
-      render :edit, alert: "Error updating test run: #{@test_run.errors.full_messages.join(', ')}"
+      respond_to do |format|
+        format.html { render :edit, alert: "Error updating test run: #{@test_run.errors.full_messages.join(', ')}" }
+        format.json { render json: { success: false, errors: @test_run.errors.full_messages } }
+      end
     end
   end
 
@@ -118,7 +132,7 @@ class AutomatedTesting::ResultsController < ApplicationController
   end
 
   def test_run_params
-    params.require(:test_run).permit(:name, :description, :environment, :test_suite)
+    params.require(:test_run).permit(:name, :description, :environment, :test_suite, :status)
   end
 
   def ensure_not_system_admin
