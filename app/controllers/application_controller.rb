@@ -18,6 +18,9 @@ class ApplicationController < ActionController::Base
 
   # Devise redirects
   def after_sign_in_path_for(resource)
+    # Ensure resource is a User object
+    return dashboard_path unless resource.is_a?(User)
+    
     if resource.system_admin?
       system_admin_dashboard_path
     else
@@ -37,14 +40,18 @@ class ApplicationController < ActionController::Base
   end
 
   def current_organization
-    @current_organization ||= current_user&.organizations&.first
+    return nil unless current_user.is_a?(User)
+    @current_organization ||= current_user.organizations.first
   end
   helper_method :current_organization
 
   private
 
   def redirect_system_admin
-    if current_user&.system_admin? && !request.path.start_with?("/system_admin") && !devise_controller?
+    # Ensure current_user is a User object, not a Hash or other type
+    return unless current_user.is_a?(User)
+    
+    if current_user.system_admin? && !request.path.start_with?("/system_admin") && !devise_controller?
       redirect_to system_admin_dashboard_path
     end
   end
