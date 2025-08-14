@@ -48,9 +48,14 @@ class AutomatedTesting::ResultsController < ApplicationController
 
   def show
     authorize @test_run
+
+    # Handle per_page parameter with validation
+    per_page = params[:per_page].present? ? [ params[:per_page].to_i, 25 ].max : 25
+    per_page = [ per_page, 100 ].min  # Cap at 100
+
     @test_results = @test_run.test_results.includes(:test_run)
                             .page(params[:page])
-                            .per(params[:per_page] || 25)
+                            .per(per_page)
 
     # Apply test result filters if present
     if params[:test_search].present?
@@ -61,6 +66,9 @@ class AutomatedTesting::ResultsController < ApplicationController
     if params[:test_status].present?
       @test_results = @test_results.where(status: params[:test_status])
     end
+
+    # Store per_page for the view
+    @current_per_page = per_page
   end
 
   def test_result
