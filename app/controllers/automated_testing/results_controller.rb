@@ -93,9 +93,15 @@ class AutomatedTesting::ResultsController < ApplicationController
     authorize @test_run
 
     if @test_run.update(test_run_params)
-      redirect_to automated_testing_result_path(@test_run), notice: "Test run updated successfully!"
+      respond_to do |format|
+        format.html { redirect_to automated_testing_result_path(@test_run), notice: "Test run updated successfully!" }
+        format.json { render json: { success: true, message: "Test run updated successfully!" } }
+      end
     else
-      render :edit, alert: "Error updating test run: #{@test_run.errors.full_messages.join(', ')}"
+      respond_to do |format|
+        format.html { render :edit, alert: "Error updating test run: #{@test_run.errors.full_messages.join(', ')}" }
+        format.json { render json: { success: false, errors: @test_run.errors.full_messages } }
+      end
     end
   end
 
@@ -118,7 +124,7 @@ class AutomatedTesting::ResultsController < ApplicationController
   end
 
   def test_run_params
-    params.require(:test_run).permit(:name, :description, :environment, :test_suite)
+    params.require(:test_run).permit(:name, :description, :environment, :test_suite, :status)
   end
 
   def ensure_not_system_admin

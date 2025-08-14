@@ -182,17 +182,25 @@
                       <span class="text-base-content/50">-</span>
                     <% end %>
                   </td>
-                  <td>
-                    <% case test_run.status %>
-                    <% when 'completed' %>
-                      <div class="badge badge-success">Completed</div>
-                    <% when 'failed' %>
-                      <div class="badge badge-error">Failed</div>
-                    <% when 'processing' %>
-                      <div class="badge badge-warning">Processing</div>
-                    <% when 'pending' %>
-                      <div class="badge badge-ghost">Pending</div>
-                    <% end %>
+                  <td onclick="event.stopPropagation();">
+                    <div class="dropdown dropdown-end">
+                      <% case test_run.status %>
+                      <% when 'completed' %>
+                        <div tabindex="0" role="button" class="badge badge-success cursor-pointer">Completed</div>
+                      <% when 'failed' %>
+                        <div tabindex="0" role="button" class="badge badge-error cursor-pointer">Failed</div>
+                      <% when 'processing' %>
+                        <div tabindex="0" role="button" class="badge badge-warning cursor-pointer">Processing</div>
+                      <% when 'pending' %>
+                        <div tabindex="0" role="button" class="badge badge-ghost cursor-pointer">Pending</div>
+                      <% end %>
+                      <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-32 p-2 shadow mt-2" onclick="event.stopPropagation();">
+                        <li><button onclick="updateTestRunStatus(<%= test_run.id %>, 'completed')" class="text-left w-full text-success">Completed</button></li>
+                        <li><button onclick="updateTestRunStatus(<%= test_run.id %>, 'failed')" class="text-left w-full text-error">Failed</button></li>
+                        <li><button onclick="updateTestRunStatus(<%= test_run.id %>, 'processing')" class="text-left w-full text-warning">Processing</button></li>
+                        <li><button onclick="updateTestRunStatus(<%= test_run.id %>, 'pending')" class="text-left w-full text-base-content">Pending</button></li>
+                      </ul>
+                    </div>
                   </td>
                   <td>
                     <div class="text-sm">
@@ -236,10 +244,10 @@
                         </svg>
                       </div>
                       <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-32 p-2 shadow">
-                        <li><%= link_to "View Details", automated_testing_result_path(test_run) %></li>
-                        <li><%= link_to "Edit", edit_automated_testing_result_path(test_run) %></li>
+                        <li><button onclick="showTestRunDetails(<%= test_run.id %>); event.stopPropagation();" class="text-left w-full">View</button></li>
+                        <li><button onclick="showEditTestRunModal(<%= test_run.id %>); event.stopPropagation();" class="text-left w-full">Edit</button></li>
                         <li><%= link_to "Delete", automated_testing_result_path(test_run), method: :delete, 
-                                    confirm: "Are you sure?", class: "text-error" %></li>
+                                    confirm: "Are you sure?", class: "text-error", onclick: "event.stopPropagation();" %></li>
                       </ul>
                     </div>
                   </td>
@@ -294,6 +302,25 @@
   </form>
 </dialog>
 
+<!-- Test Run Edit Modal -->
+<dialog id="edit_test_run_modal" class="modal">
+  <div class="modal-box max-w-2xl">
+    <form method="dialog">
+      <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+    </form>
+    
+    <h3 class="font-bold text-lg mb-4">Edit Test Run</h3>
+    <div id="edit_test_run_content">
+      <!-- Content will be loaded dynamically -->
+      <div class="loading loading-spinner loading-md"></div>
+      <p>Loading test run details...</p>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
+
 <script>
   function showTestRunDetails(testRunId) {
     const modal = document.getElementById('test_run_details_modal');
@@ -320,5 +347,104 @@
         console.error('Error loading test run details:', error);
         content.innerHTML = '<p class="text-error">Error loading test run details.</p>';
       });
+  }
+
+  function showEditTestRunModal(testRunId) {
+    const modal = document.getElementById('edit_test_run_modal');
+    const content = document.getElementById('edit_test_run_content');
+    
+    // Show modal
+    modal.showModal();
+    
+    // Load edit form via AJAX
+    fetch(`/automated_testing/results/${testRunId}/edit`)
+      .then(response => response.text())
+      .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const formContent = doc.querySelector('.edit-form-content');
+        
+        if (formContent) {
+          content.innerHTML = formContent.innerHTML;
+          // Reinitialize form handlers if needed
+          initializeEditForm();
+        } else {
+          content.innerHTML = '<p class="text-error">Failed to load edit form.</p>';
+        }
+      })
+      .catch(error => {
+        console.error('Error loading edit form:', error);
+        content.innerHTML = '<p class="text-error">Error loading edit form.</p>';
+      });
+  }
+
+  function initializeEditForm() {
+    const form = document.querySelector('#edit_test_run_content form');
+    if (form) {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const testRunId = form.action.match(/\/(\d+)$/)[1];
+        
+        fetch(form.action, {
+          method: form.method,
+          body: formData,
+          headers: {
+            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById('edit_test_run_modal').close();
+            // Refresh the page to show updated data
+            window.location.reload();
+          } else {
+            // Show errors in the form
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-error mb-4';
+            errorDiv.innerHTML = data.errors ? data.errors.join('<br>') : 'An error occurred';
+            form.prepend(errorDiv);
+          }
+        })
+        .catch(error => {
+          console.error('Error submitting form:', error);
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'alert alert-error mb-4';
+          errorDiv.innerHTML = 'An error occurred while saving';
+          form.prepend(errorDiv);
+        });
+      });
+    }
+  }
+
+  function updateTestRunStatus(testRunId, newStatus) {
+    const formData = new FormData();
+    formData.append('test_run[status]', newStatus);
+    formData.append('_method', 'PATCH');
+    
+    fetch(`/automated_testing/results/${testRunId}`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+        'Accept': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Refresh the page to show updated status
+        window.location.reload();
+      } else {
+        alert('Error updating status: ' + (data.errors ? data.errors.join(', ') : 'Unknown error'));
+      }
+    })
+    .catch(error => {
+      console.error('Error updating status:', error);
+      alert('Error updating status');
+    });
   }
 </script>
