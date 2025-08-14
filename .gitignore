@@ -4,6 +4,8 @@
 # belong in git's global ignore instead:
 # `$XDG_CONFIG_HOME/git/ignore` or `~/.config/git/ignore`
 
+.vscode/*
+
 # Ignore bundler config.
 /.bundle
 
@@ -64,7 +66,7 @@ coverage-final.json
 /.git_cache
 /log/capistrano.log
 
-# SSL certificates (use proper certificates in production)  
+# SSL certificates (use proper certificates in production)
 *.key
 *.crt
 *.pem

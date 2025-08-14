@@ -44,7 +44,7 @@ RSpec.describe "Organization Owner Invitations", type: :system do
 
       # Wait for the redirect to complete
       expect(page).to have_current_path(invite_organization_owner_system_admin_users_path)
-      
+
       # The flash message should be visible in the page
       within('[data-controller="alert"]', wait: 5) do
         expect(page).to have_content("Please provide a valid email address.")
