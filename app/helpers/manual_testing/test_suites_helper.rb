@@ -1,0 +1,2 @@
+module ManualTesting::TestSuitesHelper
+end

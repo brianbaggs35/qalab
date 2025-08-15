@@ -40,6 +40,7 @@ Rails.application.routes.draw do
   namespace :manual_testing do
     get "cases", to: "test_cases#index"
     resources :test_cases, only: [ :index, :show, :new, :create, :edit, :update, :destroy ]
+    resources :test_suites, only: [ :index, :show, :new, :create, :edit, :update, :destroy ]
   end
 
   # System Admin routes
