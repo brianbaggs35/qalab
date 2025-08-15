@@ -89,11 +89,11 @@ RSpec.describe TestSuite, type: :model do
 
   describe 'test case nullification on destroy' do
     let(:test_suite) { create(:test_suite, user: user, organization: organization) }
-    
+
     it 'nullifies test_suite_id when test suite is destroyed' do
       test_case = create(:test_case, test_suite: test_suite, organization: organization, user: user)
       expect(test_case.test_suite_id).to eq(test_suite.id)
-      
+
       test_suite.destroy
       test_case.reload
       expect(test_case.test_suite_id).to be_nil

@@ -1,6 +1,6 @@
 class ManualTesting::TestSuitesController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_test_suite, only: [:show, :edit, :update, :destroy]
+  before_action :set_test_suite, only: [ :show, :edit, :update, :destroy ]
 
   def index
     @test_suites = policy_scope(TestSuite).includes(:user, :organization)
