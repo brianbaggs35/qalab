@@ -4,10 +4,13 @@ class ManualTesting::TestCasesController < ApplicationController
   before_action :set_test_case, only: [ :show, :edit, :update, :destroy ]
 
   def index
-    @test_cases = policy_scope(TestCase).includes(:user, :organization)
+    @test_cases = policy_scope(TestCase).includes(:user, :organization, :test_suite)
                                        .recent
                                        .page(params[:page])
                                        .per(20)
+
+    # Filter by test suite if provided
+    @test_cases = @test_cases.where(test_suite_id: params[:test_suite_id]) if params[:test_suite_id].present?
 
     # Filter options
     @test_cases = @test_cases.by_priority(params[:priority]) if params[:priority].present?
@@ -22,6 +25,9 @@ class ManualTesting::TestCasesController < ApplicationController
       ready: all_test_cases.by_status(:ready).count,
       approved: all_test_cases.by_status(:approved).count
     }
+
+    # Load test suites for filtering
+    @test_suites = policy_scope(TestSuite).recent
   end
 
   def show
@@ -30,7 +36,14 @@ class ManualTesting::TestCasesController < ApplicationController
 
   def new
     @test_case = TestCase.new
+    # Pre-select test suite if coming from a test suite page
+    if params[:test_suite_id].present?
+      @test_case.test_suite_id = params[:test_suite_id]
+    end
     authorize @test_case
+    
+    # Load test suites for dropdown
+    @test_suites = policy_scope(TestSuite).recent
   end
 
   def create
@@ -65,6 +78,8 @@ class ManualTesting::TestCasesController < ApplicationController
 
   def edit
     authorize @test_case
+    # Load test suites for dropdown
+    @test_suites = policy_scope(TestSuite).recent
   end
 
   def update
@@ -104,7 +119,8 @@ class ManualTesting::TestCasesController < ApplicationController
   def test_case_params
     params.require(:test_case).permit(
       :title, :priority, :description, :expected_results, :notes,
-      :category, :status, :preconditions, :estimated_duration, :tags
+      :category, :status, :preconditions, :estimated_duration, :tags,
+      :environment, :module, :test_suite_id
       # Note: steps is handled separately in the controller action
     )
   end

@@ -1,6 +1,7 @@
 class TestCase < ApplicationRecord
   belongs_to :user
   belongs_to :organization
+  belongs_to :test_suite, optional: true
 
   # Enums
   enum :priority, { low: "low", medium: "medium", high: "high", critical: "critical" }, default: :medium
@@ -20,14 +21,16 @@ class TestCase < ApplicationRecord
     deprecated: "deprecated"
   }, default: :draft
 
-  # Validations
+  # Validations - Only title is required as per requirements
   validates :title, presence: true, length: { minimum: 3, maximum: 255 }
-  validates :description, presence: true
   validates :priority, inclusion: { in: priorities.keys }
   validates :category, inclusion: { in: categories.keys }
   validates :status, inclusion: { in: statuses.keys }
-  validates :expected_results, presence: true
   validates :estimated_duration, numericality: { greater_than: 0, less_than_or_equal_to: 300 }, allow_nil: true
+  validates :description, length: { maximum: 5000 }, allow_blank: true
+  validates :expected_results, length: { maximum: 2000 }, allow_blank: true
+  validates :environment, length: { maximum: 100 }, allow_blank: true
+  validates :module, length: { maximum: 100 }, allow_blank: true
 
   # JSONB field defaults
   attribute :steps, :jsonb, default: []

@@ -1,0 +1,220 @@
+<% content_for :title, @test_suite.name %>
+<% content_for :breadcrumbs do %>
+  <li>Manual Testing</li>
+  <li><%= link_to "Test Suites", manual_testing_test_suites_path, class: "text-primary hover:text-primary-focus" %></li>
+  <li class="text-secondary font-semibold"><%= truncate(@test_suite.name, length: 30) %></li>
+<% end %>
+
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+    <div class="flex-1">
+      <h1 class="text-3xl font-bold text-secondary mb-2"><%= @test_suite.name %></h1>
+      <% if @test_suite.description.present? %>
+        <p class="text-base-content/70 text-lg"><%= @test_suite.description %></p>
+      <% end %>
+      
+      <!-- Metadata -->
+      <div class="flex flex-wrap items-center gap-4 mt-4 text-sm text-base-content/60">
+        <span class="flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          Created by <%= @test_suite.user.full_name %>
+        </span>
+        <span class="flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <%= time_ago_in_words(@test_suite.created_at) %> ago
+        </span>
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <%= link_to new_manual_testing_test_case_path(test_suite_id: @test_suite.id), 
+          class: "btn btn-secondary gap-2" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Add Test Case
+      <% end %>
+      <%= link_to edit_manual_testing_test_suite_path(@test_suite), 
+          class: "btn btn-outline gap-2" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+        Edit Suite
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="stat bg-base-100 shadow border border-base-300 rounded-box">
+      <div class="stat-figure text-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+      <div class="stat-title">Total Test Cases</div>
+      <div class="stat-value text-primary"><%= @test_suite.test_cases_count %></div>
+    </div>
+
+    <div class="stat bg-base-100 shadow border border-base-300 rounded-box">
+      <div class="stat-figure text-warning">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+      </div>
+      <div class="stat-title">Draft</div>
+      <div class="stat-value text-warning"><%= @test_suite.draft_test_cases_count %></div>
+    </div>
+
+    <div class="stat bg-base-100 shadow border border-base-300 rounded-box">
+      <div class="stat-figure text-info">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <div class="stat-title">Ready</div>
+      <div class="stat-value text-info"><%= @test_suite.ready_test_cases_count %></div>
+    </div>
+
+    <div class="stat bg-base-100 shadow border border-base-300 rounded-box">
+      <div class="stat-figure text-success">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <div class="stat-title">Approved</div>
+      <div class="stat-value text-success"><%= @test_suite.approved_test_cases_count %></div>
+    </div>
+  </div>
+
+  <!-- Test Cases -->
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="card-title text-xl">
+          Test Cases
+          <% if @test_cases.any? %>
+            <div class="badge badge-primary"><%= @test_suite.test_cases_count %></div>
+          <% end %>
+        </h2>
+        <% if @test_cases.any? %>
+          <%= link_to manual_testing_test_cases_path(test_suite_id: @test_suite.id), 
+              class: "btn btn-ghost btn-sm gap-1" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            View All
+          <% end %>
+        <% end %>
+      </div>
+
+      <% if @test_cases.any? %>
+        <div class="space-y-4">
+          <% @test_cases.each do |test_case| %>
+            <div class="card bg-base-200 hover:bg-base-300 transition-colors">
+              <div class="card-body p-4">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <div class="flex items-start gap-3">
+                      <div class="flex-1">
+                        <h3 class="card-title text-base">
+                          <%= link_to test_case.title, manual_testing_test_case_path(test_case), 
+                              class: "hover:text-primary transition-colors" %>
+                        </h3>
+                        <% if test_case.description.present? %>
+                          <p class="text-base-content/70 text-sm mt-1 line-clamp-2">
+                            <%= truncate(test_case.description, length: 120) %>
+                          </p>
+                        <% end %>
+                      </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap items-center gap-2 mt-3">
+                      <!-- Priority Badge -->
+                      <div class="badge <%= test_case.priority_badge_class %> badge-sm gap-1">
+                        <% case test_case.priority %>
+                        <% when "critical" %>
+                          🔥
+                        <% when "high" %>
+                          🔴
+                        <% when "medium" %>
+                          🟡
+                        <% when "low" %>
+                          🟢
+                        <% end %>
+                        <%= test_case.priority.capitalize %>
+                      </div>
+                      
+                      <!-- Status Badge -->
+                      <div class="badge <%= test_case.status_badge_class %> badge-sm">
+                        <%= test_case.status.humanize %>
+                      </div>
+                      
+                      <!-- Category Badge -->
+                      <div class="badge badge-outline badge-sm">
+                        <% case test_case.category %>
+                        <% when "functional" %>
+                          ⚙️
+                        <% when "ui_ux" %>
+                          🎨
+                        <% when "integration" %>
+                          🔗
+                        <% when "performance" %>
+                          ⚡
+                        <% when "security" %>
+                          🔒
+                        <% when "regression" %>
+                          🔄
+                        <% end %>
+                        <%= test_case.category.humanize %>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="flex items-center gap-2">
+                    <%= link_to manual_testing_test_case_path(test_case), 
+                        class: "btn btn-ghost btn-xs" do %>
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Pagination -->
+        <% if @test_cases.respond_to?(:current_page) %>
+          <div class="mt-6 flex justify-center">
+            <%= paginate @test_cases %>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="text-center py-12">
+          <div class="max-w-md mx-auto">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-base-content/30 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <h3 class="text-lg font-semibold mb-2">No Test Cases Yet</h3>
+            <p class="text-base-content/60 mb-6">Start adding test cases to this suite</p>
+            <%= link_to new_manual_testing_test_case_path(test_suite_id: @test_suite.id), 
+                class: "btn btn-secondary gap-2" do %>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              Create First Test Case
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

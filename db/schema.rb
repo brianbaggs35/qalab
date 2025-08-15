@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_14_110156) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_14_235544) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -68,11 +68,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_14_110156) do
     t.uuid "organization_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "test_suite_id"
+    t.string "environment"
+    t.string "module"
     t.index ["category"], name: "index_test_cases_on_category"
     t.index ["organization_id", "status"], name: "index_test_cases_on_organization_id_and_status"
     t.index ["organization_id"], name: "index_test_cases_on_organization_id"
     t.index ["priority"], name: "index_test_cases_on_priority"
     t.index ["status"], name: "index_test_cases_on_status"
+    t.index ["test_suite_id"], name: "index_test_cases_on_test_suite_id"
     t.index ["user_id"], name: "index_test_cases_on_user_id"
   end
 
@@ -116,6 +120,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_14_110156) do
     t.index ["user_id"], name: "index_test_runs_on_user_id"
   end
 
+  create_table "test_suites", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description"
+    t.uuid "organization_id", null: false
+    t.uuid "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id", "name"], name: "index_test_suites_on_organization_id_and_name", unique: true
+    t.index ["organization_id"], name: "index_test_suites_on_organization_id"
+    t.index ["user_id"], name: "index_test_suites_on_user_id"
+  end
+
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -152,8 +168,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_14_110156) do
   add_foreign_key "organization_users", "organizations"
   add_foreign_key "organization_users", "users"
   add_foreign_key "test_cases", "organizations"
+  add_foreign_key "test_cases", "test_suites"
   add_foreign_key "test_cases", "users"
   add_foreign_key "test_results", "test_runs"
   add_foreign_key "test_runs", "organizations"
   add_foreign_key "test_runs", "users"
+  add_foreign_key "test_suites", "organizations"
+  add_foreign_key "test_suites", "users"
 end

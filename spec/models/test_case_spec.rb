@@ -9,7 +9,15 @@ RSpec.describe TestCase, type: :model do
 
     it { should validate_presence_of(:title) }
     it { should validate_length_of(:title).is_at_least(3).is_at_most(255) }
-    it { should validate_presence_of(:expected_results) }
+    # Only title is required as per new requirements
+    it { should_not validate_presence_of(:description) }
+    it { should_not validate_presence_of(:expected_results) }
+    
+    # Length validations for optional fields
+    it { should validate_length_of(:description).is_at_most(5000) }
+    it { should validate_length_of(:expected_results).is_at_most(2000) }
+    it { should validate_length_of(:environment).is_at_most(100) }
+    it { should validate_length_of(:module).is_at_most(100) }
 
     it 'validates priority inclusion' do
       test_case = build(:test_case, user: user, organization: organization)
@@ -55,6 +63,7 @@ RSpec.describe TestCase, type: :model do
   describe 'associations' do
     it { should belong_to(:user) }
     it { should belong_to(:organization) }
+    it { should belong_to(:test_suite).optional }
   end
 
   describe 'enums' do
