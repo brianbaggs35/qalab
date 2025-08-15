@@ -12,10 +12,9 @@ RSpec.describe TestCase, type: :model do
       expect(test_case.errors[:title]).to include("can't be blank")
     end
 
-    it 'requires description' do
+    it 'allows test cases without description (description no longer required)' do
       test_case.description = nil
-      expect(test_case).not_to be_valid
-      expect(test_case.errors[:description]).to include("can't be blank")
+      expect(test_case).to be_valid
     end
   end
 
