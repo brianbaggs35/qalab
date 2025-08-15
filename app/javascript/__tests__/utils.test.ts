@@ -293,6 +293,16 @@ describe('ApiClient', () => {
       });
       expect(result).toEqual(mockResponse);
     });
+
+    it('should throw error for non-ok PUT response', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 500,
+      } as Response);
+
+      const client = new ApiClient();
+      await expect(client.put('/users/1', {})).rejects.toThrow('HTTP error! status: 500');
+    });
   });
 
   describe('delete', () => {

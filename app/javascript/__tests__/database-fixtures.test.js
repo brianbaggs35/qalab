@@ -226,4 +226,47 @@ describe("Database Fixtures Integration", () => {
       expect(updatedResult.test_case_id).toBe(testCase.id);
     });
   });
+
+  describe("Edge cases and error handling", () => {
+    it("should return null when updating non-existent record", () => {
+      const result = fixtures.update('users', 999, { name: 'Updated' });
+      expect(result).toBeNull();
+    });
+
+    it("should return null when deleting non-existent record", () => {
+      const result = fixtures.destroy('users', 999);
+      expect(result).toBeNull();
+    });
+
+    it("should handle MockApiClient PUT request for non-existent record", async () => {
+      const result = await mockApiClient.put('/api/users', 999, { name: 'Updated' });
+      expect(result).toEqual({ status: 404, error: 'Not found' });
+    });
+
+    it("should handle MockApiClient DELETE request for non-existent record", async () => {
+      const result = await mockApiClient.delete('/api/users', 999);
+      expect(result).toEqual({ status: 404, error: 'Not found' });
+    });
+
+    it("should handle operations on non-existent tables", () => {
+      // Test findAll with non-existent table
+      expect(fixtures.findAll('non_existent_table')).toEqual([]);
+      
+      // Test find with non-existent table
+      expect(fixtures.find('non_existent_table', 1)).toBeUndefined();
+      
+      // Test findWhere with non-existent table
+      expect(fixtures.findWhere('non_existent_table', { id: 1 })).toEqual([]);
+      
+      // Test create with non-existent table (should create new table)
+      const result = fixtures.create('new_table', { name: 'Test' });
+      expect(result).toEqual({ id: 1, name: 'Test' });
+      
+      // Test update with non-existent table
+      expect(fixtures.update('another_non_existent_table', 1, { name: 'Updated' })).toBeNull();
+      
+      // Test destroy with non-existent table
+      expect(fixtures.destroy('yet_another_non_existent_table', 1)).toBeNull();
+    });
+  });
 });

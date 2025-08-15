@@ -45,6 +45,9 @@ describe("UploadController", () => {
     csrfMeta.content = 'test-csrf-token';
     document.head.appendChild(csrfMeta);
 
+    // Mock console.error to prevent test noise
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+
     controller = new UploadController();
     
     // Mock the element and targets
@@ -377,6 +380,9 @@ describe("UploadController", () => {
     });
 
     it("should handle upload error", () => {
+      // Reset the mock to track calls for this specific test
+      console.error.mockClear();
+      
       const mockFile = new File(['content'], 'test.xml', { type: 'application/xml' });
       const mockEvent = {
         preventDefault: jest.fn()
@@ -389,16 +395,18 @@ describe("UploadController", () => {
       const xhr = xhrInstances[0];
       xhr.status = 500;
       
-      const consoleErrorSpy = jest.spyOn(console, 'error');
-      
       const loadCallback = xhr.addEventListener.mock.calls.find(call => call[0] === 'load')[1];
       loadCallback();
       
-      expect(consoleErrorSpy).toHaveBeenCalledWith("Upload failed with status:", 500);
+      expect(console.error).toHaveBeenCalledWith("Upload failed with status:", 500);
+      expect(console.error).toHaveBeenCalledWith("Upload error:", "Upload failed. Please try again.");
       expect(mockSubmitButtonTarget.textContent).toBe('Upload Test Results');
     });
 
     it("should handle network error", () => {
+      // Reset the mock to track calls for this specific test
+      console.error.mockClear();
+      
       const mockFile = new File(['content'], 'test.xml', { type: 'application/xml' });
       const mockEvent = {
         preventDefault: jest.fn()
@@ -409,12 +417,12 @@ describe("UploadController", () => {
       controller.handleSubmit(mockEvent);
       
       const xhr = xhrInstances[0];
-      const consoleErrorSpy = jest.spyOn(console, 'error');
       
       const errorCallback = xhr.addEventListener.mock.calls.find(call => call[0] === 'error')[1];
       errorCallback();
       
-      expect(consoleErrorSpy).toHaveBeenCalledWith("Upload error occurred");
+      expect(console.error).toHaveBeenCalledWith("Upload error occurred");
+      expect(console.error).toHaveBeenCalledWith("Upload error:", "Upload failed. Please check your connection and try again.");
       expect(mockSubmitButtonTarget.textContent).toBe('Upload Test Results');
     });
   });
@@ -459,12 +467,14 @@ describe("UploadController", () => {
 
   describe("showError", () => {
     it("should display error state and show alert", () => {
+      // Reset the mock to track calls for this specific test
+      console.error.mockClear();
+      
       const testMessage = "Test error message";
-      const consoleErrorSpy = jest.spyOn(console, 'error');
       
       controller.showError(testMessage);
       
-      expect(consoleErrorSpy).toHaveBeenCalledWith("Upload error:", testMessage);
+      expect(console.error).toHaveBeenCalledWith("Upload error:", testMessage);
       expect(mockProgressContainerTarget.classList.contains('hidden')).toBe(true);
       expect(mockSubmitButtonTarget.disabled).toBe(false);
       expect(mockSubmitButtonTarget.textContent).toBe('Upload Test Results');
@@ -725,6 +735,67 @@ describe("UploadController", () => {
         controller.handleFileChange(mockEvent);
         expect(mockSubmitButtonTarget.disabled).toBe(false);
       });
+    });
+
+    it("should handle responseURL parsing error in success handler", () => {
+      jest.useFakeTimers();
+      
+      const mockFile = new File(['content'], 'test.xml', { type: 'application/xml' });
+      const mockEvent = {
+        preventDefault: jest.fn()
+      };
+      
+      Object.defineProperty(mockFileInputTarget, "files", { value: [mockFile], configurable: true });
+      
+      controller.handleSubmit(mockEvent);
+      
+      const xhr = xhrInstances[0];
+      xhr.status = 200;
+      
+      // Mock xhr.responseURL to throw an error when accessed
+      Object.defineProperty(xhr, 'responseURL', {
+        get() {
+          throw new Error('ResponseURL access error');
+        }
+      });
+      
+      const loadCallback = xhr.addEventListener.mock.calls.find(call => call[0] === 'load')[1];
+      loadCallback();
+      
+      // Fast-forward time to trigger the redirect
+      jest.advanceTimersByTime(2000);
+      
+      // Should fall back to default redirect URL
+      expect(window.location.href).toBe('/automated_testing/results');
+      
+      jest.useRealTimers();
+    });
+
+    it("should handle JSON parsing error in 422 validation response", () => {
+      const mockFile = new File(['content'], 'test.xml', { type: 'application/xml' });
+      const mockEvent = {
+        preventDefault: jest.fn()
+      };
+      
+      Object.defineProperty(mockFileInputTarget, "files", { value: [mockFile], configurable: true });
+      
+      controller.handleSubmit(mockEvent);
+      
+      const xhr = xhrInstances[0];
+      xhr.status = 422;
+      
+      // Mock xhr.responseText to throw an error when accessed
+      Object.defineProperty(xhr, 'responseText', {
+        get() {
+          throw new Error('ResponseText access error');
+        }
+      });
+      
+      const loadCallback = xhr.addEventListener.mock.calls.find(call => call[0] === 'load')[1];
+      loadCallback();
+      
+      // Should fall back to generic validation error message
+      expect(global.alert).toHaveBeenCalledWith('Upload failed due to validation errors. Please check your file and try again.');
     });
   });
 });
