@@ -41,7 +41,7 @@ class ManualTesting::TestCasesController < ApplicationController
       @test_case.test_suite_id = params[:test_suite_id]
     end
     authorize @test_case
-    
+
     # Load test suites for dropdown
     @test_suites = policy_scope(TestSuite).recent
   end

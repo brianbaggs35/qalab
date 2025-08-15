@@ -14,7 +14,7 @@ class CreateTestSuites < ActiveRecord::Migration[8.0]
 
     add_index :test_suites, :organization_id
     add_index :test_suites, :user_id
-    add_index :test_suites, [:organization_id, :name], unique: true
+    add_index :test_suites, [ :organization_id, :name ], unique: true
 
     add_foreign_key :test_suites, :organizations
     add_foreign_key :test_suites, :users

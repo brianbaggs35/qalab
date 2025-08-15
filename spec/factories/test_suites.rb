@@ -2,7 +2,7 @@ FactoryBot.define do
   factory :test_suite do
     sequence(:name) { |n| "Test Suite #{n}" }
     description { "Sample test suite for organizing test cases" }
-    
+
     association :organization
     association :user
 

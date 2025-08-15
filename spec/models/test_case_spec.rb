@@ -12,7 +12,7 @@ RSpec.describe TestCase, type: :model do
     # Only title is required as per new requirements
     it { should_not validate_presence_of(:description) }
     it { should_not validate_presence_of(:expected_results) }
-    
+
     # Length validations for optional fields
     it { should validate_length_of(:description).is_at_most(5000) }
     it { should validate_length_of(:expected_results).is_at_most(2000) }

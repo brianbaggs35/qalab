@@ -15,7 +15,7 @@ FactoryBot.define do
 
     association :user
     association :organization
-    
+
     # Optional test_suite association
     test_suite { nil }
 
