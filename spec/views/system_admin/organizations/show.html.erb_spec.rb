@@ -27,8 +27,8 @@ RSpec.describe "system_admin/organizations/show.html.erb", type: :view do
       recent_users: []
     })
     assign(:users_by_role, {
-      'owner' => [OrganizationUser.find_by(user: user1, organization: organization)],
-      'admin' => [OrganizationUser.find_by(user: user2, organization: organization)]
+      'owner' => [ OrganizationUser.find_by(user: user1, organization: organization) ],
+      'admin' => [ OrganizationUser.find_by(user: user2, organization: organization) ]
     })
   end
 

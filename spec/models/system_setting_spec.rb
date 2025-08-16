@@ -52,7 +52,7 @@ RSpec.describe SystemSetting, type: :model do
 
       it 'stores passwords in encrypted_value field' do
         SystemSetting.update_smtp_settings(params)
-        
+
         password_setting = SystemSetting.find_by(key: 'smtp_password')
         expect(password_setting.encrypted_value).to eq('secret123')
         expect(password_setting.value).to be_nil
@@ -60,7 +60,7 @@ RSpec.describe SystemSetting, type: :model do
 
       it 'skips blank values' do
         params_with_blanks = params.merge('domain' => '', 'reply_to_email' => nil)
-        
+
         expect { SystemSetting.update_smtp_settings(params_with_blanks) }
           .to change { SystemSetting.count }.by(5) # Only non-blank values
       end
@@ -124,7 +124,7 @@ RSpec.describe SystemSetting, type: :model do
         before do
           allow(Object).to receive(:defined?).with(Redis).and_return(true)
           allow(ENV).to receive(:[]).with('REDIS_URL').and_return('redis://localhost:6379')
-          
+
           redis_mock = double('Redis')
           allow(Redis).to receive(:new).and_return(redis_mock)
           allow(redis_mock).to receive(:ping).and_raise(StandardError.new('Connection failed'))
@@ -140,7 +140,7 @@ RSpec.describe SystemSetting, type: :model do
         before do
           allow(Object).to receive(:defined?).with(Redis).and_return(true)
           allow(ENV).to receive(:[]).with('REDIS_URL').and_return('redis://localhost:6379')
-          
+
           redis_mock = double('Redis')
           allow(Redis).to receive(:new).and_return(redis_mock)
           allow(redis_mock).to receive(:ping).and_return('PONG')

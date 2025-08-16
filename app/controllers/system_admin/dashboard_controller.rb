@@ -89,11 +89,13 @@ class SystemAdmin::DashboardController < ApplicationController
       { name: "test.log", path: Rails.root.join("log", "test.log") }
     ]
 
-    @selected_log = params[:log] || "production.log"
+    # Sanitize log file parameter to prevent path traversal
+    allowed_logs = @log_files.map { |file| file[:name] }
+    @selected_log = params[:log].presence_in(allowed_logs) || "production.log"
     @log_path = Rails.root.join("log", @selected_log)
 
     @log_content = ""
-    @lines_to_show = params[:lines]&.to_i || 100
+    @lines_to_show = [params[:lines]&.to_i || 100, 5000].min # Cap at 5000 lines
 
     if File.exist?(@log_path)
       lines = File.readlines(@log_path)

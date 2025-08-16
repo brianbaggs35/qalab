@@ -122,18 +122,18 @@ RSpec.describe SystemAdmin::DashboardController, type: :controller do
 
       it 'updates smtp settings and redirects with success notice' do
         expect(SystemSetting).to receive(:update_smtp_settings).with(smtp_params[:smtp])
-        
+
         post :update_system_settings, params: smtp_params
-        
+
         expect(response).to redirect_to(system_admin_system_settings_path)
         expect(flash[:notice]).to eq('SMTP settings updated successfully!')
       end
 
       it 'handles errors gracefully' do
         allow(SystemSetting).to receive(:update_smtp_settings).and_raise(StandardError.new('Test error'))
-        
+
         post :update_system_settings, params: smtp_params
-        
+
         expect(response).to redirect_to(system_admin_system_settings_path)
         expect(flash[:alert]).to include('Error updating settings')
       end
