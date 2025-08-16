@@ -99,7 +99,7 @@ RSpec.describe AutomatedTesting::UploadController, type: :controller do
 
         it 'redirects with success message' do
           post :create, params: valid_params
-          expect(response).to redirect_to(automated_testing_results_path)
+          expect(response).to redirect_to(automated_testing_test_runs_path)
           expect(flash[:notice]).to include('successfully')
         end
       end

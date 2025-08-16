@@ -117,9 +117,9 @@ class AutomatedTesting::ResultsController < ApplicationController
     authorize @test_run
 
     if @test_run.destroy
-      redirect_to automated_testing_results_path, notice: "Test run deleted successfully!"
+      redirect_to automated_testing_test_runs_path, notice: "Test run deleted successfully!"
     else
-      redirect_to automated_testing_results_path, alert: "Error deleting test run."
+      redirect_to automated_testing_test_runs_path, alert: "Error deleting test run."
     end
   end
 

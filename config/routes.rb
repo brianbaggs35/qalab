@@ -28,7 +28,7 @@ Rails.application.routes.draw do
     get "upload", to: "upload#index"
     post "upload", to: "upload#create"
     get "test_runs", to: "results#index", as: :test_runs
-    resources :results, only: [ :index, :show, :edit, :update, :destroy ] do
+    resources :results, only: [ :show, :edit, :update, :destroy ], param: :id do
       member do
         get :download_xml
         get "test_results/:test_result_id", to: "results#test_result", as: :test_result

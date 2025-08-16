@@ -52,12 +52,12 @@ class AutomatedTesting::UploadController < ApplicationController
         processed = @test_run.process_xml_file
 
         if processed
-          redirect_to automated_testing_results_path, notice: "Test run uploaded and processed successfully! #{@test_run.total_tests} tests processed."
+          redirect_to automated_testing_test_runs_path, notice: "Test run uploaded and processed successfully! #{@test_run.total_tests} tests processed."
         else
-          redirect_to automated_testing_results_path, alert: "Test run uploaded but failed to process XML. Please check the file format."
+          redirect_to automated_testing_test_runs_path, alert: "Test run uploaded but failed to process XML. Please check the file format."
         end
       else
-        redirect_to automated_testing_results_path, notice: "Test run created successfully!"
+        redirect_to automated_testing_test_runs_path, notice: "Test run created successfully!"
       end
     else
       @recent_uploads = policy_scope(TestRun).recent.limit(5)
