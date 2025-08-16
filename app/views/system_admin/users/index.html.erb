@@ -245,13 +245,13 @@
                       <% end %>
                       
                       <% unless user == current_user %>
-                        <div class="dropdown dropdown-end">
+                        <div class="dropdown dropdown-top dropdown-end">
                           <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01" />
                             </svg>
                           </div>
-                          <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-50">
+                          <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-[60]">
                             <% if user.access_locked? %>
                               <li>
                                 <%= link_to unlock_system_admin_user_path(user), method: :patch, class: "text-success" do %>

@@ -228,7 +228,7 @@
             <div class="bg-base-200/50 rounded-lg p-3">
               <div class="flex justify-between items-center py-1">
                 <span class="text-xs">Organizations</span>
-                <span class="badge badge-primary badge-sm"><%= Organization.count %></span>
+                <span class="badge badge-primary badge-sm ml-2"><%= Organization.count %></span>
               </div>
             </div>
           </li>
@@ -237,7 +237,7 @@
             <div class="bg-base-200/50 rounded-lg p-3">
               <div class="flex justify-between items-center py-1">
                 <span class="text-xs">Total Users</span>
-                <span class="badge badge-secondary badge-sm"><%= User.count %></span>
+                <span class="badge badge-secondary badge-sm ml-2"><%= User.count %></span>
               </div>
             </div>
           </li>
@@ -246,7 +246,7 @@
             <div class="bg-base-200/50 rounded-lg p-3">
               <div class="flex justify-between items-center py-1">
                 <span class="text-xs">System Admins</span>
-                <span class="badge badge-error badge-sm"><%= User.system_admins.count %></span>
+                <span class="badge badge-error badge-sm ml-2"><%= User.system_admins.count %></span>
               </div>
             </div>
           </li>
@@ -261,6 +261,11 @@
             <div class="text-xs text-base-content/70">
               v<%= Rails.version %>
             </div>
+          </div>
+          <div class="mt-2">
+            <%= form_with url: destroy_user_session_path, method: :delete, local: true, class: "w-full" do |f| %>
+              <%= f.submit "Logout", class: "btn btn-error btn-sm w-full" %>
+            <% end %>
           </div>
         </div>
       </aside>
