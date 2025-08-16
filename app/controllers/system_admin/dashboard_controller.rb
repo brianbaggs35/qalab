@@ -95,7 +95,7 @@ class SystemAdmin::DashboardController < ApplicationController
     @log_path = Rails.root.join("log", @selected_log)
 
     @log_content = ""
-    @lines_to_show = [params[:lines]&.to_i || 100, 5000].min # Cap at 5000 lines
+    @lines_to_show = [ params[:lines]&.to_i || 100, 5000 ].min # Cap at 5000 lines
 
     if File.exist?(@log_path)
       lines = File.readlines(@log_path)
