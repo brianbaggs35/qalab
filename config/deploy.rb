@@ -68,6 +68,39 @@ namespace :puma do
 end
 
 namespace :deploy do
+  desc "Check and update Ruby version if needed"
+  task :check_ruby_version do
+    on roles(:app) do
+      current_ruby = capture("export PATH=\"$HOME/.rbenv/bin:$PATH\" && eval \"$(rbenv init -)\" && ruby -v")
+      required_ruby = fetch(:rbenv_ruby)
+      
+      unless current_ruby.include?(required_ruby)
+        puts "🔄 Updating Ruby from #{current_ruby.strip} to #{required_ruby}..."
+        execute "export PATH=\"$HOME/.rbenv/bin:$PATH\" && eval \"$(rbenv init -)\" && rbenv install #{required_ruby}"
+        execute "export PATH=\"$HOME/.rbenv/bin:$PATH\" && eval \"$(rbenv init -)\" && rbenv global #{required_ruby}"
+        execute "export PATH=\"$HOME/.rbenv/bin:$PATH\" && eval \"$(rbenv init -)\" && rbenv rehash"
+        execute "export PATH=\"$HOME/.rbenv/bin:$PATH\" && eval \"$(rbenv init -)\" && gem install bundler"
+      end
+    end
+  end
+
+  desc "Check for gem updates and security vulnerabilities"
+  task :check_gems do
+    on roles(:app) do
+      within release_path do
+        # Check for security vulnerabilities
+        execute :bundle, :exec, "bundler-audit", :check, "--update" rescue nil
+        
+        # Check for outdated gems
+        outdated = capture(:bundle, :outdated) rescue ""
+        if outdated.length > 0
+          puts "📦 Found outdated gems:\n#{outdated}"
+          puts "💡 Run 'bundle update' locally and commit to update gems"
+        end
+      end
+    end
+  end
+
   desc "Restart application"
   task :restart do
     on roles(:app), in: :sequence, wait: 10 do
@@ -92,7 +125,34 @@ namespace :deploy do
     end
   end
 
+  desc "Verify deployment health"
+  task :verify_deployment do
+    on roles(:web) do
+      within current_path do
+        # Check if the application is responding
+        execute :curl, "-f", "-s", "http://localhost/up" rescue begin
+          puts "⚠️  Health check failed - application may not be responding"
+        end
+        
+        # Check nginx status
+        execute :sudo, :systemctl, :status, :nginx
+        
+        # Check puma process
+        if test("[ -f #{shared_path}/tmp/pids/puma.pid ]")
+          pid = capture("cat #{shared_path}/tmp/pids/puma.pid")
+          execute :ps, "-p", pid rescue begin
+            puts "⚠️  Puma process not found - may need manual restart"
+          end
+        end
+      end
+    end
+  end
+
+  # Enhanced deployment hooks
+  before :updating, :check_ruby_version
+  after :updated, :check_gems
   after :publishing, :restart
+  after :restart, :verify_deployment
 
   after :restart, :clear_cache do
     on roles(:web), in: :groups, limit: 3, wait: 10 do
