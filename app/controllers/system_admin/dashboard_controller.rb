@@ -56,12 +56,12 @@ class SystemAdmin::DashboardController < ApplicationController
     # Use a strict allowlist approach - only exact matches to predefined filenames
     requested_log = params[:log]
     @selected_log = case requested_log
-                    when "production.log", "development.log", "test.log"
+    when "production.log", "development.log", "test.log"
                       requested_log
-                    else
+    else
                       "production.log"
-                    end
-                    
+    end
+
     # Find the pre-constructed path from our safe list
     selected_file = @log_files.find { |file| file[:name] == @selected_log }
     @log_path = selected_file[:path]
@@ -84,7 +84,7 @@ class SystemAdmin::DashboardController < ApplicationController
 
   def system_settings
     @smtp_settings = SystemSetting.smtp_settings
-    @smtp_settings = { 'address' => '', 'port' => '587', 'username' => '', 'from_email' => '' } if @smtp_settings.empty?
+    @smtp_settings = { "address" => "", "port" => "587", "username" => "", "from_email" => "" } if @smtp_settings.empty?
   end
 
   def update_system_settings

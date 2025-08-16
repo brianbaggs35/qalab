@@ -70,46 +70,46 @@ namespace :deploy do
   desc "Initial deployment setup - installs all dependencies and configures the server"
   task :initial do
     puts "🚀 Starting initial deployment setup for #{fetch(:application)} on #{fetch(:deploy_server)}"
-    
+
     # Step 1: Install system dependencies and setup deploy user
     puts "📦 Installing system dependencies..."
-    invoke 'system:install'
-    
+    invoke "system:install"
+
     puts "👤 Setting up deploy user..."
-    invoke 'system:setup_deploy_user'
-    
+    invoke "system:setup_deploy_user"
+
     # Step 2: Setup database (install PostgreSQL if using local database)
     if fetch(:database_host) == fetch(:deploy_server) || fetch(:database_host).nil?
       puts "🗄️  Installing local PostgreSQL..."
-      invoke 'postgresql:install'
-      invoke 'postgresql:create_user'
+      invoke "postgresql:install"
+      invoke "postgresql:create_user"
     else
       puts "🌐 Using remote database at #{fetch(:database_host)}"
     end
-    
+
     # Step 3: Setup database configuration
     puts "⚙️  Setting up database configuration..."
-    invoke 'database:setup'
-    
+    invoke "database:setup"
+
     # Step 4: Setup puma configuration
     puts "🦁 Setting up Puma configuration..."
-    invoke 'puma:setup'
-    
+    invoke "puma:setup"
+
     # Step 5: Generate SSL certificate and setup NGINX
     puts "🔒 Generating SSL certificate..."
-    invoke 'ssl:generate_self_signed'
-    
+    invoke "ssl:generate_self_signed"
+
     puts "🌐 Setting up NGINX configuration..."
-    invoke 'nginx:setup'
-    
+    invoke "nginx:setup"
+
     # Step 6: Run the actual deployment
     puts "🚢 Running initial deployment..."
-    invoke 'deploy'
-    
+    invoke "deploy"
+
     # Step 7: Create and migrate databases
     puts "🗄️  Creating and migrating databases..."
-    invoke 'database:create_and_migrate'
-    
+    invoke "database:create_and_migrate"
+
     puts "✅ Initial deployment completed successfully!"
     puts "🌍 Your application should now be available at: https://#{fetch(:deploy_server)}"
     puts "📝 Remember to:"
