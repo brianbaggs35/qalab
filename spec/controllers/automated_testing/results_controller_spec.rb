@@ -194,9 +194,9 @@ RSpec.describe AutomatedTesting::ResultsController, type: :controller do
         }.to change(TestRun, :count).by(-1)
       end
 
-      it 'redirects to index' do
+      it 'redirects to test runs' do
         delete :destroy, params: { id: test_run.id }
-        expect(response).to redirect_to(automated_testing_results_path)
+        expect(response).to redirect_to(automated_testing_test_runs_path)
       end
     end
   end

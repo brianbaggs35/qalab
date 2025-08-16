@@ -194,7 +194,7 @@
                       <% when 'pending' %>
                         <div tabindex="0" role="button" class="badge badge-ghost cursor-pointer">Pending</div>
                       <% end %>
-                      <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-32 p-2 shadow mt-2" onclick="event.stopPropagation();">
+                      <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1000] w-32 p-2 shadow mt-2" onclick="event.stopPropagation();">
                         <li><button onclick="updateTestRunStatus(<%= test_run.id %>, 'completed')" class="text-left w-full text-success">Completed</button></li>
                         <li><button onclick="updateTestRunStatus(<%= test_run.id %>, 'failed')" class="text-left w-full text-error">Failed</button></li>
                         <li><button onclick="updateTestRunStatus(<%= test_run.id %>, 'processing')" class="text-left w-full text-warning">Processing</button></li>
@@ -243,8 +243,8 @@
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zM12 13a1 1 0 110-2 1 1 0 010 2zM12 20a1 1 0 110-2 1 1 0 010 2z" />
                         </svg>
                       </div>
-                      <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-32 p-2 shadow">
-                        <li><button onclick="showTestRunDetails(<%= test_run.id %>); event.stopPropagation();" class="text-left w-full">View</button></li>
+                      <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1001] w-32 p-2 shadow">
+                        <li><%= link_to "View", automated_testing_result_path(test_run), class: "text-left w-full", onclick: "event.stopPropagation();" %></li>
                         <li><button onclick="showEditTestRunModal(<%= test_run.id %>); event.stopPropagation();" class="text-left w-full">Edit</button></li>
                         <li><%= link_to "Delete", automated_testing_result_path(test_run), method: :delete, 
                                     confirm: "Are you sure?", class: "text-error", onclick: "event.stopPropagation();" %></li>

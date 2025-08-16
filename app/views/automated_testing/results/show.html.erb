@@ -293,11 +293,7 @@
                     <% end %>
                   </td>
                   <td>
-                    <% if test_result.time && test_result.time > 0 %>
-                      <span class="text-sm"><%= "%.3f" % test_result.time %>s</span>
-                    <% else %>
-                      <span class="text-base-content/50 text-sm">-</span>
-                    <% end %>
+                    <%= format_duration(test_result.time) %>
                   </td>
                   <td>
                     <% if test_result.failure_message.present? %>
@@ -383,6 +379,25 @@
 </dialog>
 
 <script>
+  function formatDuration(seconds) {
+    if (!seconds || seconds <= 0) return "N/A";
+    
+    const s = parseFloat(seconds);
+    
+    if (s < 60) {
+      return `${s.toFixed(3)}s`;
+    } else if (s < 3600) {
+      const minutes = Math.floor(s / 60);
+      const remainingSeconds = s % 60;
+      return `${minutes}m ${remainingSeconds.toFixed(3)}s`;
+    } else {
+      const hours = Math.floor(s / 3600);
+      const remainingMinutes = Math.floor((s % 3600) / 60);
+      const remainingSeconds = s % 60;
+      return `${hours}h ${remainingMinutes}m ${remainingSeconds.toFixed(3)}s`;
+    }
+  }
+
   function showTestResultDetails(testRunId, testResultId) {
     const modal = document.getElementById('test_result_detail_modal');
     const content = document.getElementById('test_result_detail_content');
@@ -427,7 +442,7 @@
           <div class="grid grid-cols-2 gap-4 mb-6">
             <div class="card bg-base-200 p-3">
               <div class="text-xs text-base-content/60 mb-1">Duration</div>
-              <div class="font-semibold">${data.time ? (parseFloat(data.time).toFixed(3) + 's') : 'N/A'}</div>
+              <div class="font-semibold">${formatDuration(data.time)}</div>
             </div>
             <div class="card bg-base-200 p-3">
               <div class="text-xs text-base-content/60 mb-1">Test Run</div>
