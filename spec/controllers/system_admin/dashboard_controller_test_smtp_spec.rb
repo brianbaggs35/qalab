@@ -19,9 +19,9 @@ RSpec.describe SystemAdmin::DashboardController, type: :controller do
 
       it "returns success when test email is sent" do
         allow(TestMailer).to receive_message_chain(:smtp_test_email, :deliver_now)
-        
+
         post :test_smtp, format: :json
-        
+
         expect(response).to have_http_status(:success)
         json_response = JSON.parse(response.body)
         expect(json_response["success"]).to be true
@@ -30,9 +30,9 @@ RSpec.describe SystemAdmin::DashboardController, type: :controller do
 
       it "returns error when email delivery fails" do
         allow(TestMailer).to receive_message_chain(:smtp_test_email, :deliver_now).and_raise(StandardError.new("SMTP error"))
-        
+
         post :test_smtp, format: :json
-        
+
         expect(response).to have_http_status(:success)
         json_response = JSON.parse(response.body)
         expect(json_response["success"]).to be false
@@ -47,7 +47,7 @@ RSpec.describe SystemAdmin::DashboardController, type: :controller do
 
       it "returns error when SMTP is not configured" do
         post :test_smtp, format: :json
-        
+
         expect(response).to have_http_status(:success)
         json_response = JSON.parse(response.body)
         expect(json_response["success"]).to be false
