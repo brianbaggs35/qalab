@@ -141,12 +141,7 @@ Choose one:
 export DEPLOY_SERVER=your-server.example.com
 
 # First deployment (includes system setup)
-bundle exec cap production deploy:setup
-bundle exec cap production deploy
-
-# Setup NGINX with SSL
-bundle exec cap production nginx:setup
-bundle exec cap production ssl:generate_self_signed
+bundle exec cap production deploy:initial
 
 # Subsequent deployments
 bundle exec cap production deploy
