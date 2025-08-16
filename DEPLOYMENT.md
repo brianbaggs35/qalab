@@ -28,8 +28,7 @@ export DEPLOY_SERVER=your-ec2-instance.amazonaws.com
 
 ```bash
 # First deployment (includes system setup)
-bundle exec cap production deploy:setup
-bundle exec cap production deploy
+bundle exec cap production deploy:initial
 
 # Subsequent deployments
 bundle exec cap production deploy

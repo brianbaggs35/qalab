@@ -58,11 +58,26 @@ set :puma_worker_timeout, nil
 set :puma_init_active_record, true
 set :puma_preload_app, false
 
+namespace :puma do
+  desc "Setup puma configuration"
+  task :setup do
+    on roles(:app) do
+      template("puma.rb.erb", "#{shared_path}/puma.rb")
+    end
+  end
+end
+
 namespace :deploy do
   desc "Restart application"
   task :restart do
     on roles(:app), in: :sequence, wait: 10 do
-      execute "sudo service #{fetch(:application)} restart"
+      if test("[ -f #{shared_path}/tmp/pids/puma.pid ]")
+        execute "kill -USR2 `cat #{shared_path}/tmp/pids/puma.pid`"
+      else
+        within current_path do
+          execute :bundle, :exec, :puma, "-C", "#{shared_path}/puma.rb", "-d"
+        end
+      end
     end
   end
 
