@@ -16,7 +16,6 @@ RSpec.describe "system_admin/organizations/new.html.erb", type: :view do
   it "displays required form fields" do
     render
     expect(rendered).to include("Organization Name")
-    expect(rendered).to include("Description")
     expect(rendered).to include("required")
   end
 
@@ -35,8 +34,7 @@ RSpec.describe "system_admin/organizations/new.html.erb", type: :view do
   it "shows initial settings section" do
     render
     expect(rendered).to include("Initial Settings")
-    expect(rendered).to include("Allow User Registration")
-    expect(rendered).to include("Active Organization")
+    expect(rendered).to include("default settings")
   end
 
   it "displays info cards" do
@@ -54,7 +52,7 @@ RSpec.describe "system_admin/organizations/new.html.erb", type: :view do
     it "displays error messages" do
       render
       expect(rendered).to include("Error!")
-      expect(rendered).to include("can't be blank")
+      expect(rendered).to include("Name can&#39;t be blank")
     end
   end
 end

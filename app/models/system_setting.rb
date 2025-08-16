@@ -76,7 +76,7 @@ class SystemSetting < ApplicationRecord
           port: smtp_settings["port"]&.to_i || 587,
           domain: smtp_settings["domain"],
           user_name: smtp_settings["username"],
-          password: get_setting("smtp_password"),
+          password: SystemSetting.get_setting("smtp_password"),
           authentication: smtp_settings["authentication"] || "plain",
           enable_starttls_auto: smtp_settings["enable_starttls"] == "true"
         }.compact

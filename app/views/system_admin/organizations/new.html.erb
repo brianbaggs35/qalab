@@ -57,24 +57,6 @@
           <% end %>
         </div>
 
-        <div class="form-control">
-          <%= form.label :description, class: "label" do %>
-            <span class="label-text font-semibold">Description</span>
-          <% end %>
-          <%= form.text_area :description, 
-                             class: "textarea textarea-bordered w-full #{'textarea-error' if @organization.errors[:description].any?}",
-                             placeholder: "Optional description of the organization's purpose, team, or project...",
-                             rows: 4 %>
-          <% if @organization.errors[:description].any? %>
-            <label class="label">
-              <span class="label-text-alt text-error"><%= @organization.errors[:description].first %></span>
-            </label>
-          <% end %>
-          <label class="label">
-            <span class="label-text-alt">This helps users understand what this organization is for.</span>
-          </label>
-        </div>
-
         <!-- Additional Settings -->
         <div class="card bg-base-200/50">
           <div class="card-body">
@@ -87,28 +69,11 @@
             </h3>
             
             <div class="space-y-4">
-              <div class="form-control">
-                <label class="label cursor-pointer">
-                  <%= form.check_box :allow_registration, class: "checkbox checkbox-primary" %>
-                  <span class="label-text">
-                    <strong>Allow User Registration</strong>
-                    <div class="text-xs text-base-content/70 mt-1">
-                      Allow new users to join this organization through invitations
-                    </div>
-                  </span>
-                </label>
-              </div>
-
-              <div class="form-control">
-                <label class="label cursor-pointer">
-                  <%= form.check_box :active, checked: true, class: "checkbox checkbox-primary" %>
-                  <span class="label-text">
-                    <strong>Active Organization</strong>
-                    <div class="text-xs text-base-content/70 mt-1">
-                      Organization is active and can be used for testing
-                    </div>
-                  </span>
-                </label>
+              <div class="alert alert-info">
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Organization will be created with default settings that can be modified later.</span>
               </div>
             </div>
           </div>

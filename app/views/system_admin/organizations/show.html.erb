@@ -111,13 +111,6 @@
             <p class="text-lg"><%= @organization.name %></p>
           </div>
           
-          <% if @organization.description.present? %>
-            <div>
-              <label class="text-sm font-semibold text-base-content/70">Description</label>
-              <p><%= @organization.description %></p>
-            </div>
-          <% end %>
-          
           <div>
             <label class="text-sm font-semibold text-base-content/70">Created</label>
             <p><%= @organization.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
@@ -162,7 +155,7 @@
               <h4 class="font-semibold text-sm text-base-content/70 mb-2">Recent Users</h4>
               <% @recent_activity[:recent_users].each do |user| %>
                 <div class="flex justify-between items-center py-1">
-                  <span class="text-sm"><%= user.name || user.email %></span>
+                  <span class="text-sm"><%= "#{user.first_name} #{user.last_name}" %></span>
                   <span class="text-xs text-base-content/60">
                     <%= time_ago_in_words(user.created_at) %> ago
                   </span>
@@ -215,7 +208,7 @@
                           </div>
                         </div>
                         <div>
-                          <div class="font-bold"><%= org_user.user.name || org_user.user.email %></div>
+                          <div class="font-bold"><%= "#{org_user.user.first_name} #{org_user.user.last_name}" %></div>
                           <div class="text-sm opacity-50"><%= org_user.user.email %></div>
                         </div>
                       </div>
@@ -244,7 +237,7 @@
                               <%= link_to remove_user_system_admin_organization_path(@organization), 
                                           method: :delete,
                                           params: { user_id: org_user.user.id },
-                                          data: { confirm: "Remove #{org_user.user.name || org_user.user.email} from this organization?" },
+                                          data: { confirm: "Remove #{org_user.user.first_name} #{org_user.user.last_name} from this organization?" },
                                           class: "text-xs text-error" do %>
                                 Remove from Org
                               <% end %>
@@ -262,4 +255,4 @@
       </div>
     </div>
   <% end %>
-</div>
+</div>v>
