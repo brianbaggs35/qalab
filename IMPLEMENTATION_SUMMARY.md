@@ -22,13 +22,27 @@ This document summarizes the implementation of Capistrano deployment and user on
 - **Force HTTPS** with automatic HTTP->HTTPS redirects
 - **Security headers**: HSTS, CSP, X-Frame-Options, etc.
 - **Modern TLS 1.2/1.3** configuration
-- **Self-signed SSL certificate** generation
+- **Let's Encrypt SSL certificates** with auto-renewal
+- **Server hardening**: UFW firewall, fail2ban, auto-updates
 - **DNS rebinding protection**
+
+### Enhanced Deployment Features
+- **Complete automation**: Fresh EC2 to running app in one command
+- **Ruby/rbenv management**: Automatic version installation and updates
+- **Security scanning**: Bundler-audit for gem vulnerability checking
+- **Health monitoring**: System resources, SSL status, service health
+- **Maintenance tools**: Database backups, log monitoring, maintenance mode
+- **Rollback capabilities**: Safe deployment with quick rollback options
 
 ### Configuration
 ```bash
-# Deploy to production
+# Initial deployment (complete server setup)
 export DEPLOY_SERVER=your-ec2-instance.amazonaws.com
+export USE_LETSENCRYPT=true
+export LETSENCRYPT_EMAIL=admin@your-domain.com
+bundle exec cap production deploy:initial
+
+# Continuous deployment
 bundle exec cap production deploy
 
 # Local PostgreSQL (default)
@@ -38,12 +52,15 @@ bundle exec cap production deploy
 export DATABASE_HOST=your-rds-endpoint.amazonaws.com
 ```
 
-### Files Created
-- `config/deploy.rb` - Main deployment configuration
+### Files Enhanced/Created
+- `config/deploy.rb` - Enhanced deployment configuration with health checks
 - `config/deploy/production.rb` - Production stage settings
-- `config/deploy/templates/nginx_site.erb` - NGINX configuration template
-- `lib/capistrano/tasks/setup.rake` - Custom deployment tasks
-- `DEPLOYMENT.md` - Comprehensive deployment guide
+- `config/deploy/templates/nginx_site.erb` - Hardened NGINX configuration
+- `config/deploy/templates/.env.example` - Comprehensive environment template
+- `lib/capistrano/tasks/setup.rake` - Enhanced setup with Let's Encrypt & security
+- `lib/capistrano/tasks/maintenance.rake` - Complete maintenance & monitoring tools
+- `DEPLOYMENT.md` - Comprehensive deployment guide with troubleshooting
+- `spec/deployment/capistrano_spec.rb` - Deployment configuration tests
 
 ## ✅ User Onboarding System Implementation
 
@@ -120,15 +137,21 @@ The application already had an outstanding invitation system:
 ## 🚀 Production Deployment Checklist
 
 ### Server Setup
-1. **Launch AWS EC2 instance** (Ubuntu 20.04+)
-2. **Configure DNS** to point to EC2 instance
-3. **Set environment variables** in `.env` file
-4. **Configure SSH keys** for deployment user
+1. **Launch AWS EC2 instance** (Ubuntu 20.04+, minimum 2GB RAM)
+2. **Configure security group** (ports 22, 80, 443)
+3. **Configure DNS** to point to EC2 instance
+4. **Set environment variables** in `.env` file
+5. **Configure SSH keys** for deployment user
 
 ### Database Setup
 Choose one:
 - **Option A**: Use local PostgreSQL (automatic installation)
 - **Option B**: Use AWS RDS (set DATABASE_HOST)
+
+### SSL Certificate Setup
+Choose one:
+- **Option A**: Let's Encrypt (recommended) - set `USE_LETSENCRYPT=true`
+- **Option B**: Self-signed (development) - leave `USE_LETSENCRYPT` unset
 
 ### Email Configuration
 1. **Configure SMTP settings** (Gmail/SendGrid/etc.)
@@ -137,10 +160,14 @@ Choose one:
 
 ### Deployment Commands
 ```bash
-# Set your server hostname
-export DEPLOY_SERVER=your-server.example.com
+# Configure environment
+cp config/deploy/templates/.env.example .env
+# Edit .env with your settings
 
-# First deployment (includes system setup)
+# Initial deployment (complete automation)
+export DEPLOY_SERVER=your-server.example.com
+export USE_LETSENCRYPT=true
+export LETSENCRYPT_EMAIL=admin@your-domain.com
 bundle exec cap production deploy:initial
 
 # Subsequent deployments
