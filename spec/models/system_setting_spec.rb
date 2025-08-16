@@ -101,11 +101,8 @@ RSpec.describe SystemSetting, type: :model do
 
     describe '.redis_connected?' do
       context 'when Redis is not defined' do
-        before do
-          allow(Object).to receive(:defined?).with(Redis).and_return(false)
-        end
-
         it 'returns false' do
+          # Since Redis gem is not included in Gemfile, this should naturally return false
           expect(SystemSetting.redis_connected?).to be false
         end
       end
@@ -122,12 +119,25 @@ RSpec.describe SystemSetting, type: :model do
 
       context 'when Redis is configured but connection fails' do
         before do
-          allow(Object).to receive(:defined?).with(Redis).and_return(true)
-          allow(ENV).to receive(:[]).with('REDIS_URL').and_return('redis://localhost:6379')
+          # Define a stub Redis class for testing
+          stub_const('Redis', Class.new do
+            def self.new(url:)
+              instance = allocate
+              instance.send(:initialize, url: url)
+              instance
+            end
 
-          redis_mock = double('Redis')
-          allow(Redis).to receive(:new).and_return(redis_mock)
-          allow(redis_mock).to receive(:ping).and_raise(StandardError.new('Connection failed'))
+            def initialize(url:)
+              @url = url
+            end
+
+            def ping
+              raise StandardError.new('Connection failed')
+            end
+          end)
+
+          allow(ENV).to receive(:[]).and_call_original
+          allow(ENV).to receive(:[]).with('REDIS_URL').and_return('redis://localhost:6379')
         end
 
         it 'returns false and logs warning' do
@@ -138,12 +148,25 @@ RSpec.describe SystemSetting, type: :model do
 
       context 'when Redis is properly connected' do
         before do
-          allow(Object).to receive(:defined?).with(Redis).and_return(true)
-          allow(ENV).to receive(:[]).with('REDIS_URL').and_return('redis://localhost:6379')
+          # Define a stub Redis class for testing
+          stub_const('Redis', Class.new do
+            def self.new(url:)
+              instance = allocate
+              instance.send(:initialize, url: url)
+              instance
+            end
 
-          redis_mock = double('Redis')
-          allow(Redis).to receive(:new).and_return(redis_mock)
-          allow(redis_mock).to receive(:ping).and_return('PONG')
+            def initialize(url:)
+              @url = url
+            end
+
+            def ping
+              'PONG'
+            end
+          end)
+
+          allow(ENV).to receive(:[]).and_call_original
+          allow(ENV).to receive(:[]).with('REDIS_URL').and_return('redis://localhost:6379')
         end
 
         it 'returns true' do
