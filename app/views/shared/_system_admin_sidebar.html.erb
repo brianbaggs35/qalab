@@ -193,8 +193,8 @@
           </li>
           
           <li>
-            <%= link_to "#", 
-                class: "group hover:bg-info/10 hover:text-info transition-colors duration-200" do %>
+            <%= link_to system_admin_logs_path, 
+                class: "group hover:bg-info/10 hover:text-info transition-colors duration-200 #{'bg-info/20 text-info font-semibold' if request.path == system_admin_logs_path}" do %>
               <div class="flex items-center gap-3">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -205,8 +205,8 @@
           </li>
           
           <li>
-            <%= link_to "#", 
-                class: "group hover:bg-info/10 hover:text-info transition-colors duration-200" do %>
+            <%= link_to system_admin_system_settings_path, 
+                class: "group hover:bg-info/10 hover:text-info transition-colors duration-200 #{'bg-info/20 text-info font-semibold' if request.path == system_admin_system_settings_path}" do %>
               <div class="flex items-center gap-3">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -225,22 +225,28 @@
           </li>
           
           <li class="pointer-events-none">
-            <div class="bg-base-200/50 rounded-lg p-3 space-y-2">
-              <div class="flex justify-between items-center">
+            <div class="bg-base-200/50 rounded-lg p-3">
+              <div class="flex justify-between items-center py-1">
                 <span class="text-xs">Organizations</span>
                 <span class="badge badge-primary badge-sm"><%= Organization.count %></span>
               </div>
-              <div class="flex justify-between items-center">
+            </div>
+          </li>
+          
+          <li class="pointer-events-none">
+            <div class="bg-base-200/50 rounded-lg p-3">
+              <div class="flex justify-between items-center py-1">
                 <span class="text-xs">Total Users</span>
                 <span class="badge badge-secondary badge-sm"><%= User.count %></span>
               </div>
-              <div class="flex justify-between items-center">
+            </div>
+          </li>
+          
+          <li class="pointer-events-none">
+            <div class="bg-base-200/50 rounded-lg p-3">
+              <div class="flex justify-between items-center py-1">
                 <span class="text-xs">System Admins</span>
                 <span class="badge badge-error badge-sm"><%= User.system_admins.count %></span>
-              </div>
-              <div class="flex justify-between items-center">
-                <span class="text-xs">Test Runs</span>
-                <span class="badge badge-accent badge-sm"><%= TestRun.count %></span>
               </div>
             </div>
           </li>

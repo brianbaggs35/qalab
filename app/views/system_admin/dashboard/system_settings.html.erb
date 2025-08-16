@@ -1,0 +1,385 @@
+<% content_for :title, "System Settings" %>
+
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex justify-between items-center">
+    <div>
+      <h1 class="text-3xl font-bold text-primary flex items-center gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        System Settings
+      </h1>
+      <p class="text-base-content/70 mt-2">
+        Configure system-wide settings and email services
+      </p>
+    </div>
+    <div class="flex gap-3">
+      <%= link_to system_admin_dashboard_path, class: "btn btn-ghost" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Back to Dashboard
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Flash Messages -->
+  <% if notice %>
+    <div class="alert alert-success">
+      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span><%= notice %></span>
+    </div>
+  <% end %>
+
+  <% if alert %>
+    <div class="alert alert-error">
+      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span><%= alert %></span>
+    </div>
+  <% end %>
+
+  <!-- SMTP Configuration -->
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <h2 class="card-title text-secondary mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+        SMTP Email Configuration
+      </h2>
+      
+      <div class="alert alert-info mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <div>
+          <h3 class="font-bold">Email Configuration Required</h3>
+          <div class="text-sm">
+            Configure SMTP settings to enable user registration confirmations, password resets, and invitations.
+          </div>
+        </div>
+      </div>
+
+      <%= form_with url: system_admin_system_settings_path, method: :post, local: true, class: "space-y-6" do |f| %>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Server Settings -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-base-content/80 border-b border-base-300 pb-2">
+              Server Settings
+            </h3>
+            
+            <div class="form-control">
+              <%= f.label "smtp[address]", "SMTP Server Address", class: "label" do %>
+                <span class="label-text font-semibold">SMTP Server Address <span class="text-error">*</span></span>
+              <% end %>
+              <%= f.text_field "smtp[address]", 
+                               value: @smtp_settings['address'],
+                               class: "input input-bordered w-full",
+                               placeholder: "smtp.gmail.com, smtp.sendgrid.net, etc.",
+                               required: true %>
+            </div>
+
+            <div class="form-control">
+              <%= f.label "smtp[port]", "Port", class: "label" do %>
+                <span class="label-text font-semibold">Port <span class="text-error">*</span></span>
+              <% end %>
+              <%= f.number_field "smtp[port]", 
+                                 value: @smtp_settings['port'] || 587,
+                                 class: "input input-bordered w-full",
+                                 placeholder: "587",
+                                 required: true %>
+              <label class="label">
+                <span class="label-text-alt">Common ports: 25, 465 (SSL), 587 (TLS), 2525</span>
+              </label>
+            </div>
+
+            <div class="form-control">
+              <%= f.label "smtp[domain]", "Domain", class: "label" do %>
+                <span class="label-text font-semibold">Domain</span>
+              <% end %>
+              <%= f.text_field "smtp[domain]", 
+                               value: @smtp_settings['domain'],
+                               class: "input input-bordered w-full",
+                               placeholder: "your-domain.com" %>
+              <label class="label">
+                <span class="label-text-alt">Your application's domain name</span>
+              </label>
+            </div>
+
+            <div class="form-control">
+              <%= f.label "smtp[authentication]", "Authentication", class: "label" do %>
+                <span class="label-text font-semibold">Authentication Method</span>
+              <% end %>
+              <%= f.select "smtp[authentication]",
+                           options_for_select([
+                             ['Plain', 'plain'],
+                             ['Login', 'login'],
+                             ['CRAM-MD5', 'cram_md5']
+                           ], @smtp_settings['authentication'] || 'plain'),
+                           {},
+                           { class: "select select-bordered w-full" } %>
+            </div>
+
+            <div class="form-control">
+              <label class="label cursor-pointer">
+                <%= f.check_box "smtp[enable_starttls]", 
+                                { checked: @smtp_settings['enable_starttls'] == 'true' },
+                                'true', 'false' %>
+                <span class="label-text font-semibold">Enable STARTTLS</span>
+                <input type="checkbox" class="toggle toggle-primary" />
+              </label>
+              <label class="label">
+                <span class="label-text-alt">Enable TLS encryption (recommended)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Authentication & Email Settings -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-base-content/80 border-b border-base-300 pb-2">
+              Authentication & Email Settings
+            </h3>
+            
+            <div class="form-control">
+              <%= f.label "smtp[username]", "Username", class: "label" do %>
+                <span class="label-text font-semibold">Username <span class="text-error">*</span></span>
+              <% end %>
+              <%= f.text_field "smtp[username]", 
+                               value: @smtp_settings['username'],
+                               class: "input input-bordered w-full",
+                               placeholder: "your-email@domain.com",
+                               required: true %>
+            </div>
+
+            <div class="form-control">
+              <%= f.label "smtp[password]", "Password", class: "label" do %>
+                <span class="label-text font-semibold">Password <span class="text-error">*</span></span>
+              <% end %>
+              <%= f.password_field "smtp[password]", 
+                                   class: "input input-bordered w-full",
+                                   placeholder: "Enter your SMTP password or app password",
+                                   required: true %>
+              <label class="label">
+                <span class="label-text-alt">Use app-specific passwords for Gmail and other providers</span>
+              </label>
+            </div>
+
+            <div class="form-control">
+              <%= f.label "smtp[from_email]", "From Email", class: "label" do %>
+                <span class="label-text font-semibold">From Email Address <span class="text-error">*</span></span>
+              <% end %>
+              <%= f.email_field "smtp[from_email]", 
+                                value: @smtp_settings['from_email'],
+                                class: "input input-bordered w-full",
+                                placeholder: "noreply@your-domain.com",
+                                required: true %>
+              <label class="label">
+                <span class="label-text-alt">Email address that appears as sender</span>
+              </label>
+            </div>
+
+            <div class="form-control">
+              <%= f.label "smtp[reply_to_email]", "Reply-To Email", class: "label" do %>
+                <span class="label-text font-semibold">Reply-To Email</span>
+              <% end %>
+              <%= f.email_field "smtp[reply_to_email]", 
+                                value: @smtp_settings['reply_to_email'],
+                                class: "input input-bordered w-full",
+                                placeholder: "support@your-domain.com" %>
+              <label class="label">
+                <span class="label-text-alt">Email address for replies (optional)</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-between items-center pt-6 border-t border-base-300">
+          <div class="text-sm text-base-content/60">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            Settings are stored securely and encrypted
+          </div>
+          
+          <div class="flex gap-3">
+            <button type="button" onclick="testSMTPConnection()" class="btn btn-secondary">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Test Connection
+            </button>
+            
+            <%= f.submit "Save SMTP Settings", 
+                         class: "btn btn-primary",
+                         data: { disable_with: "Saving..." } %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Popular SMTP Providers Guide -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="card bg-info/10 border border-info/20">
+      <div class="card-body">
+        <h3 class="card-title text-info">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Popular SMTP Providers
+        </h3>
+        
+        <div class="space-y-3 text-sm">
+          <div>
+            <strong>Gmail / Google Workspace</strong>
+            <p class="text-xs">Server: smtp.gmail.com, Port: 587, TLS: Yes</p>
+          </div>
+          <div>
+            <strong>SendGrid</strong>
+            <p class="text-xs">Server: smtp.sendgrid.net, Port: 587, User: apikey</p>
+          </div>
+          <div>
+            <strong>Amazon SES</strong>
+            <p class="text-xs">Server: email-smtp.region.amazonaws.com, Port: 587</p>
+          </div>
+          <div>
+            <strong>Mailgun</strong>
+            <p class="text-xs">Server: smtp.mailgun.org, Port: 587</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card bg-warning/10 border border-warning/20">
+      <div class="card-body">
+        <h3 class="card-title text-warning">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+          Security Best Practices
+        </h3>
+        
+        <div class="space-y-2 text-sm">
+          <p>• Use app-specific passwords instead of your main email password</p>
+          <p>• Enable two-factor authentication on your email provider</p>
+          <p>• Regularly rotate SMTP credentials</p>
+          <p>• Monitor email delivery logs for security issues</p>
+          <p>• Use dedicated email services for better deliverability</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Current Configuration Status -->
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <h3 class="card-title text-accent">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        Current Configuration Status
+      </h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+        <div class="flex items-center gap-3">
+          <div class="badge <%= @smtp_settings['address'].present? ? 'badge-success' : 'badge-error' %>">
+            <%= @smtp_settings['address'].present? ? '✓' : '✗' %>
+          </div>
+          <span class="text-sm">SMTP Server</span>
+        </div>
+        
+        <div class="flex items-center gap-3">
+          <div class="badge <%= @smtp_settings['username'].present? ? 'badge-success' : 'badge-error' %>">
+            <%= @smtp_settings['username'].present? ? '✓' : '✗' %>
+          </div>
+          <span class="text-sm">Authentication</span>
+        </div>
+        
+        <div class="flex items-center gap-3">
+          <div class="badge <%= @smtp_settings['from_email'].present? ? 'badge-success' : 'badge-error' %>">
+            <%= @smtp_settings['from_email'].present? ? '✓' : '✗' %>
+          </div>
+          <span class="text-sm">From Email</span>
+        </div>
+        
+        <div class="flex items-center gap-3">
+          <div class="badge <%= @smtp_settings.any? ? 'badge-success' : 'badge-warning' %>">
+            <%= @smtp_settings.any? ? 'Configured' : 'Pending' %>
+          </div>
+          <span class="text-sm">Overall Status</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function testSMTPConnection() {
+  const btn = event.target;
+  const originalText = btn.innerHTML;
+  
+  btn.innerHTML = `<span class="loading loading-spinner loading-sm"></span> Testing...`;
+  btn.disabled = true;
+  
+  // Simple test - in real implementation, this would make an AJAX call to test the connection
+  setTimeout(() => {
+    btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+    </svg> Test Complete`;
+    
+    // Show test result alert
+    const alert = document.createElement('div');
+    alert.className = 'alert alert-info mt-4';
+    alert.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>SMTP test would be performed here. Save settings first, then test by sending a test email.</span>
+    `;
+    btn.closest('.card-body').appendChild(alert);
+    
+    setTimeout(() => {
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+      if (alert.parentNode) {
+        alert.parentNode.removeChild(alert);
+      }
+    }, 3000);
+  }, 2000);
+}
+
+// Form validation
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.querySelector('form');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      const requiredFields = this.querySelectorAll('input[required]');
+      let allValid = true;
+      
+      requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+          field.classList.add('input-error');
+          allValid = false;
+        } else {
+          field.classList.remove('input-error');
+        }
+      });
+      
+      if (!allValid) {
+        e.preventDefault();
+        const firstError = this.querySelector('.input-error');
+        if (firstError) {
+          firstError.focus();
+        }
+      }
+    });
+  }
+});
+</script>

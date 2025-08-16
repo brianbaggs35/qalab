@@ -46,6 +46,12 @@ Rails.application.routes.draw do
   # System Admin routes
   namespace :system_admin do
     get "dashboard", to: "dashboard#index"
+    get "logs", to: "dashboard#logs"
+    get "system_settings", to: "dashboard#system_settings"
+    post "system_settings", to: "dashboard#update_system_settings"
+    get "logs", to: "dashboard#logs"
+    get "system_settings", to: "dashboard#system_settings"
+    post "system_settings", to: "dashboard#update_system_settings"
 
     resources :organizations do
       member do

@@ -143,15 +143,19 @@
           </div>
           <div class="flex justify-between items-center">
             <span>Redis Cache</span>
-            <div class="badge badge-success">Healthy</div>
+            <div class="badge <%= SystemSetting.redis_connected? ? 'badge-success' : 'badge-error' %>">
+              <%= SystemSetting.redis_connected? ? 'Connected' : 'Disconnected' %>
+            </div>
           </div>
           <div class="flex justify-between items-center">
             <span>Background Jobs</span>
             <div class="badge badge-success">Running</div>
           </div>
           <div class="flex justify-between items-center">
-            <span>Storage</span>
-            <div class="badge badge-warning">85% Full</div>
+            <span>SMTP Email</span>
+            <div class="badge <%= SystemSetting.smtp_settings.any? ? 'badge-success' : 'badge-warning' %>">
+              <%= SystemSetting.smtp_settings.any? ? 'Configured' : 'Not Set' %>
+            </div>
           </div>
         </div>
       </div>
