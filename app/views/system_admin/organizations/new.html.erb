@@ -1,0 +1,199 @@
+<% content_for :title, "Create New Organization" %>
+
+<div class="space-y-6">
+  <!-- Header -->
+  <div>
+    <div class="breadcrumbs text-sm">
+      <ul>
+        <li><%= link_to "Organizations", system_admin_organizations_path, class: "link link-primary" %></li>
+        <li><span class="text-base-content/70">Create New</span></li>
+      </ul>
+    </div>
+    <h1 class="text-3xl font-bold text-primary flex items-center gap-3 mt-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+      </svg>
+      Create New Organization
+    </h1>
+    <p class="text-base-content/70 mt-2">
+      Create a new organization to manage users, test runs, and test cases.
+    </p>
+  </div>
+
+  <!-- Create Form -->
+  <div class="card bg-base-100 shadow-xl max-w-2xl">
+    <div class="card-body">
+      <%= form_with model: [:system_admin, @organization], local: true, class: "space-y-6" do |form| %>
+        <% if @organization.errors.any? %>
+          <div class="alert alert-error">
+            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <h3 class="font-bold">Error!</h3>
+              <div class="text-xs">
+                <ul class="list-disc list-inside">
+                  <% @organization.errors.full_messages.each do |message| %>
+                    <li><%= message %></li>
+                  <% end %>
+                </ul>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <div class="form-control">
+          <%= form.label :name, class: "label" do %>
+            <span class="label-text font-semibold">Organization Name <span class="text-error">*</span></span>
+          <% end %>
+          <%= form.text_field :name, 
+                              class: "input input-bordered w-full #{'input-error' if @organization.errors[:name].any?}",
+                              placeholder: "Enter organization name (e.g., Acme Corp, QA Team, etc.)",
+                              required: true %>
+          <% if @organization.errors[:name].any? %>
+            <label class="label">
+              <span class="label-text-alt text-error"><%= @organization.errors[:name].first %></span>
+            </label>
+          <% end %>
+        </div>
+
+        <div class="form-control">
+          <%= form.label :description, class: "label" do %>
+            <span class="label-text font-semibold">Description</span>
+          <% end %>
+          <%= form.text_area :description, 
+                             class: "textarea textarea-bordered w-full #{'textarea-error' if @organization.errors[:description].any?}",
+                             placeholder: "Optional description of the organization's purpose, team, or project...",
+                             rows: 4 %>
+          <% if @organization.errors[:description].any? %>
+            <label class="label">
+              <span class="label-text-alt text-error"><%= @organization.errors[:description].first %></span>
+            </label>
+          <% end %>
+          <label class="label">
+            <span class="label-text-alt">This helps users understand what this organization is for.</span>
+          </label>
+        </div>
+
+        <!-- Additional Settings -->
+        <div class="card bg-base-200/50">
+          <div class="card-body">
+            <h3 class="card-title text-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Initial Settings
+            </h3>
+            
+            <div class="space-y-4">
+              <div class="form-control">
+                <label class="label cursor-pointer">
+                  <%= form.check_box :allow_registration, class: "checkbox checkbox-primary" %>
+                  <span class="label-text">
+                    <strong>Allow User Registration</strong>
+                    <div class="text-xs text-base-content/70 mt-1">
+                      Allow new users to join this organization through invitations
+                    </div>
+                  </span>
+                </label>
+              </div>
+
+              <div class="form-control">
+                <label class="label cursor-pointer">
+                  <%= form.check_box :active, checked: true, class: "checkbox checkbox-primary" %>
+                  <span class="label-text">
+                    <strong>Active Organization</strong>
+                    <div class="text-xs text-base-content/70 mt-1">
+                      Organization is active and can be used for testing
+                    </div>
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-between items-center pt-4">
+          <div class="text-sm text-base-content/60">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Fields marked with <span class="text-error">*</span> are required
+          </div>
+          
+          <div class="flex gap-3">
+            <%= link_to system_admin_organizations_path, class: "btn btn-ghost" do %>
+              Cancel
+            <% end %>
+            
+            <%= form.submit "Create Organization", 
+                           class: "btn btn-primary",
+                           data: { disable_with: "Creating..." } %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Info Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
+    <div class="card bg-info/10 border border-info/20">
+      <div class="card-body">
+        <h3 class="card-title text-info text-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          What happens next?
+        </h3>
+        <div class="text-sm space-y-2">
+          <p>• Organization will be created with default settings</p>
+          <p>• You can add users and assign roles after creation</p>
+          <p>• Users can start creating test cases and running tests</p>
+          <p>• Organization settings can be modified later</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card bg-warning/10 border border-warning/20">
+      <div class="card-body">
+        <h3 class="card-title text-warning text-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+          Important Notes
+        </h3>
+        <div class="text-sm space-y-2">
+          <p>• Organization names should be unique and descriptive</p>
+          <p>• You'll need to assign at least one owner after creation</p>
+          <p>• Consider the organization's purpose when naming it</p>
+          <p>• Active organizations count towards system limits</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Auto-focus the name field
+  const nameField = document.querySelector('input[name="organization[name]"]');
+  if (nameField) {
+    nameField.focus();
+  }
+
+  // Form validation
+  const form = document.querySelector('form');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      const nameField = this.querySelector('input[name="organization[name]"]');
+      if (!nameField.value.trim()) {
+        e.preventDefault();
+        nameField.focus();
+        nameField.classList.add('input-error');
+      }
+    });
+  }
+});
+</script>

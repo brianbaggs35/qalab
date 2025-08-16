@@ -80,4 +80,48 @@ class SystemAdmin::DashboardController < ApplicationController
     total_size = test_runs_with_xml.sum { |run| run.xml_file.bytesize }
     (total_size.to_f / test_runs_with_xml.count / 1024).round(2)
   end
+
+  def logs
+    # Simple log file reading implementation
+    @log_files = [
+      { name: "production.log", path: Rails.root.join("log", "production.log") },
+      { name: "development.log", path: Rails.root.join("log", "development.log") },
+      { name: "test.log", path: Rails.root.join("log", "test.log") }
+    ]
+
+    @selected_log = params[:log] || "production.log"
+    @log_path = Rails.root.join("log", @selected_log)
+
+    @log_content = ""
+    @lines_to_show = params[:lines]&.to_i || 100
+
+    if File.exist?(@log_path)
+      lines = File.readlines(@log_path)
+      @total_lines = lines.count
+      @log_content = lines.last(@lines_to_show).join
+    else
+      @log_content = "Log file not found"
+      @total_lines = 0
+    end
+  rescue => e
+    @log_content = "Error reading log file: #{e.message}"
+    @total_lines = 0
+  end
+
+  def system_settings
+    @smtp_settings = SystemSetting.smtp_settings || {}
+  end
+
+  def update_system_settings
+    SystemSetting.update_smtp_settings(smtp_params)
+    redirect_to system_admin_system_settings_path, notice: "SMTP settings updated successfully!"
+  rescue => e
+    redirect_to system_admin_system_settings_path, alert: "Error updating settings: #{e.message}"
+  end
+
+  private
+
+  def smtp_params
+    params.require(:smtp).permit(:address, :port, :domain, :username, :password, :authentication, :enable_starttls, :from_email, :reply_to_email)
+  end
 end
