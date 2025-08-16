@@ -73,7 +73,7 @@ namespace :deploy do
     on roles(:app) do
       current_ruby = capture("export PATH=\"$HOME/.rbenv/bin:$PATH\" && eval \"$(rbenv init -)\" && ruby -v")
       required_ruby = fetch(:rbenv_ruby)
-      
+
       unless current_ruby.include?(required_ruby)
         puts "🔄 Updating Ruby from #{current_ruby.strip} to #{required_ruby}..."
         execute "export PATH=\"$HOME/.rbenv/bin:$PATH\" && eval \"$(rbenv init -)\" && rbenv install #{required_ruby}"
@@ -90,7 +90,7 @@ namespace :deploy do
       within release_path do
         # Check for security vulnerabilities
         execute :bundle, :exec, "bundler-audit", :check, "--update" rescue nil
-        
+
         # Check for outdated gems
         outdated = capture(:bundle, :outdated) rescue ""
         if outdated.length > 0
@@ -133,10 +133,10 @@ namespace :deploy do
         execute :curl, "-f", "-s", "http://localhost/up" rescue begin
           puts "⚠️  Health check failed - application may not be responding"
         end
-        
+
         # Check nginx status
         execute :sudo, :systemctl, :status, :nginx
-        
+
         # Check puma process
         if test("[ -f #{shared_path}/tmp/pids/puma.pid ]")
           pid = capture("cat #{shared_path}/tmp/pids/puma.pid")

@@ -9,30 +9,30 @@ RSpec.describe "Capistrano deployment configuration" do
 
     it "includes all expected deployment tasks" do
       task_output = `cd #{Rails.root} && bundle exec cap -T`
-      
+
       # Core deployment tasks
       expect(task_output).to include("deploy:initial")
       expect(task_output).to include("deploy:check_ruby_version")
       expect(task_output).to include("deploy:check_gems")
       expect(task_output).to include("deploy:verify_deployment")
-      
+
       # SSL tasks
       expect(task_output).to include("ssl:generate_letsencrypt")
       expect(task_output).to include("ssl:renew_letsencrypt")
       expect(task_output).to include("ssl:generate_self_signed")
-      
+
       # Maintenance tasks
       expect(task_output).to include("maintenance:backup_database")
       expect(task_output).to include("maintenance:check_resources")
       expect(task_output).to include("maintenance:check_ssl")
       expect(task_output).to include("maintenance:enable")
       expect(task_output).to include("maintenance:disable")
-      
+
       # System tasks
       expect(task_output).to include("system:install")
       expect(task_output).to include("system:setup_deploy_user")
       expect(task_output).to include("system:setup_security")
-      
+
       # Log monitoring tasks
       expect(task_output).to include("logs:app")
       expect(task_output).to include("logs:nginx_access")

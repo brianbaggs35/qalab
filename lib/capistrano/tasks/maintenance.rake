@@ -4,13 +4,13 @@ namespace :maintenance do
     on roles(:db) do
       backup_file = "#{fetch(:application)}_#{Time.now.strftime('%Y%m%d_%H%M%S')}.sql"
       backup_path = "#{shared_path}/backups"
-      
+
       execute :mkdir, "-p", backup_path
       execute :sudo, "-u", "postgres", "pg_dump", fetch(:database_name), ">", "#{backup_path}/#{backup_file}"
-      
+
       # Keep only last 7 backups
       execute "ls -t #{backup_path}/*.sql | tail -n +8 | xargs rm -f" rescue nil
-      
+
       puts "✅ Database backup created: #{backup_file}"
     end
   end
@@ -19,19 +19,19 @@ namespace :maintenance do
   task :check_resources do
     on roles(:app) do
       puts "📊 System Resource Usage:"
-      
+
       # Memory usage
       memory = capture("free -h | grep Mem")
       puts "Memory: #{memory}"
-      
+
       # Disk usage
       disk = capture("df -h / | tail -1")
       puts "Disk: #{disk}"
-      
+
       # Load average
       load = capture("uptime")
       puts "Load: #{load}"
-      
+
       # Application logs (last 10 lines)
       puts "\n📋 Recent Application Logs:"
       logs = capture("tail -10 #{shared_path}/log/production.log") rescue "No logs found"
@@ -46,7 +46,7 @@ namespace :maintenance do
       execute :sudo, :apt, :upgrade, "-y"
       execute :sudo, :apt, :autoremove, "-y"
       execute :sudo, :apt, :autoclean
-      
+
       puts "✅ System packages updated"
     end
   end
@@ -55,12 +55,12 @@ namespace :maintenance do
   task :check_ssl do
     on roles(:web) do
       domain = fetch(:deploy_server)
-      
+
       # Check certificate expiration
       cert_info = capture("echo | openssl s_client -connect #{domain}:443 -servername #{domain} 2>/dev/null | openssl x509 -noout -dates") rescue "Certificate check failed"
       puts "🔒 SSL Certificate Info for #{domain}:"
       puts cert_info
-      
+
       # Check if Let's Encrypt certificate
       issuer = capture("echo | openssl s_client -connect #{domain}:443 -servername #{domain} 2>/dev/null | openssl x509 -noout -issuer") rescue ""
       if issuer.include?("Let's Encrypt")
@@ -76,7 +76,7 @@ namespace :maintenance do
     on roles(:app) do
       execute :sudo, :systemctl, :restart, :nginx
       invoke "deploy:restart"
-      
+
       puts "✅ All services restarted"
     end
   end
@@ -102,10 +102,10 @@ namespace :maintenance do
         </body>
         </html>
       HTML
-      
+
       upload! StringIO.new(maintenance_page), "/tmp/maintenance.html"
       execute :sudo, :mv, "/tmp/maintenance.html", "#{current_path}/public/maintenance.html"
-      
+
       puts "🔧 Maintenance mode enabled"
     end
   end
@@ -114,7 +114,7 @@ namespace :maintenance do
   task :disable do
     on roles(:web) do
       execute :sudo, :rm, "-f", "#{current_path}/public/maintenance.html"
-      
+
       puts "✅ Maintenance mode disabled"
     end
   end

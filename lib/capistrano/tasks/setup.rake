@@ -28,17 +28,17 @@ namespace :system do
       execute :sudo, "apt-get", "install", "-y", "nodejs", "npm", "nginx", "curl", "gnupg2", "software-properties-common"
       execute :sudo, "apt-get", "install", "-y", "build-essential", "libssl-dev", "libreadline-dev", "zlib1g-dev", "libyaml-dev", "libxml2-dev", "libxslt1-dev"
       execute :sudo, "apt-get", "install", "-y", "git", "autoconf", "bison", "libffi-dev", "libgdbm-dev", "libncurses5-dev", "libsqlite3-dev", "libtool"
-      
+
       # Install rbenv if not present
       unless test("[ -d ~/.rbenv ]")
         execute "curl -fsSL https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer | bash"
         execute "echo 'export PATH=\"$HOME/.rbenv/bin:$PATH\"' >> ~/.bashrc"
         execute "echo 'eval \"$(rbenv init -)\"' >> ~/.bashrc"
-        
+
         # Source rbenv for current session
         execute "export PATH=\"$HOME/.rbenv/bin:$PATH\" && eval \"$(rbenv init -)\""
       end
-      
+
       # Install specified Ruby version if not already installed
       ruby_version = fetch(:rbenv_ruby)
       unless test("[ -d ~/.rbenv/versions/#{ruby_version} ]")
@@ -46,7 +46,7 @@ namespace :system do
         execute "export PATH=\"$HOME/.rbenv/bin:$PATH\" && eval \"$(rbenv init -)\" && rbenv global #{ruby_version}"
         execute "export PATH=\"$HOME/.rbenv/bin:$PATH\" && eval \"$(rbenv init -)\" && rbenv rehash"
       end
-      
+
       # Install bundler
       execute "export PATH=\"$HOME/.rbenv/bin:$PATH\" && eval \"$(rbenv init -)\" && gem install bundler"
     end
@@ -60,13 +60,13 @@ namespace :system do
       execute :sudo, "mkdir", "-p", "/home/deploy/.ssh"
       execute :sudo, "chown", "deploy:deploy", "/home/deploy/.ssh"
       execute :sudo, "chmod", "700", "/home/deploy/.ssh"
-      
+
       # Add deploy user to sudo group for deployment tasks
       execute :sudo, "usermod", "-a", "-G", "sudo", "deploy"
-      
+
       # Setup SSH key for deploy user if provided
-      if ENV['DEPLOY_SSH_KEY']
-        ssh_key = File.read(File.expand_path(ENV['DEPLOY_SSH_KEY']))
+      if ENV["DEPLOY_SSH_KEY"]
+        ssh_key = File.read(File.expand_path(ENV["DEPLOY_SSH_KEY"]))
         execute :sudo, "bash", "-c", "echo '#{ssh_key}' > /home/deploy/.ssh/authorized_keys"
         execute :sudo, "chown", "deploy:deploy", "/home/deploy/.ssh/authorized_keys"
         execute :sudo, "chmod", "600", "/home/deploy/.ssh/authorized_keys"
@@ -85,12 +85,12 @@ namespace :system do
       execute :sudo, "ufw", "allow", "80"
       execute :sudo, "ufw", "allow", "443"
       execute :sudo, "ufw", "--force", "enable"
-      
+
       # Install fail2ban for SSH protection
       execute :sudo, "apt-get", "install", "-y", "fail2ban"
       execute :sudo, "systemctl", "enable", "fail2ban"
       execute :sudo, "systemctl", "start", "fail2ban"
-      
+
       # Configure automatic security updates
       execute :sudo, "apt-get", "install", "-y", "unattended-upgrades"
       execute :sudo, "dpkg-reconfigure", "-plow", "unattended-upgrades"
@@ -118,26 +118,26 @@ namespace :ssl do
       # Install certbot
       execute :sudo, "apt-get", "update"
       execute :sudo, "apt-get", "install", "-y", "certbot", "python3-certbot-nginx"
-      
+
       # Stop nginx temporarily to allow certbot to bind to port 80
       execute :sudo, "systemctl", "stop", "nginx"
-      
+
       # Generate certificate
       domain = fetch(:deploy_server)
-      email = ENV['LETSENCRYPT_EMAIL'] || ask("Enter email for Let's Encrypt:", "admin@#{domain}")
-      
-      execute :sudo, "certbot", "certonly", "--standalone", 
+      email = ENV["LETSENCRYPT_EMAIL"] || ask("Enter email for Let's Encrypt:", "admin@#{domain}")
+
+      execute :sudo, "certbot", "certonly", "--standalone",
               "--non-interactive", "--agree-tos",
               "--email", email,
               "-d", domain
-      
+
       # Update nginx SSL paths to use Let's Encrypt certificates
       set :nginx_ssl_cert, "/etc/letsencrypt/live/#{domain}/fullchain.pem"
       set :nginx_ssl_key, "/etc/letsencrypt/live/#{domain}/privkey.pem"
-      
+
       # Start nginx back up
       execute :sudo, "systemctl", "start", "nginx"
-      
+
       # Setup auto-renewal cron job
       cron_job = "0 2 * * * /usr/bin/certbot renew --quiet --post-hook 'systemctl reload nginx'"
       execute :sudo, "bash", "-c", "echo '#{cron_job}' | crontab -"
@@ -190,7 +190,7 @@ namespace :deploy do
     invoke "puma:setup"
 
     # Step 5: Generate SSL certificate - prefer Let's Encrypt if domain is provided
-    if ENV['USE_LETSENCRYPT'] == 'true' || ENV['LETSENCRYPT_EMAIL']
+    if ENV["USE_LETSENCRYPT"] == "true" || ENV["LETSENCRYPT_EMAIL"]
       puts "🔒 Generating Let's Encrypt SSL certificate..."
       invoke "ssl:generate_letsencrypt"
     else
@@ -213,7 +213,7 @@ namespace :deploy do
     puts "✅ Initial deployment completed successfully!"
     puts "🌍 Your application should now be available at: https://#{fetch(:deploy_server)}"
     puts "📝 Next steps:"
-    if ENV['USE_LETSENCRYPT'] != 'true' && !ENV['LETSENCRYPT_EMAIL']
+    if ENV["USE_LETSENCRYPT"] != "true" && !ENV["LETSENCRYPT_EMAIL"]
       puts "   1. For production, run: USE_LETSENCRYPT=true bundle exec cap production ssl:generate_letsencrypt"
     end
     puts "   2. Point your domain DNS to this EC2 instance"

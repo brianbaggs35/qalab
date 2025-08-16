@@ -43,7 +43,7 @@
 package-lock.json
 
 # Test coverage
-/coverage/*
+/coverage/
 .nyc_output/
 coverage.json
 
