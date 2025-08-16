@@ -49,6 +49,7 @@ Rails.application.routes.draw do
     get "logs", to: "dashboard#logs"
     get "system_settings", to: "dashboard#system_settings"
     post "system_settings", to: "dashboard#update_system_settings"
+    post "test_smtp", to: "dashboard#test_smtp"
     get "logs", to: "dashboard#logs"
     get "system_settings", to: "dashboard#system_settings"
     post "system_settings", to: "dashboard#update_system_settings"

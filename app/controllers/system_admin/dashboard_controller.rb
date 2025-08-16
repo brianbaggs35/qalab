@@ -94,6 +94,25 @@ class SystemAdmin::DashboardController < ApplicationController
     redirect_to system_admin_system_settings_path, alert: "Error updating settings: #{e.message}"
   end
 
+  def test_smtp
+    begin
+      # Get current SMTP settings
+      smtp_settings = SystemSetting.smtp_settings
+      
+      if smtp_settings.empty? || smtp_settings['address'].blank?
+        render json: { success: false, message: "Please configure SMTP settings first" }
+        return
+      end
+
+      # Test SMTP connection by sending a test email
+      TestMailer.smtp_test_email(current_user.email).deliver_now
+      
+      render json: { success: true, message: "Test email sent successfully! Check your inbox." }
+    rescue => e
+      render json: { success: false, message: "SMTP test failed: #{e.message}" }
+    end
+  end
+
   private
 
   def ensure_system_admin

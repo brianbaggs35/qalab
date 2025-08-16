@@ -328,31 +328,69 @@ function testSMTPConnection() {
   btn.innerHTML = `<span class="loading loading-spinner loading-sm"></span> Testing...`;
   btn.disabled = true;
   
-  // Simple test - in real implementation, this would make an AJAX call to test the connection
-  setTimeout(() => {
-    btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-    </svg> Test Complete`;
+  // Remove any existing alerts
+  const existingAlerts = btn.closest('.card-body').querySelectorAll('.smtp-test-alert');
+  existingAlerts.forEach(alert => alert.remove());
+  
+  // Make AJAX call to test SMTP connection
+  fetch('<%= system_admin_test_smtp_path %>', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    const alertClass = data.success ? 'alert-success' : 'alert-error';
+    const iconPath = data.success ? 
+      'M5 13l4 4L19 7' : 
+      'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z';
+    
+    btn.innerHTML = data.success ? 
+      `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg> Test Complete` :
+      `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg> Test Failed`;
     
     // Show test result alert
     const alert = document.createElement('div');
-    alert.className = 'alert alert-info mt-4';
+    alert.className = `alert ${alertClass} mt-4 smtp-test-alert`;
     alert.innerHTML = `
       <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconPath}" />
       </svg>
-      <span>SMTP test would be performed here. Save settings first, then test by sending a test email.</span>
+      <span>${data.message}</span>
     `;
     btn.closest('.card-body').appendChild(alert);
     
     setTimeout(() => {
       btn.innerHTML = originalText;
       btn.disabled = false;
-      if (alert.parentNode) {
-        alert.parentNode.removeChild(alert);
-      }
     }, 3000);
-  }, 2000);
+  })
+  .catch(error => {
+    btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg> Connection Error`;
+    
+    const alert = document.createElement('div');
+    alert.className = 'alert alert-error mt-4 smtp-test-alert';
+    alert.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>Network error occurred. Please try again.</span>
+    `;
+    btn.closest('.card-body').appendChild(alert);
+    
+    setTimeout(() => {
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    }, 3000);
+  });
 }
 
 // Form validation
