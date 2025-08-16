@@ -84,6 +84,9 @@ group :development do
   gem "capistrano-rails", "~> 1.6"
   gem "capistrano-bundler", "~> 2.1"
   gem "capistrano-rbenv", "~> 2.2"
+  
+  # Security vulnerability scanning
+  gem "bundler-audit", require: false
 end
 
 group :test do
